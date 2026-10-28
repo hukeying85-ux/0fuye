@@ -9,17 +9,19 @@
 
 ## 0. 台式机上「仅需首次运行一次」的 1 行初始化命令
 
-在**普通（非管理员）PowerShell 窗口**里粘贴执行这一行即可（首次会提示粘贴一次 GitHub Token，输入时不可见）：
+在**普通（非管理员）PowerShell 窗口**里粘贴执行这一行（首次会提示粘贴一次 GitHub Token，输入时不可见）：
 
 ```powershell
-git clone https://github.com/hukeying85-ux/0fuye.git C:\cgmd\0fuye 2>$null; powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\bootstrap_desktop.ps1
+git clone -b arena/32cd826e-0fuye https://github.com/hukeying85-ux/0fuye.git C:\cgmd\0fuye 2>$null; powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\bootstrap_desktop.ps1
 ```
 
-如果仓库已经克隆过，直接跑第二段即可：
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\bootstrap_desktop.ps1
-```
+> 该分支（`arena/32cd826e-0fuye`，PR #1）合并进 `main` 之后，可以去掉 `-b` 参数：
+>
+> ```powershell
+> git clone https://github.com/hukeying85-ux/0fuye.git C:\cgmd\0fuye 2>$null; powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\bootstrap_desktop.ps1
+> ```
+>
+> 仓库已经克隆过时，直接跑第二段即可；`2>$null` 保证「已存在」的克隆失败不会中断后续初始化。
 
 这一行会一次性完成：
 
@@ -34,9 +36,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hu
 | 7 | 注册计划任务 `CGMD-Hub-Poll`：**每 60 s 静默轮询**，入口是 `wscript.exe`（GUI 子系统，物理上不可能弹出控制台黑框） |
 | 8 | 立刻做一次静默验证轮询 + 往手机推一条上线信标 |
 
-> 全部 PowerShell / VBS / C# 源文件都是**纯 ASCII**（有单元测试强制校验），因此 GBK 代码页的 Windows PowerShell 5.1 也不会解析乱码。
+轮询分支 = **克隆里当前 checkout 的分支**（上面这行就是 `arena/32cd826e-0fuye`）。想固定到别的分支，在 `skills/cgmd-hub/config/cgmd_hub.local.json` 里改 `"branch"` 即可。
 
----
+> 全部 PowerShell / VBS / C# 源文件都是**纯 ASCII**（有单元测试强制校验），因此 GBK 代码页的 Windows PowerShell 5.1 也不会解析乱码。
 
 ## 1. 三层架构总览
 
