@@ -1,0 +1,75 @@
+# =============================================================================
+# CGMD-Engine repository ignore rules
+# Large MD artefacts must NEVER enter git. Only metrics + vector figures come
+# back from the GPU workstation.
+# =============================================================================
+
+# --- GROMACS heavy artefacts (hard rule, > 5 MB trajectories forbidden) ------
+*.xtc
+*.trr
+*.tpr
+*.cpt
+*.gro
+*.edr
+*.en
+*.log
+*.xvg
+*.h5
+*.dcd
+*.nc
+*.pdb
+# keep curated, tiny reference inputs only
+!results/**/reference/*.pdb
+!code/cgmd/examples/**/*.pdb
+
+# GROMACS aux
+# (mirrored as globs; some are already covered by *.log and *.gro)
+mdout.mdp
+#energy.xvg
+#gyrate.xvg
+no*.xvg
+*.part000*
+#mdrun.log
+
+# --- MD run sandbox directories ---------------------------------------------
+runs/
+run/
+mdrun/
+scratch/
+trajectories/
+code/cgmd/work/
+code/cgmd/out/
+results/cgmd/*/raw/
+results/cgmd/*/frames/
+code/cgmd/examples/*/out/
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+env/
+.coverage
+htmlcov/
+
+# --- Desktop hub local state / secrets (never committed) --------------------
+skills/cgmd-hub/state/
+skills/cgmd-hub/logs/
+skills/cgmd-hub/config/cgmd_hub.local.json
+*.local.json
+.ntfy_token
+.git-credentials-cgmd
+cgmd_hub.env
+
+# --- OS / editor ------------------------------------------------------------
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

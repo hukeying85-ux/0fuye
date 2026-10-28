@@ -1,0 +1,19 @@
+{
+  "_comment": "Template. Do NOT edit in place: bootstrap_desktop.ps1 writes cgmd_hub.local.json (git-ignored). Paths are Windows paths on the PowerShell side and are converted with wslpath before use.",
+  "repo_path": "C:\\cgmd\\0fuye",
+  "branch": "main",
+  "locked_repo": "hukeying85-ux/0fuye",
+  "github_user": "hukeying85-ux",
+  "wsl_distro": "Ubuntu",
+  "wsl_workdir_root": "~/cgmd-runs",
+  "gpu_id": 0,
+  "ntfy_topic": "arena-beacon-95bc796a66",
+  "poll_seconds": 60,
+  "task_name": "CGMD-Hub-Poll",
+  "prune_raw": true,
+  "max_frames": 400,
+  "martini3_dir": "",
+  "gmx_binary": "",
+  "box_xy_nm": 12.0,
+  "box_z_nm": 8.0
+}

@@ -1,0 +1,46 @@
+; ============================================================================
+; CGMD-Engine / Martini 3 -- PRODUCTION (GPU, microsecond scale)
+; ============================================================================
+integrator              = md
+dt                      = @DT_PS@
+nsteps                  = @PROD_NSTEPS@
+comm-mode               = linear
+nstcomm                 = 100
+constraints             = none
+continuation            = yes
+gen-vel                 = no
+
+; --- neighbour searching / non-bonded (Martini 3 defaults) ------------------
+nstlist                 = 20
+cutoff-scheme           = Verlet
+verlet-buffer-tolerance = 0.005
+pbc                     = xyz
+
+coulombtype             = reaction-field
+rcoulomb                = 1.1
+epsilon_r               = 15
+epsilon_rf             = 0
+vdwtype                 = cutoff
+vdw-modifier            = Potential-shift
+rvdw                    = 1.1
+
+; --- thermostat / barostat --------------------------------------------------
+tcoupl                  = v-rescale
+tc-grps                 = System
+tau-t                   = 1.0
+ref-t                   = @TEMPERATURE@
+pcoupl                  = Parrinello-Rahman
+pcoupltype              = semiisotropic
+tau-p                   = 12.0
+compressibility         = 3e-4 3e-4
+ref-p                   = 1.0 1.0
+
+; --- output (trajectories stay on the workstation, never in git) ------------
+nstxout                 = 0
+nstvout                 = 0
+nstfout                 = 0
+nstenergy               = 5000
+nstlog                  = @NSTLOG@
+nstcalcenergy           = 100
+nstxout-compressed      = @NSTXOUT_COMPRESSED@
+compressed-x-grps       = System

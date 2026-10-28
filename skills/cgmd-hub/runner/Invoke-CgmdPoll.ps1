@@ -1,0 +1,393 @@
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    One poll cycle of the CGMD desktop hub (designed for a 60 s scheduled task).
+
+.DESCRIPTION
+    1. guards against overlapping runs (exclusive lock file);
+    2. fetches the configured branch and verifies the origin is the locked
+       repository hukeying85-ux/0fuye (any other remote aborts immediately);
+    3. reads results/status/cgmd_task.json from the branch;
+    4. when status == "pending" (or an abandoned claim), starts
+       code/federation/desktop_runner.py inside WSL2, which claims the task,
+       runs the Martini 3 pipeline on the GPU and writes the reduced result;
+    5. commits only results/status + results/cgmd and pushes back to the same
+       branch, then records a heartbeat in state/hub-state.json.
+
+    Absolutely nothing is written to the screen: this script is started by
+    wscript.exe (see CgmdPoll.vbs), which has no console at all.
+
+.PARAMETER ConfigPath
+    Workstation config, default ..\config\cgmd_hub.local.json
+
+.PARAMETER Force
+    Run even when the task is not pending (used by bootstrap validation).
+
+.PARAMETER NoPublish
+    Execute the task but never push (leaves the commit local).
+
+.PARAMETER MaxRunMinutes
+    Hard wall clock limit for the simulation; 0 means no limit.
+
+.EXAMPLE
+    powershell -NoProfile -File Invoke-CgmdPoll.ps1 -Force
+#>
+[CmdletBinding()]
+param(
+    [string]$ConfigPath,
+    [switch]$Force,
+    [switch]$NoPublish,
+    [int]$MaxRunMinutes = 0,
+    [switch]$LogVerbose
+)
+
+$ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
+$script:HubRoot = Split-Path -Parent $PSScriptRoot
+$script:StateDir = Join-Path $script:HubRoot 'state'
+$script:LogDir = Join-Path $script:HubRoot 'logs'
+$script:LockPath = Join-Path $script:StateDir 'poll.lock'
+$script:StatePath = Join-Path $script:StateDir 'hub-state.json'
+$script:RunOut = Join-Path $script:StateDir 'last-run.log'
+$script:CmdFile = Join-Path $script:StateDir 'last-run.cmd'
+$script:Lock = $null
+
+foreach ($dir in @($script:StateDir, $script:LogDir)) {
+    if (-not (Test-Path -LiteralPath $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+}
+
+function Get-BeijingStamp {
+    $utc = [DateTime]::UtcNow
+    foreach ($id in @('China Standard Time', 'Asia/Shanghai')) {
+        try {
+            $tz = [System.TimeZoneInfo]::FindSystemTimeZoneById($id)
+            return [System.TimeZoneInfo]::ConvertTimeFromUtc($utc, $tz).ToString('yyyy-MM-ddTHH:mm:sszzz')
+        } catch { continue }
+    }
+    return $utc.AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
+}
+
+function Write-HubLog {
+    param([string]$Message, [string]$Level = 'INFO')
+    $stamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
+    $line = '{0} [{1}] {2}' -f $stamp, $Level, $Message
+    $file = Join-Path $script:LogDir ('hub-{0}.log' -f (Get-Date -Format 'yyyyMMdd'))
+    try {
+        [System.IO.File]::AppendAllText($file, $line + [Environment]::NewLine, (New-Object System.Text.UTF8Encoding($false)))
+    } catch { }
+    if ($LogVerbose) { Write-Host $line }
+}
+
+function Read-JsonFile {
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { return $null }
+    $raw = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
+    if ([string]::IsNullOrWhiteSpace($raw)) { return $null }
+    return ($raw | ConvertFrom-Json)
+}
+
+function Write-JsonFile {
+    param([string]$Path, $Data)
+    $dir = Split-Path -Parent $Path
+    if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    $json = $Data | ConvertTo-Json -Depth 8
+    [System.IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding($false)))
+}
+
+function Get-Property {
+    param($Object, [string]$Name, $Default = $null)
+    if ($null -eq $Object) { return $Default }
+    $prop = $Object.PSObject.Properties[$Name]
+    if ($null -eq $prop) { return $Default }
+    if ($null -eq $prop.Value) { return $Default }
+    return $prop.Value
+}
+
+function Get-HubConfig {
+    param([string]$Path)
+    $candidates = @()
+    if ($Path) { $candidates += $Path }
+    $candidates += (Join-Path $script:HubRoot 'config\cgmd_hub.local.json')
+    $candidates += (Join-Path $script:HubRoot 'config\cgmd_hub.json')
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) {
+            $cfg = Read-JsonFile -Path $candidate
+            if ($null -ne $cfg) { return $cfg }
+        }
+    }
+    throw 'no hub config found; run bootstrap_desktop.ps1 first'
+}
+
+function Invoke-Git {
+    param([string]$Repo, [string[]]$GitArgs)
+    $all = @('-C', $Repo) + $GitArgs
+    $output = & git @all 2>&1
+    $code = $LASTEXITCODE
+    return [pscustomobject]@{ Code = $code; Output = (($output | ForEach-Object { "$_" }) -join [Environment]::NewLine).Trim() }
+}
+
+function Convert-ToWslPath {
+    param([string]$WindowsPath)
+    $result = & wsl.exe -d $script:Distro -- wslpath -a $WindowsPath 2>&1
+    if ($LASTEXITCODE -ne 0) { throw ("wslpath failed: " + ($result -join ' ')) }
+    return ("$result").Trim()
+}
+
+function Quote-Bash {
+    param([string]$Value)
+    return "'" + ($Value -replace "'", "'\''") + "'"
+}
+
+function Invoke-Captured {
+    param([string]$CommandLine, [string]$OutFile, [int]$TimeoutSeconds = 0)
+    $content = '@echo off' + [Environment]::NewLine + $CommandLine + ' > "' + $OutFile + '" 2>&1' +
+               [Environment]::NewLine + 'echo CGMD_EXIT_CODE=%ERRORLEVEL% >> "' + $OutFile + '"' +
+               [Environment]::NewLine
+    [System.IO.File]::WriteAllText($script:CmdFile, $content, [System.Text.Encoding]::ASCII)
+    $proc = Start-Process -FilePath $env:ComSpec -ArgumentList ('/d /c ""{0}""' -f $script:CmdFile) `
+        -NoNewWindow -PassThru
+    if ($TimeoutSeconds -gt 0) {
+        if (-not $proc.WaitForExit($TimeoutSeconds * 1000)) {
+            Write-HubLog ("run exceeded {0} s, killing pid {1}" -f $TimeoutSeconds, $proc.Id) 'WARN'
+            & taskkill.exe /F /T /PID $proc.Id 2>&1 | Out-Null
+            return -1
+        }
+    } else {
+        $proc.WaitForExit()
+    }
+    return $proc.ExitCode
+}
+
+function Send-Beacon {
+    param([string]$Title, [string]$Message, [string[]]$Tags = @('desktop_computer'), [string]$Topic = '')
+    $script = Join-Path $PSScriptRoot 'Send-CgmdBeacon.ps1'
+    if (-not (Test-Path -LiteralPath $script)) { return }
+    if (-not $Topic) { $Topic = $script:Topic }
+    try {
+        & $script -Topic $Topic -Title $Title -Message $Message -Tags $Tags -Quiet | Out-Null
+    } catch {
+        Write-HubLog ("beacon error: " + $_.Exception.Message) 'WARN'
+    }
+}
+
+function Publish-Results {
+    param([string]$Repo, [string]$Branch, [string]$Message)
+    $paths = @()
+    foreach ($rel in @('results\status', 'results\cgmd')) {
+        if (Test-Path -LiteralPath (Join-Path $Repo $rel)) { $paths += $rel }
+    }
+    if ($paths.Count -eq 0) { return $true }
+    $gitArgs = @('add', '-A', '--') + ($paths | ForEach-Object { $_ -replace '\\', '/' })
+    $null = Invoke-Git -Repo $Repo -GitArgs $gitArgs
+    $status = Invoke-Git -Repo $Repo -GitArgs @('status', '--porcelain')
+    if (-not $status.Output) {
+        Write-HubLog 'nothing to publish'
+        return $true
+    }
+    $commit = Invoke-Git -Repo $Repo -GitArgs @('commit', '-m', $Message)
+    if ($commit.Code -ne 0 -and $commit.Output -notmatch 'nothing to commit') {
+        Write-HubLog ("commit failed: " + $commit.Output) 'ERROR'
+        return $false
+    }
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        $push = Invoke-Git -Repo $Repo -GitArgs @('push', 'origin', ('HEAD:' + $Branch))
+        if ($push.Code -eq 0) {
+            Write-HubLog ("published to {0} (attempt {1})" -f $Branch, $attempt)
+            return $true
+        }
+        Write-HubLog ("push failed (attempt {0}): {1}" -f $attempt, $push.Output) 'WARN'
+        $pull = Invoke-Git -Repo $Repo -GitArgs @('pull', '--rebase', '--autostash', 'origin', $Branch)
+        if ($pull.Code -ne 0) {
+            Write-HubLog ("rebase failed: " + $pull.Output) 'ERROR'
+            $null = Invoke-Git -Repo $Repo -GitArgs @('rebase', '--abort')
+            return $false
+        }
+    }
+    return $false
+}
+
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
+$startedAt = Get-Date
+try {
+    try {
+        $script:Lock = [System.IO.File]::Open($script:LockPath, 'OpenOrCreate', 'ReadWrite', 'None')
+    } catch {
+        Write-HubLog 'another poll is running, exiting' 'WARN'
+        exit 0
+    }
+
+    $cfg = Get-HubConfig -Path $ConfigPath
+    $repo = Get-Property $cfg 'repo_path'
+    $branch = Get-Property $cfg 'branch' 'main'
+    $script:Distro = Get-Property $cfg 'wsl_distro' 'Ubuntu'
+    $script:Topic = Get-Property $cfg 'ntfy_topic' 'arena-beacon-95bc796a66'
+    $wslWork = Get-Property $cfg 'wsl_workdir_root' '/home/cgmd/cgmd-runs'
+    $gpuId = Get-Property $cfg 'gpu_id' 0
+    $lockedRepo = Get-Property $cfg 'locked_repo' 'hukeying85-ux/0fuye'
+    $prune = Get-Property $cfg 'prune_raw' $true
+
+    if (-not $repo -or -not (Test-Path -LiteralPath $repo)) {
+        Write-HubLog ("repo_path missing or not found: {0}" -f $repo) 'ERROR'
+        exit 4
+    }
+
+    $remote = Invoke-Git -Repo $repo -GitArgs @('remote', 'get-url', 'origin')
+    if ($remote.Code -ne 0) {
+        Write-HubLog 'origin remote is not configured' 'ERROR'
+        exit 4
+    }
+    if ($remote.Output -notmatch [regex]::Escape($lockedRepo)) {
+        Write-HubLog ("REFUSING to run: origin is '{0}', expected '{1}'" -f $remote.Output, $lockedRepo) 'ERROR'
+        exit 5
+    }
+
+    Write-HubLog ("poll start branch={0} repo={1}" -f $branch, $repo)
+
+    # --- 1. publish leftovers, then synchronise --------------------------
+    $dirty = Invoke-Git -Repo $repo -GitArgs @('status', '--porcelain')
+    if ($dirty.Output -and $dirty.Output -match 'results/') {
+        Write-HubLog 'publishing leftover results from the previous cycle'
+        $null = Publish-Results -Repo $repo -Branch $branch -Message 'cgmd: publish leftover results [desktop hub]'
+    }
+
+    $fetch = Invoke-Git -Repo $repo -GitArgs @('fetch', '--quiet', 'origin', $branch)
+    if ($fetch.Code -ne 0) {
+        Write-HubLog ("fetch failed: " + $fetch.Output) 'WARN'
+    } else {
+        $dirty = Invoke-Git -Repo $repo -GitArgs @('status', '--porcelain')
+        $current = Invoke-Git -Repo $repo -GitArgs @('rev-parse', '--abbrev-ref', 'HEAD')
+        if (-not $dirty.Output) {
+            $null = Invoke-Git -Repo $repo -GitArgs @('checkout', '--quiet', $branch)
+            $sync = Invoke-Git -Repo $repo -GitArgs @('reset', '--hard', ('origin/' + $branch))
+            if ($sync.Code -ne 0) {
+                Write-HubLog ("sync failed: " + $sync.Output) 'WARN'
+            } else {
+                Write-HubLog ("synced to origin/{0}" -f $branch)
+            }
+        } else {
+            Write-HubLog ("working tree dirty ({0}), skipping hard sync" -f ($dirty.Output -replace "`r?`n", '; ')) 'WARN'
+            $null = Invoke-Git -Repo $repo -GitArgs @('checkout', '--quiet', $branch)
+        }
+    }
+
+    # --- 2. inspect the task document ------------------------------------
+    $taskFile = Join-Path $repo 'results\status\cgmd_task.json'
+    $task = Read-JsonFile -Path $taskFile
+    if ($null -eq $task) {
+        Write-HubLog 'no task document on this branch, nothing to do'
+        exit 0
+    }
+    $taskStatus = [string](Get-Property $task 'status' 'idle')
+    $taskId = [string](Get-Property $task 'task_id' 'unknown')
+    Write-HubLog ("task {0} status={1}" -f $taskId, $taskStatus)
+
+    if ($taskStatus -ne 'pending' -and -not $Force) {
+        Write-HubLog 'task is not pending, idling'
+        exit 0
+    }
+
+    # --- 3. run the pipeline inside WSL2 ---------------------------------
+    $wslRepo = Convert-ToWslPath -WindowsPath $repo
+    $parts = @()
+    $parts += ('cd ' + (Quote-Bash $wslRepo))
+    $parts += ('export PYTHONPATH=' + (Quote-Bash ($wslRepo + ':' + $wslRepo + '/code/cgmd')) + ' PYTHONIOENCODING=utf-8')
+    $parts += ('python3 code/federation/desktop_runner.py run')
+    $parts += ('--task-file results/status/cgmd_task.json')
+    $parts += ('--repo ' + (Quote-Bash $wslRepo))
+    $parts += ('--workdir-root ' + (Quote-Bash $wslWork))
+    $parts += ('--gpu-id ' + $gpuId)
+    if ($prune) { $parts += '--prune-raw' }
+    if ($Force) { $parts += '--force' }
+    $bashScript = $parts -join ' && '
+    # NOTE: cmd.exe only honours double quotes, so the bash script (which uses
+    # single quotes internally) is handed to wsl.exe wrapped in double quotes.
+    $wslCommand = 'wsl.exe -d ' + $script:Distro + ' -- bash -lc "' + $bashScript + '"'
+
+    if (Test-Path -LiteralPath $script:RunOut) { Remove-Item -LiteralPath $script:RunOut -Force }
+    Write-HubLog 'starting desktop_runner.py in WSL2'
+    Send-Beacon -Title '[CGMD] hub claim' -Message ("desktop started task {0}" -f $taskId) -Tags @('rocket')
+
+    $timeout = 0
+    if ($MaxRunMinutes -gt 0) { $timeout = $MaxRunMinutes * 60 }
+    $exit = Invoke-Captured -CommandLine $wslCommand -OutFile $script:RunOut -TimeoutSeconds $timeout
+
+    $runnerJson = $null
+    if (Test-Path -LiteralPath $script:RunOut) {
+        $lines = [System.IO.File]::ReadAllLines($script:RunOut, [System.Text.Encoding]::UTF8)
+        for ($i = $lines.Length - 1; $i -ge 0; $i--) {
+            $line = $lines[$i].Trim()
+            if ($line.StartsWith('{') -and $line.EndsWith('}')) {
+                try { $runnerJson = $line | ConvertFrom-Json; break } catch { continue }
+            }
+        }
+        foreach ($line in $lines) {
+            if ($line -match '^CGMD_EXIT_CODE=(-?\d+)$') { $exit = [int]$Matches[1] }
+        }
+        $tail = ($lines | Select-Object -Last 40) -join [Environment]::NewLine
+        Write-HubLog ("runner output (tail):" + [Environment]::NewLine + $tail)
+    }
+    Write-HubLog ("runner finished with exit code {0}" -f $exit)
+
+    # --- 4. publish the reduced results ----------------------------------
+    $ok = $false
+    if ($null -ne $runnerJson) { $ok = [bool](Get-Property $runnerJson 'ok' $false) }
+    if ($NoPublish) {
+        Write-HubLog 'NoPublish set, skipping git publish'
+    } else {
+        $message = 'cgmd: {0} {1} [desktop hub]' -f $taskId, $taskStatus
+        if ($null -ne $runnerJson) {
+            $message = 'cgmd: {0} {1} [desktop hub]' -f $taskId, (Get-Property $runnerJson 'status' 'unknown')
+        }
+        $published = Publish-Results -Repo $repo -Branch $branch -Message $message
+        if (-not $published) {
+            Write-HubLog 'publish failed, will retry next cycle' 'ERROR'
+            Send-Beacon -Title '[CGMD] publish failed' -Message ("git push failed for task {0}; retrying next cycle" -f $taskId) -Tags @('warning')
+        }
+    }
+
+    # --- 5. heartbeat -----------------------------------------------------
+    $previous = Read-JsonFile -Path $script:StatePath
+    $heartbeat = [ordered]@{
+        last_poll_at       = Get-BeijingStamp
+        last_poll_seconds  = [math]::Round(((Get-Date) - $startedAt).TotalSeconds, 1)
+        task_id            = $taskId
+        task_status_before = $taskStatus
+        runner_exit_code   = $exit
+        runner_ok          = $ok
+        runner_result      = $runnerJson
+        repo               = $repo
+        branch             = $branch
+        wsl_distro         = $script:Distro
+        gpu_id             = $gpuId
+        poll_count         = 1 + [int](Get-Property $previous 'poll_count' 0)
+    }
+    Write-JsonFile -Path $script:StatePath -Data $heartbeat
+    Write-HubLog 'poll finished'
+    if ($null -ne $runnerJson) {
+        $status = Get-Property $runnerJson 'status' 'unknown'
+        $summary = Get-Property $runnerJson 'summary' ''
+        Send-Beacon -Title '[CGMD] hub done' -Message ("task {0} -> {1}{2}result: {3}" -f $taskId, $status, [Environment]::NewLine, $summary) -Tags @('white_check_mark')
+    }
+
+    if ($exit -eq 3) { exit 3 }
+    if ($exit -eq -1) { exit 6 }
+    if ($exit -ne 0 -and -not $ok) { exit 1 }
+    exit 0
+}
+catch {
+    Write-HubLog ("unhandled error: " + $_.Exception.Message + ' | ' + $_.ScriptStackTrace) 'ERROR'
+    Send-Beacon -Title '[CGMD] hub error' -Message ("poll error: " + $_.Exception.Message) -Tags @('rotating_light')
+    exit 9
+}
+finally {
+    if ($null -ne $script:Lock) {
+        try { $script:Lock.Dispose() } catch { }
+        try {
+            if (Test-Path -LiteralPath $script:LockPath) { Remove-Item -LiteralPath $script:LockPath -Force }
+        } catch { }
+    }
+}
