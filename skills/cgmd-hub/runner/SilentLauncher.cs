@@ -103,21 +103,29 @@ internal static class CgmdHubSilent
         string cwd = null;
         bool wait = false;
 
-        for (int i = 0; i < args.Length; i++)
+        try
         {
-            switch (args[i].ToLowerInvariant())
+            for (int i = 0; i < args.Length; i++)
             {
-                case "--script": script = args[++i]; break;
-                case "--exe": exe = args[++i]; break;
-                case "--args": extraArgs = args[++i]; break;
-                case "--log": _logPath = args[++i]; break;
-                case "--cwd": cwd = args[++i]; break;
-                case "--wait": wait = true; break;
-                case "-h":
-                case "--help":
-                    Console.Error.WriteLine("CGMDHub.exe --script <ps1> | --exe <path> [--args \"...\"] [--log <file>] [--cwd <dir>] [--wait]");
-                    return 0;
+                switch (args[i].ToLowerInvariant())
+                {
+                    case "--script": script = args[++i]; break;
+                    case "--exe": exe = args[++i]; break;
+                    case "--args": extraArgs = args[++i]; break;
+                    case "--log": _logPath = args[++i]; break;
+                    case "--cwd": cwd = args[++i]; break;
+                    case "--wait": wait = true; break;
+                    case "-h":
+                    case "--help":
+                        Console.Error.WriteLine("CGMDHub.exe --script <ps1> | --exe <path> [--args \"...\"] [--log <file>] [--cwd <dir>] [--wait]");
+                        return 0;
+                }
             }
+        }
+        catch (IndexOutOfRangeException)
+        {
+            // a flag was given without its value: fail quietly instead of crashing
+            return 2;
         }
 
         if (string.IsNullOrEmpty(script) && string.IsNullOrEmpty(exe))
