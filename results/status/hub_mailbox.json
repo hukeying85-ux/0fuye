@@ -1,9 +1,9 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:16:28+08:00",
+    "generated_at":  "2026-10-29T14:16:57+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
-    "state":  "error",
+    "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
