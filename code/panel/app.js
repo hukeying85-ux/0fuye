@@ -254,10 +254,46 @@
     }
   }
 
+  // dsh-boot.mp4 (the original dsh-video-skin clip) is not shipped in this
+  // repository, so the boot overlay used to sit on a black screen for the whole
+  // 14.5 s watchdog.  This keeps the same beat with the mascot artwork.
+  function showBootFallback(reason) {
+    const overlay = $("#boot-overlay");
+    const bootVid = $("#boot-video");
+    const layer = $("#boot-fallback");
+    const fill = $("#boot-fill");
+    const stageEl = $("#boot-stage");
+    if (!overlay || !layer) return;
+    if (overlay.dataset.fallbackShown === "1") return;
+    overlay.dataset.fallbackShown = "1";
+    if (bootVid) {
+      try {
+        bootVid.pause();
+      } catch (_) {}
+      bootVid.hidden = true;
+    }
+    layer.hidden = false;
+    overlay.classList.add("boot-fallback-active");
+    if (stageEl) stageEl.textContent = "正在进入 Arena Desk v2.8…";
+    if (fill) {
+      fill.style.transition = "width 2200ms linear";
+      fill.style.width = "100%";
+    }
+    setTimeout(() => {
+      if (typeof enterWorkspaceRef === "function") enterWorkspaceRef(600, reason || "boot_fallback");
+    }, 2400);
+  }
+
+  let enterWorkspaceRef = null;
+
   function triggerBootAnimation(force) {
     const overlay = $("#boot-overlay");
     const bootVid = $("#boot-video");
     if (!overlay) return;
+    overlay.dataset.fallbackShown = "0";
+    const fallbackLayer = $("#boot-fallback");
+    if (fallbackLayer) fallbackLayer.hidden = true;
+    overlay.classList.remove("boot-fallback-active");
     if (!force) {
       dismissBootOverlay();
       return;
@@ -292,6 +328,7 @@
 
     const enterWorkspace = (spanMs, reasonTag) => {
       if (exiting) return;
+      enterWorkspaceRef = enterWorkspace;
       exiting = true;
       document.removeEventListener("visibilitychange", onVisChange);
       if (BOOT_RAF) {
@@ -337,7 +374,12 @@
         } catch (_) {}
 
         bootVid.onended = () => enterWorkspace(fadeMs, "dsh_video_boot_ended");
-        bootVid.onerror = () => enterWorkspace(250, "dsh_video_boot_error");
+        bootVid.onerror = () => showBootFallback("dsh_video_boot_error");
+        // A 404 on the clip does not always fire "error" (cached headers); a
+        // source that never reports metadata is the same thing to the user.
+        setTimeout(() => {
+          if (!exiting && bootVid.readyState === 0) showBootFallback("dsh_video_boot_nodata");
+        }, 1800);
         bootVid.ontimeupdate = () => {
           if (exiting || !fill) return;
           const d = bootVid.duration;
@@ -657,7 +699,7 @@
               const slotKey = s.account_slot || "S1";
               return `<tr>
                 <td><strong>${esc(s.title || s.id)}</strong><div class="muted small">${esc(s.id)} · <span class="pill" style="padding:1px 6px;font-size:10px">${esc(slotKey)}</span></div></td>
-                <td><code>${esc(s.repo || "mqgg5630-cyber/0fuye")}</code><div class="small muted">${esc(s.branch || "-")}</div></td>
+                <td><code>${esc(s.repo || "hukeying85-ux/0fuye")}</code><div class="small muted">${esc(s.branch || "-")}</div></td>
                 <td><span class="pill ${wOn && s.status === "succeeded" ? "ok" : "warn"}">${esc(wOn ? (s.status || "ok") : "已暂停值守")}</span></td>
                 <td class="small muted">${esc(fmtLocalTime(s.at) || s.at || "-")}</td>
                 <td>
@@ -676,7 +718,7 @@
     if (hd) {
       const repoInfo = data.repo_info || {};
       const items = [
-        ["当前绑定私有仓", `${repoInfo.owner || "mqgg5630-cyber"}/${repoInfo.repo || "0fuye"} (Private)`],
+        ["当前绑定私有仓", `${repoInfo.owner || "hukeying85-ux"}/${repoInfo.repo || "0fuye"} (Private)`],
         ["会话专属分支", repoInfo.branch || "arena/89735ee7-0fuye"],
         ["守护任务名称", `${hub.task_name || "git-sync-hub"}（支持安全一键启停）`],
         ["工作站主机名", hub.host || "LAPTOP-R77M5D6M"],
@@ -747,7 +789,7 @@
           const slotKey = s.account_slot || "S1";
           return `<tr>
             <td><strong>${esc(s.title || s.id)}</strong><div class="muted small">${esc(s.prompt ? s.prompt.slice(0, 80) : "未登记提示词")}</div></td>
-            <td><code>${esc(s.repo || "mqgg5630-cyber/0fuye")}</code><div class="small muted">${esc(s.branch || "")}</div></td>
+            <td><code>${esc(s.repo || "hukeying85-ux/0fuye")}</code><div class="small muted">${esc(s.branch || "")}</div></td>
             <td><span class="pill ${wOn ? "ok" : "warn"}">${esc(wOn ? (s.status || "synced") : "已暂停")}</span></td>
             <td class="small">${esc(s.sync_mode || "results+deliverable")}</td>
             <td class="small muted">${esc(fmtLocalTime(s.at) || s.at || "-")}</td>

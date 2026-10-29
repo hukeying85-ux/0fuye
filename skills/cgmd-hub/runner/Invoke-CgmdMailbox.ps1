@@ -95,7 +95,14 @@ function Read-JsonFile {
     if (-not (Test-Path -LiteralPath $Path)) { return $null }
     $raw = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
     if ([string]::IsNullOrWhiteSpace($raw)) { return $null }
-    return ($raw | ConvertFrom-Json)
+    try {
+        return ($raw | ConvertFrom-Json)
+    } catch {
+        # Not JSON (a literal "False" once landed in results/status and made
+        # every reader throw).  Treat it as missing, never as fatal.
+        Write-HubLog ('ignoring a status file that is not JSON: ' + $Path) 'WARN'
+        return $null
+    }
 }
 
 function Write-JsonFile {

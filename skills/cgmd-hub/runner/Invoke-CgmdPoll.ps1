@@ -139,6 +139,35 @@ function Clear-PollPid {
     try { Remove-Item -LiteralPath $script:LockPidPath -Force -ErrorAction SilentlyContinue } catch { }
 }
 
+function Repair-StatusFiles {
+    # results/status/desktop_selfcheck.json was once committed with the literal
+    # text "False".  Every reader that touched it threw ("Invalid JSON
+    # primitive: False") and one mailbox job died on it.  A status file must
+    # never be able to take the watch down, so anything that is not JSON is
+    # deleted here and the deletion is published.
+    param([string]$Repo)
+    $statusDir = Join-Path (Join-Path $Repo 'results') 'status'
+    if (-not (Test-Path -LiteralPath $statusDir)) { return $false }
+    $removed = @()
+    foreach ($item in @(Get-ChildItem -LiteralPath $statusDir -Filter '*.json' -File -ErrorAction SilentlyContinue)) {
+        $raw = ''
+        try { $raw = [System.IO.File]::ReadAllText($item.FullName, [System.Text.Encoding]::UTF8) } catch { continue }
+        if ([string]::IsNullOrWhiteSpace($raw)) { continue }
+        $parsed = $null
+        try { $parsed = $raw | ConvertFrom-Json } catch { $parsed = $null }
+        if ($null -eq $parsed) {
+            Write-HubLog ('removing a status file that is not JSON: ' + $item.Name + ' (' + $raw.Trim().Substring(0, [math]::Min(40, $raw.Trim().Length)) + ')') 'WARN'
+            try {
+                Remove-Item -LiteralPath $item.FullName -Force
+                $removed += $item.Name
+            } catch {
+                Write-HubLog ('could not remove ' + $item.Name + ': ' + $_.Exception.Message) 'WARN'
+            }
+        }
+    }
+    return ($removed.Count -gt 0)
+}
+
 function Test-SmokeDue {
     # Self-healing schedule: verify 100 ps whenever the last proof is missing,
     # failed, or simply old.  No request file from a human is involved.
@@ -219,7 +248,14 @@ function Read-JsonFile {
     if (-not (Test-Path -LiteralPath $Path)) { return $null }
     $raw = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
     if ([string]::IsNullOrWhiteSpace($raw)) { return $null }
-    return ($raw | ConvertFrom-Json)
+    try {
+        return ($raw | ConvertFrom-Json)
+    } catch {
+        # Not JSON (a literal "False" once landed in results/status and made
+        # every reader throw).  Treat it as missing, never as fatal.
+        Write-HubLog ('ignoring a status file that is not JSON: ' + $Path) 'WARN'
+        return $null
+    }
 }
 
 function Write-JsonFile {
@@ -502,6 +538,16 @@ try {
     }
 
     $requestFile = Join-Path $repo 'results\status\selfcheck_request.json'
+
+    # --- 1a. never let a broken status file take the watch down -----------
+    try {
+        if (Repair-StatusFiles -Repo $repo) {
+            Write-HubLog 'publishing the repair (a status file was not valid JSON)'
+            $null = Publish-Results -Repo $repo -Branch $branch -Message 'repair: drop status files that are not JSON [desktop hub]'
+        }
+    } catch {
+        Write-HubLog ('status repair failed: ' + $_.Exception.Message) 'WARN'
+    }
 
     # --- 1b. mailbox bus: any session, any branch -> this workstation -----
     # Work is queued on a dedicated ref (default hub/mailbox), so a caller

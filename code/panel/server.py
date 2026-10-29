@@ -56,6 +56,148 @@ SECRET = re.compile(
     re.I,
 )
 
+# ---------------------------------------------------------------------------
+# Built-in mobile companion
+# ---------------------------------------------------------------------------
+# The original PWA (jobbeacon_src/jobbeacon/pwa) was never committed, so on a
+# fresh checkout /mobile answered 404 and the QR code on the desktop led to a
+# dead page.  These strings are the fallback: a single self-contained page with
+# no external assets, served only when the real PWA files are absent.
+MOBILE_FALLBACK_HTML = """<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0a14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Arena Desk · 手机伴侣</title>
+<link rel="manifest" href="/mobile/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/mobile/apple-touch-icon.png">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0; min-height: 100vh; padding: 22px 16px 34px;
+    font: 15px/1.55 -apple-system, "SF Pro SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    color: #eef1ff;
+    background:
+      radial-gradient(120% 70% at 50% 0%, rgba(255,190,232,.28), transparent 62%),
+      radial-gradient(90% 60% at 12% 92%, rgba(140,190,255,.22), transparent 66%),
+      linear-gradient(168deg, #0b0a14, #171126 48%, #0b0a14);
+  }
+  .card {
+    background: rgba(255,255,255,.075); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 18px; padding: 16px; margin-bottom: 12px;
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  }
+  h1 { font-size: 19px; margin: 0 0 4px; letter-spacing: .04em; }
+  .sub { color: rgba(255,255,255,.62); font-size: 12px; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px;
+          background: rgba(140,255,190,.16); color: #9dffcb; border: 1px solid rgba(140,255,190,.3); }
+  .pill.bad { background: rgba(255,150,150,.16); color: #ffb3b3; border-color: rgba(255,150,150,.32); }
+  button.refresh {
+    width: 100%; padding: 13px; border-radius: 14px; border: 1px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.1); color: #fff; font-size: 15px; font-weight: 600;
+  }
+  pre { margin: 8px 0 0; font-size: 11px; color: rgba(255,255,255,.62); overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .row:last-child { border-bottom: 0; }
+  .k { color: rgba(255,255,255,.6); }
+  .v { text-align: right; font-weight: 600; }
+</style></head>
+<body>
+  <div class="card">
+    <h1>Arena Desk · 手机伴侣</h1>
+    <div class="sub">内建精简版（原 PWA 素材未随仓库分发）</div>
+    <div style="margin-top:10px"><span id="status" class="pill">连接中…</span></div>
+  </div>
+  <div class="card">
+    <div class="row"><span class="k">主机</span><span class="v" id="host">—</span></div>
+    <div class="row"><span class="k">版本</span><span class="v" id="ver">—</span></div>
+    <div class="row"><span class="k">任务</span><span class="v" id="tasks">—</span></div>
+    <div class="row"><span class="k">刷新于</span><span class="v" id="when">—</span></div>
+    <button class="refresh" id="refresh" style="margin-top:14px">刷新状态</button>
+  </div>
+  <div class="card">
+    <div class="sub">原始返回（便于排查）</div>
+    <pre id="raw">…</pre>
+  </div>
+<script>
+  const $ = (id) => document.getElementById(id);
+  async function pull() {
+    try {
+      const r = await fetch("/api/state", { credentials: "same-origin", cache: "no-store" });
+      const d = await r.json();
+      $("status").textContent = "在线";
+      $("status").className = "pill";
+      $("host").textContent = d.host || d.hostname || location.hostname;
+      $("ver").textContent = d.version || "—";
+      const tasks = d.tasks || [];
+      $("tasks").textContent = Array.isArray(tasks) ? tasks.length + " 项" : "—";
+      $("when").textContent = new Date().toLocaleTimeString();
+      $("raw").textContent = JSON.stringify(d, null, 1).slice(0, 1400);
+    } catch (err) {
+      $("status").textContent = "离线";
+      $("status").className = "pill bad";
+      $("raw").textContent = String(err);
+    }
+  }
+  $("refresh").addEventListener("click", pull);
+  pull();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/mobile/sw.js").catch(() => {});
+  }
+</script>
+</body></html>
+"""
+
+MOBILE_FALLBACK_MANIFEST = {
+    "name": "Arena Desk 手机伴侣",
+    "short_name": "ArenaDesk",
+    "start_url": "/mobile",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0b0a14",
+    "theme_color": "#0b0a14",
+    "icons": [
+        {"src": "/mobile/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+        {"src": "/mobile/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+        {"src": "/mobile/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    ],
+}
+
+MOBILE_FALLBACK_SW = """// minimal offline shell for the built-in companion
+const CACHE = "arena-desk-mobile-v1";
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(["/mobile"])).catch(() => {}));
+  self.skipWaiting();
+});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request).then((hit) => hit || caches.match("/mobile")))
+  );
+});
+"""
+
+
+def mobile_fallback(route):
+    """Bytes + mime for the built-in companion, or None if the route is unknown."""
+    if route in ("/mobile", "/mobile/"):
+        return MOBILE_FALLBACK_HTML.encode("utf-8"), "text/html; charset=utf-8"
+    if route == "/mobile/manifest.webmanifest":
+        return json.dumps(MOBILE_FALLBACK_MANIFEST, ensure_ascii=False).encode("utf-8"), "application/manifest+json; charset=utf-8"
+    if route == "/mobile/sw.js":
+        return MOBILE_FALLBACK_SW.encode("utf-8"), "text/javascript; charset=utf-8"
+    if route == "/mobile/mobile.css":
+        return b"/* inline styles in the page */", "text/css; charset=utf-8"
+    if route == "/mobile/mobile.js":
+        return b"/* inline script in the page */", "text/javascript; charset=utf-8"
+    return None
+
 ASSET_MIMES = {
     "icon.svg": "image/svg+xml",
     "whale.svg": "image/svg+xml",
@@ -990,6 +1132,13 @@ class Handler(http.server.BaseHTTPRequestHandler):
             fp = pwa_dir / fname
             if fp.is_file():
                 return self.send(200, fp.read_bytes(), fmime)
+
+        # The original PWA was never committed: keep /mobile usable instead of
+        # answering 404 to the QR code printed on the desktop.
+        fallback = mobile_fallback(route)
+        if fallback is not None:
+            body, mime = fallback
+            return self.send(200, body, mime, {"Cache-Control": "no-store"})
 
         return self.send(404, {"error": "Not found"})
 

@@ -2,12 +2,17 @@
 $ErrorActionPreference = 'Stop'
 $root = if ($PSScriptRoot -and (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'server.py'))) {
     $PSScriptRoot
-} elseif (Test-Path -LiteralPath 'E:\') {
-    'E:\0apps\ArenaDesk'
-} elseif (Test-Path -LiteralPath 'D:\') {
-    'D:\0apps\ArenaDesk'
 } else {
-    'C:\0apps\ArenaDesk'
+    # The reference laptop had an E: drive; the workstation does not.  Walk the
+    # drives that exist instead of assuming one.
+    $found = $null
+    foreach ($drv in @('C:\', 'D:\', 'E:\', 'F:\', 'G:\')) {
+        if (-not (Test-Path -LiteralPath $drv)) { continue }
+        $candidate = Join-Path $drv '0apps\ArenaDesk'
+        if (Test-Path -LiteralPath (Join-Path $candidate 'ArenaDesk.exe')) { $found = $candidate; break }
+        if (-not $found -and (Test-Path -LiteralPath $candidate)) { $found = $candidate }
+    }
+    if ($found) { $found } else { 'C:\0apps\ArenaDesk' }
 }
 $exe = Join-Path $root 'ArenaDesk.exe'
 if (Test-Path -LiteralPath $exe) {

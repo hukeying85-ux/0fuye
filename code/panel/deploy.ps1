@@ -12,7 +12,30 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$root = if (Test-Path -LiteralPath 'E:\') { 'E:\0apps\ArenaDesk' } elseif (Test-Path -LiteralPath 'D:\') { 'D:\0apps\ArenaDesk' } else { 'C:\0apps\ArenaDesk' }
+$driveRoots = @('C:\', 'D:\', 'E:\', 'F:\', 'G:\') | Where-Object { Test-Path -LiteralPath $_ }
+$root = $null
+foreach ($drv in $driveRoots) {
+    if (Test-Path -LiteralPath (Join-Path $drv '0apps\ArenaDesk')) { $root = (Join-Path $drv '0apps\ArenaDesk'); break }
+}
+if (-not $root) { $root = 'C:\0apps\ArenaDesk' }
+$appDrive = ($root.Substring(0, 2))
+
+# Resolve a legacy "E:\..." path onto a drive this machine actually has.  The
+# reference laptop had an E: drive; the GPU workstation only has C:/F:, so
+# hardcoded E: paths silently found nothing there.
+function Resolve-AnyDrive {
+    param([string]$Path)
+    if (-not $Path) { return $null }
+    if (Test-Path -LiteralPath $Path) { return $Path }
+    if ($Path -match '^[A-Za-z]:\\(.*)$') {
+        $tail = $Matches[1]
+        foreach ($drv in $driveRoots) {
+            $candidate = Join-Path $drv $tail
+            if (Test-Path -LiteralPath $candidate) { return $candidate }
+        }
+    }
+    return $null
+}
 New-Item -ItemType Directory -Force "$root\data", "$root\assets", "$root\media", "$root\samples", "$root\auth" | Out-Null
 $verMarker = Join-Path "$root\data" 'deployed-version.txt'
 $prevDeployedVersion = ''
@@ -432,7 +455,11 @@ if ($env:COMPUTERNAME -eq 'LAPTOP-R77M5D6M') {
 }
 
 # Keep verified standalone desktop pet task active via GUI-subsystem ArenaSilentRun.exe (ZERO powershell console flash)
-$petExe = Get-ChildItem 'E:\0apps\DSHPet' -Filter 'dsh-pet-standalone-webm.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+$petRoot = Resolve-AnyDrive 'E:\0apps\DSHPet'
+$petExe = $null
+if ($petRoot) {
+    $petExe = Get-ChildItem $petRoot -Filter 'dsh-pet-standalone-webm.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+}
 if ($petExe) {
     if ($compiledSilentRun) {
         Install-Task 'arena-desktop-pet' $silentRunPath ('"' + $root + '\launch_pet.ps1"') $true
@@ -443,7 +470,7 @@ if ($petExe) {
 
 # Migrate jev-chat-analyze & jev-chat-monitor off powershell.exe onto GUI-subsystem pythonw.exe / ArenaSilentRun.exe
 try {
-    $jevRoot = 'E:\0apps\jev-chat-windows'
+    $jevRoot = Resolve-AnyDrive 'E:\0apps\jev-chat-windows'
     $jevPyw  = Join-Path $jevRoot 'venv\Scripts\pythonw.exe'
     $jevAna  = Join-Path $jevRoot 'monitor\auto_analyze.py'
     $jevMon  = Join-Path $jevRoot 'monitor\start_monitor.ps1'

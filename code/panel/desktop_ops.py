@@ -26,6 +26,70 @@ PKG_SPEC_RE = re.compile(r"^[A-Za-z0-9._-]+(?:::[A-Za-z0-9._-]+)?$")
 HOST_SPEC_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 USER_SPEC_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 DRIVE_RE = re.compile(r"^[A-Za-z]:?$")
+
+# The panel used to assume an E: drive exists (it did on the laptop).  On the
+# GPU workstation there is no E: at all, so every probe, installer default and
+# media folder silently pointed at nothing.  Everything below resolves a
+# canonical "E:\..." path onto a drive that actually exists.
+WINDOWS_DRIVES = ("C:", "D:", "E:", "F:", "G:", "H:")
+
+
+def _drive_exists(drive: str) -> bool:
+    if os.name != "nt":
+        return False
+    return pathlib.Path(drive + "\\").exists()
+
+
+def existing_drives() -> list:
+    if os.name != "nt":
+        return ["C:"]
+    found = [drive for drive in WINDOWS_DRIVES if _drive_exists(drive)]
+    return found or ["C:"]
+
+
+def resolve_win_path(path_text: str) -> pathlib.Path:
+    """Resolve a path that may name a drive this machine does not have.
+
+    ``E:\\0apps\\ArenaDesk`` becomes ``C:\\0apps\\ArenaDesk`` when E: is absent
+    and the C: copy exists.  If nothing matches, the original path is returned
+    so callers keep their "not installed" semantics.
+    """
+    raw = str(path_text or "").strip()
+    if not raw:
+        return pathlib.Path(raw)
+    normalised = raw.replace("\\", "/")
+    match = re.match(r"^([A-Za-z]):/(.*)$", normalised)
+    if not match:
+        return pathlib.Path(raw)
+    letter = match.group(1).upper() + ":"
+    tail = match.group(2)
+    if _drive_exists(letter) and pathlib.Path(f"{letter}/{tail}").exists():
+        return pathlib.Path(f"{letter}/{tail}")
+    for drive in existing_drives():
+        candidate = pathlib.Path(f"{drive}/{tail}")
+        if candidate.exists():
+            return candidate
+    return pathlib.Path(raw)
+
+
+def app_root() -> pathlib.Path:
+    """Where this copy of Arena Desk lives (any drive)."""
+    if HERE.name == "ArenaDesk" or (HERE / "server.py").exists():
+        return HERE
+    for drive in existing_drives():
+        candidate = pathlib.Path(drive + "\\0apps\\ArenaDesk")
+        if (candidate / "server.py").exists():
+            return candidate
+    return HERE
+
+
+def app_drive() -> str:
+    """The drive everything gets installed to: the one Arena Desk lives on."""
+    root = str(app_root())
+    match = re.match(r"^([A-Za-z]):", root)
+    if match:
+        return match.group(1).upper() + ":"
+    return existing_drives()[0]
 SECRET_RE = re.compile(
     r"(?:\b(?:ntn_|secret_|ghp_|gho_|github_pat_|sk-)[\w-]{12,}"
     r"|-----BEGIN .*PRIVATE KEY"
@@ -291,7 +355,7 @@ class DesktopOps:
         if self.demo or os.name != "nt":
             return {
                 "jev_installed": True,
-                "jev_dir": r"E:\0apps\jev-chat-windows",
+                "jev_dir": str(resolve_win_path(r"E:\0apps\jev-chat-windows")),
                 "monitor_silent": True,
                 "analyzer_silent": True,
                 "ollama_ready": True,
@@ -299,8 +363,8 @@ class DesktopOps:
                 "private_vault_policy": "STRICT_LOCAL_READONLY · 零原文上传",
                 "mode": "preview",
             }
-        jev_dir = pathlib.Path(r"E:\0apps\jev-chat-windows")
-        vault_dir = pathlib.Path(r"E:\0yf")
+        jev_dir = resolve_win_path(r"E:\0apps\jev-chat-windows")
+        vault_dir = resolve_win_path(r"E:\0yf")
         llm_ok = tcp_ping("127.0.0.1", 11434, timeout=0.6).get("reachable", False)
         return {
             "jev_installed": jev_dir.is_dir(),
@@ -409,12 +473,12 @@ class DesktopOps:
             except OSError:
                 return
 
-        # 1. Local ArenaDesk media folder + DSH video-skin downloaded assets (if present on E:)
+        # 1. Local ArenaDesk media folder + DSH video-skin assets (any drive)
         scan_dirs = [
             (HERE / "media", "Arena Desk 本地媒体"),
-            (pathlib.Path("E:/0apps/ArenaDesk/media"), "Arena Desk 媒体库"),
-            (pathlib.Path("E:/0apps/DSH/node_modules/dsh-video-skin"), "已下载的 Video Skin 素材"),
-            (pathlib.Path("E:/0apps/DSH/data/dsh-video-skin-media"), "自定义 Video Skin 素材"),
+            (resolve_win_path("E:/0apps/ArenaDesk/media"), "Arena Desk 媒体库"),
+            (resolve_win_path("E:/0apps/DSH/node_modules/dsh-video-skin"), "已下载的 Video Skin 素材"),
+            (resolve_win_path("E:/0apps/DSH/data/dsh-video-skin-media"), "自定义 Video Skin 素材"),
         ]
         for sdir, label in scan_dirs:
             if sdir.is_dir():
@@ -482,7 +546,8 @@ class DesktopOps:
     def _probe_single_software(self, item: dict) -> dict:
         found_path = ""
         for p in item.get("probes", []):
-            cp = pathlib.Path(p)
+            # catalog.json lists E:-drive paths; resolve them onto a real drive
+            cp = resolve_win_path(p)
             if cp.is_file():
                 found_path = str(cp)
                 break
@@ -534,10 +599,13 @@ class DesktopOps:
         jobs = read_json(self.data / "install-jobs.json", []) or []
         return {"scan": cached, "jobs": jobs[-15:]}
 
-    def start_install(self, pkg_id: str, custom_spec: str = "", manager: str = "winget", drive: str = "E:") -> dict:
+    def start_install(self, pkg_id: str, custom_spec: str = "", manager: str = "winget", drive: str = "") -> dict:
         if self.demo or os.name != "nt":
             raise ValueError("当前为只读预览或非 Windows 主机；请在本机 Arena Desk 中点击一键安装。")
-        drive_clean = (drive.strip().rstrip(":")[:1].upper() or "E") + ":"
+        # No hardcoded E: any more: install where Arena Desk itself lives.
+        drive_clean = (drive or app_drive()).strip().rstrip(":")[:1].upper() + ":"
+        if not _drive_exists(drive_clean):
+            drive_clean = app_drive()
         if not DRIVE_RE.match(drive_clean):
             raise ValueError("Invalid target drive")
 

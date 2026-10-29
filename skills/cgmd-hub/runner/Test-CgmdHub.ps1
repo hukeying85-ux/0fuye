@@ -135,7 +135,14 @@ function Read-JsonFile {
     try {
         $raw = [System.IO.File]::ReadAllText($Path, [System.Text.Encoding]::UTF8)
         if ([string]::IsNullOrWhiteSpace($raw)) { return $null }
+        try {
         return ($raw | ConvertFrom-Json)
+    } catch {
+        # Not JSON (a literal "False" once landed in results/status and made
+        # every reader throw).  Treat it as missing, never as fatal.
+# not JSON: treat as missing (a literal False was committed once)
+        return $null
+    }
     } catch {
         return $null
     }

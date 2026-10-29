@@ -211,6 +211,100 @@ body[data-theme="mist-paper"] #skin-vignette {
   background: #000;
 }
 
+/* ---- boot fallback (no dsh-boot.mp4 shipped) ------------------------------ */
+#boot-overlay.boot-fallback-active {
+  background:
+    radial-gradient(120% 90% at 50% 12%, rgba(255, 214, 240, 0.35), transparent 60%),
+    radial-gradient(90% 80% at 20% 90%, rgba(150, 210, 255, 0.28), transparent 65%),
+    linear-gradient(165deg, #0b0a14 0%, #171126 45%, #0b0a14 100%);
+}
+
+.dsvs-boot-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dsvs-boot-fallback[hidden] {
+  display: none !important;
+}
+
+.dsvs-boot-fallback-art {
+  width: min(58vw, 520px);
+  max-height: 66vh;
+  object-fit: contain;
+  border-radius: 26px;
+  filter: saturate(1.05) drop-shadow(0 24px 60px rgba(0, 0, 0, 0.55));
+  animation: bootMascotFloat 6s ease-in-out infinite, bootMascotIn 900ms cubic-bezier(0.22, 0.8, 0.28, 1) both;
+}
+
+.dsvs-boot-fallback-glow {
+  position: absolute;
+  width: 70vmax;
+  height: 70vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 180, 232, 0.22) 0%, rgba(140, 190, 255, 0.12) 40%, transparent 70%);
+  animation: bootGlowPulse 5.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dsvs-boot-fallback-copy {
+  position: absolute;
+  bottom: 13vh;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  animation: bootCopyIn 1.6s ease 300ms both;
+}
+
+.dsvs-boot-fallback-copy strong {
+  font-size: clamp(20px, 2.4vw, 30px);
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 6px 24px rgba(255, 190, 232, 0.5);
+}
+
+.dsvs-boot-fallback-copy span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@keyframes bootMascotIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes bootMascotFloat {
+  0%, 100% { transform: translateY(-6px); }
+  50% { transform: translateY(8px); }
+}
+
+@keyframes bootGlowPulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 0.95; transform: scale(1.04); }
+}
+
+@keyframes bootCopyIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dsvs-boot-fallback-art,
+  .dsvs-boot-fallback-glow,
+  .dsvs-boot-fallback-copy {
+    animation: none;
+  }
+}
+
 .dsvs-boot-ui {
   position: absolute;
   left: 0;

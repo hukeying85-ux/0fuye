@@ -10,7 +10,7 @@
 <body data-theme="sakura-mist">
   <!-- Genuine dsh-video-skin (MIT) Ultra-Transparent Dynamic Backdrop Stage -->
   <div id="skin-stage" aria-hidden="true">
-    <video id="skin-video" src="/assets/dsh-bg.mp4?v=2.5.0" autoplay loop muted playsinline preload="auto"></video>
+    <video id="skin-video" src="/assets/dsh-bg.mp4?v=2.5.0" poster="/assets/wallpaper-anime.jpg?v=2.5.0" autoplay loop muted playsinline preload="auto"></video>
     <img id="skin-image" src="/assets/wallpaper-anime.jpg?v=2.5.0" alt="" hidden>
     <canvas id="skin-canvas"></canvas>
     <div id="skin-vignette"></div>
@@ -18,7 +18,22 @@
 
   <!-- Genuine Something11235/dsh-video-skin (MIT) Full-Bleed Video Boot Surface -->
   <div id="boot-overlay" class="dsvs-boot boot-hide" hidden role="dialog" aria-label="DSH 原版视频开机启动动画">
-    <video id="boot-video" class="dsvs-boot-video" src="/assets/dsh-boot.mp4?v=2.5.0" playsinline preload="auto"></video>
+    <video id="boot-video" class="dsvs-boot-video" src="/assets/dsh-boot.mp4?v=2.5.0"
+           poster="/assets/boot-mascot.jpg?v=2.5.0" playsinline preload="auto"></video>
+    <!--
+      dsh-boot.mp4 is the original dsh-video-skin clip and is not distributed in
+      this repository, so on a fresh install the <video> 404s.  This layer keeps
+      the boot screen alive (mascot, glow, progress) instead of showing black
+      for the whole watchdog window.
+    -->
+    <div id="boot-fallback" class="dsvs-boot-fallback" hidden aria-hidden="true">
+      <img src="/assets/boot-mascot.jpg?v=2.5.0" alt="" class="dsvs-boot-fallback-art">
+      <div class="dsvs-boot-fallback-glow"></div>
+      <div class="dsvs-boot-fallback-copy">
+        <strong>Arena Desk</strong>
+        <span>CRYSTAL SUITE v2.8</span>
+      </div>
+    </div>
     <button type="button" id="boot-sound-btn" class="dsvs-boot-sound" hidden>🔇 开启声音</button>
     <div class="dsvs-boot-ui">
       <div class="dsvs-boot-meta">
@@ -41,10 +56,10 @@
         </div>
       </a>
 
-      <div class="repo-chip" title="已接入私人仓库 mqgg5630-cyber/0fuye · 零闪窗静默同步">
+      <div class="repo-chip" title="已接入私人仓库 hukeying85-ux/0fuye · 零闪窗静默同步">
         <span class="lock-dot">🔒</span>
         <div>
-          <b>mqgg5630-cyber/0fuye</b>
+          <b>hukeying85-ux/0fuye</b>
           <small id="branch-label">arena/89735ee7-0fuye</small>
         </div>
       </div>
@@ -1260,7 +1275,7 @@
       </section>
 
       <footer class="app-footer">
-        <span>Arena Desk Crystal Edition v2.6 · Private Repo <code>mqgg5630-cyber/0fuye</code> · dsh-video-skin (MIT) Integrated</span>
+        <span>Arena Desk Crystal Edition v2.6 · Private Repo <code>hukeying85-ux/0fuye</code> · dsh-video-skin (MIT) Integrated</span>
         <span>前台自动开机动画 · 安卓原生 WebAPK 伴侣 · 三账号物理分舱 · 全域隐私严格脱敏</span>
       </footer>
     </main>
