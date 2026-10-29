@@ -82,7 +82,7 @@ $trigger = New-ScheduledTaskTrigger -Once -At ((Get-Date).AddMinutes(1))
 try {
     $trigger.Repetition = (New-ScheduledTaskTrigger -Once -At ((Get-Date).AddMinutes(1)) `
         -RepetitionInterval (New-TimeSpan -Seconds $IntervalSeconds) `
-        -RepetitionDuration ([TimeSpan]::MaxValue)).Repetition
+        -RepetitionDuration (New-TimeSpan -Days 3650)).Repetition
 } catch {
     $trigger.Repetition = (New-ScheduledTaskTrigger -Once -At ((Get-Date).AddMinutes(1)) `
         -RepetitionInterval (New-TimeSpan -Seconds $IntervalSeconds) `
