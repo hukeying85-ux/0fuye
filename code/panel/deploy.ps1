@@ -139,8 +139,11 @@ foreach ($pair in @(
     }
 }
 
-$jbSrc = Join-Path $repoRoot 'projects\jobbeacon\src\jobbeacon'
-if (Test-Path -LiteralPath $jbSrc) {
+$jbSrc = @(
+    (Join-Path $PSScriptRoot 'jobbeacon_src\jobbeacon'),
+    (Join-Path $repoRoot 'projects\jobbeacon\src\jobbeacon')
+) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+if ($jbSrc) {
     $jbDst = Join-Path $root 'jobbeacon_src\jobbeacon'
     New-Item -ItemType Directory -Force -Path $jbDst | Out-Null
     Copy-Item -Path (Join-Path $jbSrc '*') -Destination $jbDst -Recurse -Force
