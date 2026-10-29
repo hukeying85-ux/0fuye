@@ -486,6 +486,7 @@ function Invoke-JobSelfcheck {
 }
 
 function Invoke-JobSync {
+    param($JobArgs)
     $script = Join-Path $script:ScriptDir 'Sync-Desktop.ps1'
     if (-not (Test-Path -LiteralPath $script)) {
         return [ordered]@{ status = 'unsupported'; summary = 'Sync-Desktop.ps1 is missing' }
@@ -494,6 +495,9 @@ function Invoke-JobSync {
     $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $script + '" -Quiet'
     if ($RepoPath) { $line += ' -RepoPath "' + $RepoPath + '"' }
     if ($Branch) { $line += ' -Branch "' + $Branch + '"' }
+    # args.desk=true redeploys the Arena Desk panel itself (needed whenever the
+    # panel's own html/js/css change, not just the hub scripts).
+    if ([bool](Get-Property $JobArgs 'desk' $false)) { $line += ' -Desk -Force' }
     $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds ([math]::Min($MaxJobSeconds, 900))
     return [ordered]@{
         status    = $(if ($code -eq 0) { 'ok' } else { 'fail' })
@@ -622,7 +626,7 @@ function Invoke-Job {
     switch ($kind) {
         'ping'      { return Invoke-JobPing }
         'selfcheck' { return Invoke-JobSelfcheck }
-        'sync'      { return Invoke-JobSync }
+        'sync'      { return Invoke-JobSync -JobArgs $jobArgs }
         'smoke'     { return Invoke-JobSmoke -JobArgs $jobArgs }
         'gmx'       { return Invoke-JobGmx -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
