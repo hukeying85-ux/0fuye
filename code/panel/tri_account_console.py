@@ -491,23 +491,25 @@ def probe_and_sync_desktop_hub(data_dir: pathlib.Path, results_dir: pathlib.Path
         ps_payload = (
             "New-Item -ItemType Directory -Force -Path C:\\cgmd | Out-Null; "
             f"if (-not (Test-Path C:\\cgmd\\0fuye\\.git)) {{ git clone -b {HUKEYING_BRANCH} https://github.com/{HUKEYING_REPO}.git C:\\cgmd\\0fuye }} "
-            f"else {{ git -C C:\\cgmd\\0fuye fetch origin {HUKEYING_BRANCH}; git -C C:\\cgmd\\0fuye checkout {HUKEYING_BRANCH}; git -C C:\\cgmd\\0fuye merge --ff-only origin/{HUKEYING_BRANCH} }}; "
-            "if (Test-Path C:\\cgmd\\0fuye\\skills\\git-sync-default\\install_desktop_default_hub.ps1) { "
-            "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\cgmd\\0fuye\\skills\\git-sync-default\\install_desktop_default_hub.ps1 } "
-            "elseif (Test-Path C:\\cgmd\\0fuye\\skills\\cgmd-hub\\bootstrap_desktop.ps1) { "
-            "powershell -NoProfile -ExecutionPolicy Bypass -File C:\\cgmd\\0fuye\\skills\\cgmd-hub\\bootstrap_desktop.ps1 }"
+            f"else {{ git -C C:\\cgmd\\0fuye fetch origin {HUKEYING_BRANCH}; git -C C:\\cgmd\\0fuye checkout -f {HUKEYING_BRANCH}; git -C C:\\cgmd\\0fuye reset --hard origin/{HUKEYING_BRANCH} }}; "
+            "$u = [Security.Principal.WindowsIdentity]::GetCurrent().Name; "
+            "$cmd = if (Test-Path C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Sync-Desktop.ps1) { '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Sync-Desktop.ps1 -Desk -SkipAutoHeal -Notify -Force' } else { '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File C:\\cgmd\\0fuye\\skills\\git-sync-default\\install_desktop_default_hub.ps1' }; "
+            "$act = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $cmd -WorkingDirectory 'C:\\cgmd\\0fuye'; "
+            "$prin = New-ScheduledTaskPrincipal -UserId $u -LogonType Interactive -RunLevel Limited; "
+            "Register-ScheduledTask -TaskName 'cgmd-kick-once' -TaskPath '\\' -Action $act -Principal $prin -Force | Out-Null; "
+            "Start-ScheduledTask -TaskName 'cgmd-kick-once' -TaskPath '\\'"
         )
         # Try both Windows OpenSSH & WSL2 (/mnt/c/Windows/...) over standard ssh + tailscale ssh
         for ssh_user in ("BNI", "w24e", "root", "ubuntu", "shaohuawen03", os.environ.get("USERNAME", "")):
             if not ssh_user or deployed_on_desktop:
                 continue
             for remote_shell in (
-                f"powershell -NoProfile -ExecutionPolicy Bypass -Command \"{ps_payload}\"",
-                f"/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -ExecutionPolicy Bypass -Command '{ps_payload}'",
+                f"powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command \"{ps_payload}\"",
+                f"/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command '{ps_payload}'",
             ):
                 rc, out, err = _run_silent(
-                    ["ssh.exe", "-n", "-o", "BatchMode=yes", "-o", "User=" + ssh_user, "-o", "ConnectTimeout=5", "-o", "ServerAliveInterval=5", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=accept-new", reachable_ip, remote_shell],
-                    timeout=75,
+                    ["ssh.exe", "-n", "-o", "BatchMode=yes", "-o", "User=" + ssh_user, "-o", "ConnectTimeout=5", "-o", "ServerAliveInterval=4", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=accept-new", reachable_ip, remote_shell],
+                    timeout=18,
                 )
                 ssh_attempts.append(f"{ssh_user}@{reachable_ip}:rc={rc}:{(out or err)[:80]}")
                 if rc == 0:

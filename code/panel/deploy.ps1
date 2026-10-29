@@ -562,4 +562,4 @@ if (($LaunchBootDemo -or $isVersionUpgrade) -and $compiledExe -and (-not $NoOpen
     tasks              = $r.tasks
     desktop            = $desktop
     hub                = (Get-ScheduledTask -TaskName 'git-sync-hub' -TaskPath '\' -ErrorAction SilentlyContinue | Select-Object TaskName, State)
-} | ConvertTo-Json -Depth 6
+} | ConvertTo-Json -Depth 6 -Compress
