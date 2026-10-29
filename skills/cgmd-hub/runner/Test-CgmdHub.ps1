@@ -107,7 +107,7 @@ $script:HubRoot = Split-Path -Parent $PSScriptRoot
 $script:StateDir = Join-Path $script:HubRoot 'state'
 $script:Checks = New-Object System.Collections.ArrayList
 $script:StartedAt = Get-Date
-if ($Json) { $Quiet = $true }
+if ($Json.IsPresent) { $Quiet = $true }
 
 if (-not (Test-Path -LiteralPath $script:StateDir)) {
     New-Item -ItemType Directory -Path $script:StateDir -Force | Out-Null
@@ -403,7 +403,7 @@ if ($null -eq $cfg) {
         checks     = @($script:Checks)
         exit_code  = 4
     }
-    if ($Json) { $report | ConvertTo-Json -Depth 8 }
+    if ($Json.IsPresent) { $report | ConvertTo-Json -Depth 8 }
     exit 4
 }
 
@@ -902,13 +902,17 @@ $reportDir = Split-Path -Parent $reportPath
 if (-not (Test-Path -LiteralPath $reportDir)) {
     New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
 }
-$json = $report | ConvertTo-Json -Depth 8
-[System.IO.File]::WriteAllText($reportPath, $json, (New-Object System.Text.UTF8Encoding($false)))
+# NOTE: PowerShell variable names are case-insensitive, so a local $json is the
+# [switch]$Json parameter.  Assigning a string to it threw
+# "Cannot convert ... to System.Management.Automation.SwitchParameter" at the
+# very end of every run, which is why desktop_selfcheck.json never got written.
+$reportJson = $report | ConvertTo-Json -Depth 8
+[System.IO.File]::WriteAllText($reportPath, $reportJson, (New-Object System.Text.UTF8Encoding($false)))
 $stateCopy = Join-Path $script:StateDir 'last-selfcheck.json'
-[System.IO.File]::WriteAllText($stateCopy, $json, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText($stateCopy, $reportJson, (New-Object System.Text.UTF8Encoding($false)))
 
-if ($Json) {
-    Write-Output $json
+if ($Json.IsPresent) {
+    Write-Output $reportJson
 } elseif (-not $Quiet) {
     Write-Host ''
     Write-Host ('=' * 74) -ForegroundColor DarkGray

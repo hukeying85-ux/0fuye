@@ -112,3 +112,31 @@ def test_scripts_declare_ps51_and_param_block(path):
         return
     assert "[CmdletBinding()]" in text, os.path.basename(path)
     assert "param(" in text, os.path.basename(path)
+
+
+def test_no_local_variable_shadows_a_switch_parameter():
+    """`param([switch]$Json)` + a local `$json` is the same variable in PS.
+
+    Assigning a JSON string to it threw "Cannot convert ... to
+    System.Management.Automation.SwitchParameter" at the very end of every
+    selfcheck run, so the report on the workstation never got written.
+    """
+    import re
+
+    for path in sorted(glob.glob(RUNNER_GLOB, recursive=True)):
+        source = open(path, "rb").read().decode("ascii")
+        switches = re.findall(r"\[switch\]\s*\$(\w+)", source)
+        for switch in switches:
+            for match in re.finditer(r"(?m)^\s*\$(\w+)\s*=", source):
+                name = match.group(1)
+                if name.lower() == switch.lower() and name != switch:
+                    line = source[:match.start()].count("\n") + 1
+                    pytest.fail("%s:%d assigns $%s but $%s is a [switch] parameter"
+                                % (os.path.basename(path), line, name, switch))
+
+
+def test_switch_parameters_are_tested_with_ispresent():
+    for name in ("Test-CgmdHub.ps1", "Sync-Desktop.ps1", "Invoke-CgmdPoll.ps1"):
+        source = open(os.path.join(ROOT, "skills", "cgmd-hub", "runner", name),
+                      "rb").read().decode("ascii")
+        assert "if ($Json) {" not in source, name
