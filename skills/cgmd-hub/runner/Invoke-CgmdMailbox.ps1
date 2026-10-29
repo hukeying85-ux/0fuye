@@ -736,21 +736,8 @@ function Invoke-JobDeskdiag {
     }
 
     # boot animation plumbing: the scheduled tasks and the preference file
-    $tasks = @()
-    foreach ($name in @('arena-desk-boot-demo', 'arena-desk-open', 'arena-desk-panel')) {
-        $entry = [ordered]@{ name = $name; exists = $false; state = ''; last_result = ''; last_run = '' }
-        try {
-            $task = Get-ScheduledTask -TaskName $name -TaskPath '\' -ErrorAction Stop
-            $entry['exists'] = $true
-            $entry['state'] = [string]$task.State
-            try {
-                $info = Get-ScheduledTaskInfo -TaskName $name -TaskPath '\' -ErrorAction Stop
-                $entry['last_result'] = [string]$info.LastTaskResult
-                $entry['last_run'] = $(if ($info.LastRunTime) { ([datetime]$info.LastRunTime).ToString('yyyy-MM-dd HH:mm:ss') } else { '' })
-            } catch { }
-        } catch { }
-        $tasks += $entry
-    }
+    $tasks = @(Get-DesktopTasks)
+
     $appearance = $null
     if ($deskRoot) { $appearance = Read-JsonFile -Path (Join-Path $deskRoot 'data\appearance.json') }
 
@@ -774,6 +761,154 @@ function Invoke-JobDeskdiag {
             clips        = $clips
             tasks        = $tasks
             appearance   = $appearance
+        }
+    }
+}
+
+function Get-DesktopTasks {
+    param([string[]]$Names = @('arena-desk-boot-demo', 'arena-desk-open', 'arena-desk-open-manual', 'arena-desk-panel'))
+    $rows = @()
+    foreach ($name in $Names) {
+        $row = [ordered]@{
+            name = $name; exists = $false; state = ''; last_result = ''; last_run = ''
+            triggers = @(); actions = @()
+        }
+        $task = $null
+        try { $task = Get-ScheduledTask -TaskName $name -TaskPath '\' -ErrorAction Stop } catch { $task = $null }
+        if ($null -ne $task) {
+            $row['exists'] = $true
+            $row['state'] = [string]$task.State
+            foreach ($t in @($task.Triggers)) {
+                $row['triggers'] += $(if ($t.CimClass.CimClassName) { $t.CimClass.CimClassName } else { '?' })
+            }
+            foreach ($a in @($task.Actions)) {
+                $row['actions'] += ([string]$a.Execute + ' ' + [string]$a.Arguments).Trim()
+            }
+            try {
+                $info = Get-ScheduledTaskInfo -TaskName $name -TaskPath '\' -ErrorAction Stop
+                $row['last_result'] = [string]$info.LastTaskResult
+                $row['last_run'] = $(if ($info.LastRunTime -and $info.LastRunTime.Year -gt 2000) {
+                                        ([datetime]$info.LastRunTime).ToString('yyyy-MM-dd HH:mm:ss') } else { '' })
+            } catch { }
+        }
+        $rows += $row
+    }
+    return $rows
+}
+
+function Invoke-JobDeskfix {
+    # Repair the desktop-side plumbing end to end, from here, with no human.
+    # 1) the boot animation task needs an AtLogOn trigger (it had none);
+    # 2) only one task may open a window at logon, or two windows appear;
+    # 3) the panel has to be running before any window opens;
+    # 4) finally launch the animation so the result is visible immediately.
+    $deskRoot = Find-DeskRoot
+    $notes = @()
+    if (-not $deskRoot) {
+        return [ordered]@{ status = 'fail'; summary = 'Arena Desk is not deployed on any drive'; detail = @{} }
+    }
+    $exePath = Join-Path $deskRoot 'ArenaDesk.exe'
+    if (-not (Test-Path -LiteralPath $exePath)) {
+        $notes += 'ArenaDesk.exe missing, falling back to launch_panel.ps1'
+    }
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $principal = New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
+        -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 0) -RestartCount 3 `
+        -RestartInterval (New-TimeSpan -Minutes 1) -MultipleInstances IgnoreNew
+    $trigger = New-ScheduledTaskTrigger -AtLogOn -User $user
+    $ps = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+
+    # --- the boot animation owns the logon trigger -------------------------
+    $bootRegistered = $false
+    if (Test-Path -LiteralPath $exePath) {
+        try {
+            $bootAction = New-ScheduledTaskAction -Execute $exePath -Argument '--boot' -WorkingDirectory $deskRoot
+            Register-ScheduledTask -TaskName 'arena-desk-boot-demo' -TaskPath '\' -Action $bootAction `
+                -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+            $bootRegistered = $true
+            $notes += 'arena-desk-boot-demo re-registered WITH an AtLogOn trigger'
+        } catch {
+            $notes += ('boot-demo registration failed: ' + $_.Exception.Message)
+        }
+        # a second window at logon would be noise
+        try {
+            $openTask = Get-ScheduledTask -TaskName 'arena-desk-open' -TaskPath '\' -ErrorAction SilentlyContinue
+            if ($openTask) {
+                Disable-ScheduledTask -TaskName 'arena-desk-open' -TaskPath '\' -ErrorAction SilentlyContinue | Out-Null
+                $notes += 'arena-desk-open disabled at logon (the animation task opens the window instead)'
+            }
+            $openAction = New-ScheduledTaskAction -Execute $exePath -WorkingDirectory $deskRoot
+            Register-ScheduledTask -TaskName 'arena-desk-open-manual' -TaskPath '\' -Action $openAction `
+                -Principal $principal -Settings $settings -Force | Out-Null
+            $notes += 'arena-desk-open-manual registered (no trigger, for "skip the animation")'
+        } catch {
+            $notes += ('open-manual registration failed: ' + $_.Exception.Message)
+        }
+    } else {
+        $launcher = Join-Path $deskRoot 'launch_panel.ps1'
+        if (Test-Path -LiteralPath $launcher) {
+            $args = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + $launcher + '"'
+            try {
+                $openAction = New-ScheduledTaskAction -Execute $ps -Argument $args -WorkingDirectory $deskRoot
+                Register-ScheduledTask -TaskName 'arena-desk-open' -TaskPath '\' -Action $openAction `
+                    -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+                $bootRegistered = $true
+                $notes += 'no exe: arena-desk-open re-registered with the AtLogOn trigger'
+            } catch {
+                $notes += ('open registration failed: ' + $_.Exception.Message)
+            }
+        }
+    }
+
+    # --- the panel must be alive before the window opens -------------------
+    $panelUp = $false
+    try {
+        $probe = Invoke-WebRequest -Uri 'http://127.0.0.1:18765/api/state' -TimeoutSec 6 -UseBasicParsing -ErrorAction Stop
+        $panelUp = ($probe.StatusCode -eq 200)
+    } catch { $panelUp = $false }
+    if (-not $panelUp) {
+        $notes += 'panel was down, starting it'
+        $null = Restart-Panel -DeskRoot $deskRoot
+        try {
+            $probe = Invoke-WebRequest -Uri 'http://127.0.0.1:18765/api/state' -TimeoutSec 6 -UseBasicParsing -ErrorAction Stop
+            $panelUp = ($probe.StatusCode -eq 200)
+        } catch { $panelUp = $false }
+    }
+
+    # --- show the animation now, so "did it work" is answerable ------------
+    $launched = $false
+    if ($bootRegistered -and $panelUp) {
+        try {
+            Start-ScheduledTask -TaskName 'arena-desk-boot-demo' -TaskPath '\' -ErrorAction Stop
+            $launched = $true
+            $notes += 'arena-desk-boot-demo started now'
+        } catch {
+            try {
+                & schtasks.exe /Run /TN 'arena-desk-boot-demo' | Out-Null
+                $launched = ($LASTEXITCODE -eq 0)
+                if ($launched) { $notes += 'arena-desk-boot-demo started now (schtasks)' }
+            } catch { }
+        }
+    }
+    Start-Sleep -Seconds 3
+    $tasks = Get-DesktopTasks
+    $boot = @($tasks | Where-Object { $_['name'] -eq 'arena-desk-boot-demo' })[0]
+    $summary = ('panel {0} | boot task trigger {1} | launched {2}' -f
+        $(if ($panelUp) { 'up' } else { 'DOWN' }), @($boot['triggers']).Count, $launched)
+    $status = 'ok'
+    if (-not $panelUp) { $status = 'fail' }
+    elseif (-not $bootRegistered -or @($boot['triggers']).Count -eq 0) { $status = 'fail' }
+    elseif (-not $launched) { $status = 'warn' }
+    return [ordered]@{
+        status  = $status
+        summary = $summary
+        detail  = [ordered]@{
+            desk_root = $deskRoot
+            panel_up  = $panelUp
+            launched  = $launched
+            tasks     = $tasks
+            notes     = $notes
         }
     }
 }
@@ -811,6 +946,7 @@ function Invoke-Job {
         'smoke'     { return Invoke-JobSmoke -JobArgs $jobArgs }
         'gmx'       { return Invoke-JobGmx -JobArgs $jobArgs }
         'deskdiag'  { return Invoke-JobDeskdiag }
+        'deskfix'   { return Invoke-JobDeskfix }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
         'pipeline'  { return [ordered]@{ status = 'unsupported'
                                          summary = 'the Martini pipeline job kind is not wired yet; use smoke or gmx' } }

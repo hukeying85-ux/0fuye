@@ -51,7 +51,7 @@ SCHEMA_RESULT = "cgmd.mailbox.result.v1"
 DEFAULT_REF = "hub/mailbox"
 
 # Kinds the desktop worker knows.  shell is opt-in on the desk side.
-KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "shell", "pipeline")
+KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline")
 
 STATUS_OK = "ok"
 STATUS_FAIL = "fail"

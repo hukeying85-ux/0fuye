@@ -370,9 +370,20 @@ function Install-Task([string]$n, [string]$exe, [string]$arguments = '', [bool]$
 Install-Task 'arena-desk-panel' $pywExe ('"' + $root + '\server.py"') $true
 $launchArgs = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "' + $root + '\launch_panel.ps1"'
 if ($compiledExe) {
-    Install-Task 'arena-desk-open' $exePath ''
+    # The boot animation is what should appear at logon, so THIS task owns the
+    # AtLogOn trigger.  It used to be registered without any trigger at all,
+    # which is why the animation never played by itself (LastRunTime stayed at
+    # the 1999 sentinel while LastTaskResult said 267011 = "has not run yet").
     $bootAction = New-ScheduledTaskAction -Execute $exePath -Argument '--boot' -WorkingDirectory $root
-    Register-ScheduledTask -TaskName 'arena-desk-boot-demo' -TaskPath '\' -Action $bootAction -Principal $principal -Settings $settings -Force | Out-Null
+    Register-ScheduledTask -TaskName 'arena-desk-boot-demo' -TaskPath '\' -Action $bootAction `
+        -Trigger $trigger -Principal $principal -Settings $settings -Force | Out-Null
+    # "open without animation" stays available manually, but must not open a
+    # second window at logon - so it is registered with no trigger.
+    Install-Task 'arena-desk-open' $exePath ''
+    Unregister-ScheduledTask -TaskName 'arena-desk-open-manual' -TaskPath '\' -Confirm:$false -ErrorAction SilentlyContinue
+    $openAction = New-ScheduledTaskAction -Execute $exePath -WorkingDirectory $root
+    Register-ScheduledTask -TaskName 'arena-desk-open-manual' -TaskPath '\' -Action $openAction `
+        -Principal $principal -Settings $settings -Force | Out-Null
 } else {
     Install-Task 'arena-desk-open' $ps $launchArgs
 }
