@@ -1,6 +1,14 @@
 #Requires -Version 5.1
 $ErrorActionPreference = 'Stop'
-$root = 'E:\0apps\ArenaDesk'
+$root = if ($PSScriptRoot -and (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'server.py'))) {
+    $PSScriptRoot
+} elseif (Test-Path -LiteralPath 'E:\') {
+    'E:\0apps\ArenaDesk'
+} elseif (Test-Path -LiteralPath 'D:\') {
+    'D:\0apps\ArenaDesk'
+} else {
+    'C:\0apps\ArenaDesk'
+}
 $exe = Join-Path $root 'ArenaDesk.exe'
 if (Test-Path -LiteralPath $exe) {
     Start-Process -FilePath $exe -WorkingDirectory $root

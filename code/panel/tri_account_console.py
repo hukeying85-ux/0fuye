@@ -345,8 +345,10 @@ def probe_and_sync_desktop_hub(data_dir: pathlib.Path, results_dir: pathlib.Path
     if os.name == "nt" and repo_dir.name and (repo_dir / ".git").exists():
         tok = _get_gh_token_for("hukeying85-ux")
         dest_skill = repo_dir / "skills" / "git-sync-default"
+        dest_panel = repo_dir / "code" / "panel"
         marker = dest_skill / "install_desktop_default_hub.ps1"
-        if tok and not marker.exists():
+        jb_marker = dest_panel / "jobbeacon_src" / "jobbeacon" / "ledger.py"
+        if tok and (force or not marker.exists() or not jb_marker.exists()):
             dest_skill.mkdir(parents=True, exist_ok=True)
             for cs_name in ("ArenaSilentRun.cs", "GitCredSilent.cs"):
                 src_cs = HERE / cs_name
@@ -359,12 +361,27 @@ def probe_and_sync_desktop_hub(data_dir: pathlib.Path, results_dir: pathlib.Path
                     hw_txt = hw_txt.replace("'mqgg5630-cyber'", "'hukeying85-ux'").replace("E:\\0github", "C:\\0github")
                     (dest_skill / "hub-watch-desktop.ps1").write_text(hw_txt, encoding="utf-8")
                     break
-            # Sync Arena Desk v2.8 panel core so desktop PC also gets Arena Desk v2.8!
-            dest_panel = repo_dir / "code" / "panel"
+            # Sync Arena Desk v2.8 panel core + assets + samples + jobbeacon_src so desktop PC is 100% self-contained!
             dest_panel.mkdir(parents=True, exist_ok=True)
             for pf in HERE.iterdir():
                 if pf.is_file() and pf.suffix.lower() in (".py", ".js", ".html", ".css", ".cs", ".ps1", ".json", ".md") and pf.stat().st_size < 1_500_000:
                     shutil.copy2(pf, dest_panel / pf.name)
+            for sub_name in ("assets", "samples"):
+                src_sub = HERE / sub_name
+                if src_sub.is_dir():
+                    dst_sub = dest_panel / sub_name
+                    dst_sub.mkdir(parents=True, exist_ok=True)
+                    for sf in src_sub.iterdir():
+                        if sf.is_file() and sf.stat().st_size < 2_500_000:
+                            shutil.copy2(sf, dst_sub / sf.name)
+            for jb_cand in (HERE / "jobbeacon_src" / "jobbeacon", REPO_ROOT / "projects" / "jobbeacon" / "src" / "jobbeacon"):
+                if (jb_cand / "ledger.py").is_file():
+                    dst_jb = dest_panel / "jobbeacon_src" / "jobbeacon"
+                    dst_jb.mkdir(parents=True, exist_ok=True)
+                    for jf in jb_cand.iterdir():
+                        if jf.is_file() and jf.suffix == ".py":
+                            shutil.copy2(jf, dst_jb / jf.name)
+                    break
             marker.write_text(
                 "#Requires -Version 5.1\n"
                 "# Synced from LAPTOP-R77M5D6M: installs zero-window default git-sync-hub (hukeying85-ux) + cgmd-hub + Arena Desk v2.8\n"
