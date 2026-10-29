@@ -1,24 +1,22 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:38:30+08:00",
+    "generated_at":  "2026-10-29T14:39:56+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T063704-9a27.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:02:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 14:03:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:04:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:05:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:06:56 [INFO] mailbox: 0 queued, running at most 1",
@@ -76,18 +74,15 @@
                      "2026-10-29 14:36:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:37:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:37:56 [INFO] job kind=smoke",
-                     "2026-10-29 14:38:26 [INFO] job 20261029T063704-9a27 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
+                     "2026-10-29 14:38:26 [INFO] job 20261029T063704-9a27 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
+                     "2026-10-29 14:38:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-29 14:39:56 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
-                      {
-                          "id":  "20261029T063704-9a27",
-                          "kind":  "smoke",
-                          "status":  "ok",
-                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
-                      }
+
                   ],
     "recent":  [
                    {
