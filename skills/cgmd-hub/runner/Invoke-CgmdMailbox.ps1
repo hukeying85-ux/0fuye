@@ -245,6 +245,24 @@ function Invoke-PeerCycle {
         $label = [string]$peer.Label
         $entry = [ordered]@{ peer = $label; status = 'skipped'; ran = 0; note = '' }
         try {
+            # A peer that has never queued anything has no mailbox branch yet:
+            # that is "waiting", not an error, and must not spam the log.
+            $ls = Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'credential.helper=', 'ls-remote',
+                '--heads', $peer.Url, ('refs/heads/' + $peer.Ref))
+            if ($ls.Code -ne 0) {
+                $entry.status = 'unreachable'
+                $entry.note = ([string]$ls.Output).Trim()
+                if ($entry.note.Length -gt 200) { $entry.note = $entry.note.Substring(0, 200) }
+                $script:PeerInfo += $entry
+                Write-Log ('peer {0} unreachable: {1}' -f $label, $entry.note) 'WARN'
+                continue
+            }
+            if ($ls.Output -notmatch [regex]::Escape('refs/heads/' + $peer.Ref)) {
+                $entry.status = 'waiting'
+                $entry.note = 'no mailbox branch yet (appears on the first send)'
+                $script:PeerInfo += $entry
+                continue
+            }
             $tracking = ('refs/remotes/peer-{0}' -f $index)
             $fetch = Fetch-PeerRef -Url $peer.Url -PeerRef $peer.Ref -Tracking $tracking
             if ($fetch.Code -ne 0) {
