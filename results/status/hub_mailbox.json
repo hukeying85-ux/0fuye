@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:57:55+08:00",
+    "generated_at":  "2026-10-29T14:59:11+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261029T065816-bd45.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -21,12 +21,10 @@
                      "20261029T064849-5f39":  1,
                      "20261029T065021-c6ea":  1,
                      "20261029T065241-deb3":  1,
-                     "20261029T065614-93ef":  1
+                     "20261029T065614-93ef":  1,
+                     "20261029T065816-bd45":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:22:56 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
-                     "2026-10-29 14:23:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-29 14:23:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:24:57 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:24:57 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:25:55 [INFO] mailbox: 1 queued, running at most 1",
@@ -83,15 +81,30 @@
                      "2026-10-29 14:56:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:56:56 [INFO] job kind=deskdiag",
                      "2026-10-29 14:56:59 [INFO] job 20261029T065614-93ef (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 3",
-                     "2026-10-29 14:57:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-29 14:57:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-29 14:58:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 14:58:56 [INFO] job kind=deskfix",
+                     "2026-10-29 14:59:07 [INFO] job 20261029T065816-bd45 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
-
+                      {
+                          "id":  "20261029T065816-bd45",
+                          "kind":  "deskfix",
+                          "status":  "ok",
+                          "summary":  "panel up | boot task trigger 1 | launched True"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T065816-bd45",
+                       "kind":  "deskfix",
+                       "status":  "ok",
+                       "summary":  "panel up | boot task trigger 1 | launched True",
+                       "finished_at":  "2026-10-29T14:59:07+08:00"
+                   },
                    {
                        "id":  "20261029T065614-93ef",
                        "kind":  "deskdiag",
