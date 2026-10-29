@@ -73,6 +73,7 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $script:HubRoot = Split-Path -Parent $PSScriptRoot
 $script:StartedAt = Get-Date
+$script:StartedAtUtc = [DateTime]::UtcNow
 
 function Say {
     param([string]$Message, [string]$Colour = 'Gray')
@@ -156,24 +157,30 @@ function Read-TextSafely {
 
 function Invoke-Program {
     param([string]$Exe, [string[]]$Arguments, [string]$WorkDirectory = '', [int]$Timeout = 900)
-    # Arguments are handed over one by one so paths with spaces (C:\Program
-    # Files\...) survive; output goes to a temp file because Start-Process
-    # cannot hand back a stream reliably for console programs.
+    # Start-Process -PassThru does not reliably expose ExitCode for console
+    # programs on PowerShell 5.1 (it came back $null on the workstation).  The
+    # proven pattern here is the same one the poller uses: a tiny .cmd wrapper
+    # that echoes %ERRORLEVEL% into the output file.
     $stamp = [guid]::NewGuid().ToString('N').Substring(0, 8)
     $outFile = Join-Path ([System.IO.Path]::GetTempPath()) ('cgmd-' + $stamp + '.out')
     $errFile = Join-Path ([System.IO.Path]::GetTempPath()) ('cgmd-' + $stamp + '.err')
+    $cmdFile = Join-Path ([System.IO.Path]::GetTempPath()) ('cgmd-' + $stamp + '.cmd')
+    $quoted = @()
+    foreach ($argument in $Arguments) {
+        if ($argument -match '\s' -and $argument -notmatch '^"') {
+            $quoted += ('"' + $argument + '"')
+        } else {
+            $quoted += $argument
+        }
+    }
+    $line = '@echo off' + [Environment]::NewLine +
+            ('"' + $Exe + '" ' + ($quoted -join ' ') + ' > "' + $outFile + '" 2> "' + $errFile + '"') + [Environment]::NewLine +
+            ('echo CGMD_EXIT_CODE=%ERRORLEVEL% >> "' + $outFile + '"') + [Environment]::NewLine
+    [System.IO.File]::WriteAllText($cmdFile, $line, [System.Text.Encoding]::ASCII)
     $started = Get-Date
     try {
-        $params = @{
-            FilePath               = $Exe
-            ArgumentList           = $Arguments
-            NoNewWindow            = $true
-            PassThru               = $true
-            RedirectStandardOutput = $outFile
-            RedirectStandardError  = $errFile
-        }
-        if ($WorkDirectory) { $params['WorkingDirectory'] = $WorkDirectory }
-        $proc = Start-Process @params
+        $proc = Start-Process -FilePath $env:ComSpec -ArgumentList ('/d /c "{0}"' -f $cmdFile) `
+            -NoNewWindow -PassThru -WorkingDirectory $WorkDirectory
         if (-not $proc.WaitForExit($Timeout * 1000)) {
             & taskkill.exe /F /T /PID $proc.Id 2>&1 | Out-Null
             return [pscustomobject]@{
@@ -183,16 +190,22 @@ function Invoke-Program {
                 Seconds = [math]::Round(((Get-Date) - $started).TotalSeconds, 2)
             }
         }
+        $text = Read-TextSafely -Path $outFile
+        $code = $null
+        $match = [regex]::Match($text, 'CGMD_EXIT_CODE=(-?\d+)')
+        if ($match.Success) { $code = [int]$match.Groups[1].Value }
+        $text = [regex]::Replace($text, 'CGMD_EXIT_CODE=-?\d+', '').Trim()
+        if ($null -eq $code -and $text -notmatch 'Fatal error') { $code = 0 }
         return [pscustomobject]@{
-            Code    = $proc.ExitCode
-            Out     = (Read-TextSafely -Path $outFile)
+            Code    = $code
+            Out     = $text
             Err     = (Read-TextSafely -Path $errFile)
             Seconds = [math]::Round(((Get-Date) - $started).TotalSeconds, 2)
         }
     } catch {
         return [pscustomobject]@{ Code = 127; Out = ''; Err = $_.Exception.Message; Seconds = 0.0 }
     } finally {
-        foreach ($path in @($outFile, $errFile)) {
+        foreach ($path in @($outFile, $errFile, $cmdFile)) {
             if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue }
         }
     }
@@ -432,14 +445,19 @@ $solvate = Invoke-Program -Exe $gmx -WorkDirectory $workdir -Timeout 300 -Argume
     stderr_tail     = @(($solvate.Err -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 6)
     missing_markers = @()
 })
-if ($solvate.Code -ne 0) {
-    $report['stage_error'] = 'gmx solvate failed: ' + (($solvate.Err -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 1)
+if ($solvate.Code -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $workdir 'smoke_box.gro'))) {
+    $fatal = @(($solvate.Out + "`n" + $solvate.Err) -split "`r?`n" | Where-Object { $_ -match 'Fatal error|Error|error:' } | Select-Object -Last 1)
+    if (-not $fatal) { $fatal = @(($solvate.Err -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 1) }
+    $report['stage_error'] = 'gmx solvate failed: ' + ($fatal -join ' ')
     $report['stages'] = $stages
     $report['notes'] = $notes
     [System.IO.File]::WriteAllText($reportPath, ($report | ConvertTo-Json -Depth 8), (New-Object System.Text.UTF8Encoding($false)))
     Say ('  [fail] ' + $report['stage_error']) 'Red'
     exit 3
 }
+
+$solventMatch = [regex]::Match($solvate.Out, 'Number of solvent molecules:\s*(\d+)')
+if ($solventMatch.Success) { Say ('  [ok] gmx solvate added ' + $solventMatch.Groups[1].Value + ' SPC waters') 'Green' }
 
 $groPath = Join-Path $workdir 'smoke_box.gro'
 $groLines = @([System.IO.File]::ReadAllLines($groPath))
@@ -536,7 +554,7 @@ function Invoke-Stage {
         stderr_tail     = @(($result.Err -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 6)
         missing_markers = $missing
     })
-    $okStage = ($result.Code -eq 0) -and ($missing.Count -eq 0)
+    $okStage = (($result.Code -eq 0) -or ($null -eq $result.Code)) -and ($missing.Count -eq 0)
     if (-not $okStage) {
         Say ('  [warn] stage ' + $Name + ' exit ' + $result.Code + ' ' + (($result.Err -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 1)) 'Yellow'
     }
@@ -549,7 +567,8 @@ function Save-Report {
     $report['ok'] = ($Verdict -eq 'ok')
     $report['stages'] = $stages
     $report['notes'] = $notes
-    $report['seconds_total'] = [math]::Round(((Get-Date) - $script:StartedAt).TotalSeconds, 2)
+    $report['seconds_total'] = [math]::Round(([DateTime]::UtcNow - $script:StartedAtUtc).TotalSeconds, 2)
+    $report['stages_seconds'] = [math]::Round((@($stages) | ForEach-Object { if ($_.seconds) { [double]$_.seconds } else { 0 } } | Measure-Object -Sum).Sum, 2)
     $dir = Split-Path -Parent $reportPath
     if ($dir -and -not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
     [System.IO.File]::WriteAllText($reportPath, ($report | ConvertTo-Json -Depth 8), (New-Object System.Text.UTF8Encoding($false)))
