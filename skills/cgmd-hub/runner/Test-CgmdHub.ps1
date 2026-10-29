@@ -688,7 +688,7 @@ if ($probe.Count -gt 0 -and $probe.ContainsKey('PROBE_DONE')) {
     } elseif ($disk -lt $MinFreeGB) {
         Add-Check 'disk' 'free space' 'warn' ('{0:N1} GB free in WSL home, a 1 us campaign wants {1:N0} GB+' -f $disk, $MinFreeGB)
     } else {
-        Add-Check 'disk' 'free space' 'pass' ('{0:N1} GB free in WSL home (workdir ' + $wslWork + ')' -f $disk)
+        Add-Check 'disk' 'free space' 'pass' (('{0:N1} GB free in WSL home (workdir {1})') -f $disk, $wslWork)
     }
 } else {
     # WSL2 did not answer.  That is only fatal when there is no native Windows

@@ -192,14 +192,20 @@ def test_poller_repairs_invalid_status_files():
     assert "repair: drop status files that are not JSON" in source
 
 
-def test_the_junk_selfcheck_report_is_gone():
-    junk = ROOT / "results" / "status" / "desktop_selfcheck.json"
-    if junk.exists():
-        text = junk.read_text(encoding="utf-8").strip()
-        assert text.startswith("{"), "desktop_selfcheck.json must be a JSON object, not %r" % text[:20]
-    tracked = subprocess.check_output(["git", "ls-files", "--", "results/status/desktop_selfcheck.json"],
-                                      cwd=str(ROOT)).decode().strip()
-    assert tracked == "", "the literal False report must not be tracked"
+def test_the_selfcheck_report_is_a_real_document():
+    """It may be tracked again, but only as a genuine cgmd.selfcheck.v1 object.
+
+    The file once held the literal text ``False``, which made ConvertFrom-Json
+    throw inside every reader (one mailbox job died on it).
+    """
+    report = ROOT / "results" / "status" / "desktop_selfcheck.json"
+    if not report.exists():
+        return
+    text = report.read_text(encoding="utf-8").strip()
+    assert text.startswith("{"), "desktop_selfcheck.json must be a JSON object, not %r" % text[:20]
+    document = json.loads(text)
+    assert document.get("schema") == "cgmd.selfcheck.v1"
+    assert isinstance(document.get("checks"), list)
 
 
 # ---------------------------------------------------------------------------

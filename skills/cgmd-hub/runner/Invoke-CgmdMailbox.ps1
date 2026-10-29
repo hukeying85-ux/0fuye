@@ -475,7 +475,9 @@ function Invoke-JobSelfcheck {
     $summary = 'selfcheck exit ' + $code
     if ($null -ne $report) {
         $summary = ('selfcheck: {0} pass / {1} warn / {2} fail' -f
-            (Get-Property $report 'pass' 0), (Get-Property $report 'warn' 0), (Get-Property $report 'fail' 0))
+            (Get-Property (Get-Property $report 'summary' $null) 'passed' 0),
+            (Get-Property (Get-Property $report 'summary' $null) 'warnings' 0),
+            (Get-Property (Get-Property $report 'summary' $null) 'failed' 0))
     }
     return [ordered]@{
         status  = $(if ($code -eq 0) { 'ok' } else { 'fail' })

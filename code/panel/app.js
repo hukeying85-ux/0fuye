@@ -229,6 +229,9 @@
       clearTimeout(BOOT_BG_SAFETY_TIMER);
       BOOT_BG_SAFETY_TIMER = 0;
     }
+    const fallbackLayer = $("#boot-fallback");
+    if (fallbackLayer) fallbackLayer.hidden = true;
+    overlay.classList.remove("boot-fallback-active");
     const bootVid = $("#boot-video");
     if (bootVid) {
       try {
@@ -328,7 +331,6 @@
 
     const enterWorkspace = (spanMs, reasonTag) => {
       if (exiting) return;
-      enterWorkspaceRef = enterWorkspace;
       exiting = true;
       document.removeEventListener("visibilitychange", onVisChange);
       if (BOOT_RAF) {
@@ -353,6 +355,11 @@
         dismissBootOverlay(reasonTag || "dsh_video_boot_ended");
       }, spanMs + 40);
     };
+
+    // showBootFallback() needs to end the boot sequence, but enterWorkspace is
+    // defined in this closure: publish it as soon as it exists, not from inside
+    // its own body (that would only ever run after the fallback had called it).
+    enterWorkspaceRef = enterWorkspace;
 
     const startPlaybackWhenVisible = () => {
       if (exiting || startedVisiblePlayback) return;
