@@ -1,0 +1,43 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261029T064433-5331",
+    "kind":  "sync",
+    "status":  "fail",
+    "summary":  "sync exit 7",
+    "detail":  {
+                   "exit_code":  7
+               },
+    "logs_tail":  [
+                      "                       \"seconds\":  0",
+                      "                   },",
+                      "                   {",
+                      "                       \"id\":  \"task\",",
+                      "                       \"title\":  \"poll task\",",
+                      "                       \"status\":  \"pass\",",
+                      "                       \"detail\":  \"CGMD-Hub-Poll | state Ready | last run 10/29/2026 14:44:44 | result 0\",",
+                      "                       \"seconds\":  0",
+                      "                   },",
+                      "                   {",
+                      "                       \"id\":  \"beacon\",",
+                      "                       \"title\":  \"phone beacon\",",
+                      "                       \"status\":  \"pass\",",
+                      "                       \"detail\":  \"POST https://ntfy.sh/arena-beacon-95bc796a66\",",
+                      "                       \"seconds\":  2.26",
+                      "                   }",
+                      "               ]",
+                      "}��ֵת��Ϊ��System.Management.Automation.SwitchParameter�����͡�",
+                      "����λ�� C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Test-CgmdHub.ps1:905 �ַ�: 1",
+                      "+ $json = $report | ConvertTo-Json -Depth 8",
+                      "+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                      "    + CategoryInfo          : InvalidArgument: (:) []��RuntimeException",
+                      "    + FullyQualifiedErrorId : ConvertToFinalInvalidCastException",
+                      " ",
+                      "CGMD_EXIT_CODE=7 "
+                  ],
+    "note":  "redeploy panel with the E:/boot/mobile fixes",
+    "requested_by":  "user",
+    "started_at":  "2026-10-29T14:44:56+08:00",
+    "finished_at":  "2026-10-29T14:45:53+08:00",
+    "seconds":  56.32,
+    "worker":  "DESKTOP-IEUDGS5"
+}
