@@ -1,23 +1,22 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:35:00+08:00",
+    "generated_at":  "2026-10-29T14:35:55+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T061550-2d7d.json"
+
               ],
     "attempts":  {
 
                  },
     "log_tail":  [
-                     "2026-10-29 13:57:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 13:58:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 13:59:57 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:00:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -76,18 +75,14 @@
                      "2026-10-29 14:33:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:33:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:34:56 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-29 14:34:56 [WARN] job 20261029T061550-2d7d already has an answer on disk, publishing it instead of re-running"
+                     "2026-10-29 14:34:56 [WARN] job 20261029T061550-2d7d already has an answer on disk, publishing it instead of re-running",
+                     "2026-10-29 14:35:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
-                      {
-                          "id":  "20261029T061550-2d7d",
-                          "kind":  "smoke",
-                          "status":  "ok",
-                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
-                      }
+
                   ],
     "recent":  [
                    {
