@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T16:25:09+08:00",
+    "generated_at":  "2026-10-29T16:26:34+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T082308-4946.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -38,9 +38,6 @@
                      "20261029T082308-4946":  1
                  },
     "log_tail":  [
-                     "2026-10-29 15:33:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 15:34:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 15:35:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:36:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:37:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:38:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -97,7 +94,10 @@
                      "2026-10-29 16:22:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 16:23:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 16:23:56 [INFO] job kind=sync",
-                     "2026-10-29 16:25:01 [INFO] job 20261029T082308-4946 (sync) -\u003e ok: sync exit 6 | panel restarted"
+                     "2026-10-29 16:25:01 [INFO] job 20261029T082308-4946 (sync) -\u003e ok: sync exit 6 | panel restarted",
+                     "2026-10-29 16:25:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-29 16:25:58 [INFO] job kind=smoke",
+                     "2026-10-29 16:26:29 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082516-de56 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
                  ],
     "call_tail":  [
 
@@ -108,20 +108,27 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/0fuye#peer-test",
-                      "status":  "idle",
-                      "ran":  0,
-                      "note":  "1 request(s) seen, all already answered"
+                      "status":  "ran",
+                      "ran":  1,
+                      "note":  ""
                   }
               ],
     "processed":  [
                       {
-                          "id":  "20261029T082308-4946",
-                          "kind":  "sync",
+                          "id":  "20261029T082516-de56",
+                          "kind":  "smoke",
                           "status":  "ok",
-                          "summary":  "sync exit 6 | panel restarted"
+                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T082516-de56",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-29T16:26:29+08:00"
+                   },
                    {
                        "id":  "20261029T082308-4946",
                        "kind":  "sync",
@@ -254,13 +261,6 @@
                        "status":  "fail",
                        "summary":  "selfcheck: 0 pass / 0 warn / 0 fail",
                        "finished_at":  "2026-10-29T14:49:24+08:00"
-                   },
-                   {
-                       "id":  "20261029T064657-a850",
-                       "kind":  "sync",
-                       "status":  "fail",
-                       "summary":  "sync exit 7",
-                       "finished_at":  "2026-10-29T14:47:53+08:00"
                    }
                ]
 }
