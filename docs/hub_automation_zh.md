@@ -256,6 +256,56 @@ python3 -m core.hub_mailbox caps
 
 ---
 
+## 3.8 跨仓派活：token 只覆盖一个仓库，所以改成"各写各的、台式机居中"
+
+任何会话都想驱动台式机（验收标准第 2 条），但 Arena 给每个云端会话的 `GH_TOKEN`
+**只对会话所在的那个仓库有写权限**。2026-10-29 在 `JevHarness` 会话里实测：
+
+| 请求 | 结果 |
+| --- | --- |
+| `POST /repos/hukeying85-ux/JevHarness/git/blobs` | `201 Created` |
+| `POST /repos/hukeying85-ux/0fuye/git/blobs` | **`403 Resource not accessible by integration`** |
+| `git push` 到 `JevHarness`（从 0fuye 会话发） | **`403`**（对称，反过来一样） |
+| `git ls-remote` / `git clone` 对方公开仓库 | 正常（读是开放的） |
+
+所以"让对方往 0fuye 的 `hub/mailbox` 推"这条路走不通，也不该走。现在改成：
+
+```
+对端仓库 hub/mailbox ──inbox/<id>.json──▶ 台式机（peer_repos，匿名 fetch）
+                                           │ 执行（GPU / GROMACS）
+                                           ▼
+                       0fuye hub/mailbox ──outbox/<id>.json──▶ 调用方按同一 id 取回
+```
+
+| 组件 | 位置 | 作用 |
+| --- | --- | --- |
+| `peer_repos` | 台式机 `config\cgmd_hub.local.json` | 要侍候的对端仓库，`owner/repo` 或 `owner/repo#ref`；由 `deskfix` 远程写入 |
+| `Invoke-PeerCycle` | `skills/cgmd-hub/runner/Invoke-CgmdMailbox.ps1` | 每轮匿名 `ls-remote` + `fetch` 对端信箱，跑单，回执写进**本仓** outbox |
+| `peer_once` / `parse_peer` | `core/hub_mailbox.py` | 同一协议的 Python 孪生实现，测试用它驱动；没 PowerShell 的机器也能当中继 |
+| `--read-repo` | `core.hub_mailbox` CLI | 从本仓派单、去 0fuye 读回执（一次命令两件事） |
+
+细节：匿名优先（`-c credential.helper=`），私有仓库自动退回本机凭据助手再试一次；
+对端还没建信箱分支时报 `waiting`（不算错误，不刷日志）；回执带 `peer` 字段；
+对端那封请求**不用删**——台式机靠 ledger + 已有回执双重去重，同一单号只跑一次。
+
+**实测（2026-10-29 16:2x–16:3x，真机）：**
+
+| 步骤 | 结果 |
+| --- | --- |
+| 在另一个信箱里排队 `ping`（`hukeying85-ux/0fuye#peer-test`，模拟对端仓库） | 台式机一个轮询周期内取走 |
+| 回执 | `ok \| DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s) \| peer=hukeying85-ux/0fuye#peer-test` |
+| 同样路径排队 `smoke {"ps":100}` | `ok \| gmx 2025.1: 100 ps integrated on gpu`，`ps=100`、**540 ns/day**、`accelerator=gpu` |
+| 生产配置 | `peer_repos = ["hukeying85-ux/JevHarness"]`，`deskdiag` 里 `peers: [{status: waiting, note: no mailbox branch yet}]` |
+
+对端会话要做的只有两句（不需要碰台式机、不需要我贴命令）：
+
+```bash
+git clone https://github.com/hukeying85-ux/0fuye.git /tmp/desk
+python3 -m core.hub_mailbox --repo . run --kind ping --read-repo /tmp/desk
+```
+
+---
+
 ## 4. 两条链路怎么选
 
 ```
