@@ -1,0 +1,9 @@
+{
+  "desk": false,
+  "how": "the desktop hub runs `python3 -m cgmd.smoke --ps 100` inside WSL2 on its next poll, publishes results/status/gmx_smoke.json (GROMACS version + software inventory + 100 ps integration) and deletes this file",
+  "note": "native gmx 100 ps: version/GPU inventory after WorkingDirectory fix",
+  "requested_at": "2026-10-29T12:37:07+08:00",
+  "requested_by": "arena-agent",
+  "schema": "cgmd.selfcheck.request.v1",
+  "smoke": true
+}
