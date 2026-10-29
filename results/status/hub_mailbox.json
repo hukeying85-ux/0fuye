@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T15:08:04+08:00",
+    "generated_at":  "2026-10-29T15:09:56+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T070717-3684.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -32,8 +32,6 @@
                      "20261029T070717-3684":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:34:56 [WARN] job 20261029T061550-2d7d already has an answer on disk, publishing it instead of re-running",
-                     "2026-10-29 14:35:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:36:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:37:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:37:56 [INFO] job kind=smoke",
@@ -91,18 +89,15 @@
                      "2026-10-29 15:07:06 [INFO] job 20261029T070612-9728 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True",
                      "2026-10-29 15:07:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 15:07:56 [INFO] job kind=deskdiag",
-                     "2026-10-29 15:08:00 [INFO] job 20261029T070717-3684 (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4"
+                     "2026-10-29 15:08:00 [INFO] job 20261029T070717-3684 (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
+                     "2026-10-29 15:08:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-29 15:09:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
-                      {
-                          "id":  "20261029T070717-3684",
-                          "kind":  "deskdiag",
-                          "status":  "ok",
-                          "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4"
-                      }
+
                   ],
     "recent":  [
                    {
