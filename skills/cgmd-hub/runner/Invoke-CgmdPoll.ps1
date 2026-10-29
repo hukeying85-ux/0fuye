@@ -215,6 +215,45 @@ function Publish-Results {
     return $false
 }
 
+function Publish-Diagnostics {
+    param([string]$Repo, [string]$Branch, [string]$Label = 'poll')
+    # Copies the tail of today's hub log plus the last captured call into the
+    # repository, so a failure on the workstation is diagnosable from git.
+    if ($NoPublish) { return }
+    $statusDir = Join-Path (Join-Path $Repo 'results') 'status'
+    if (-not (Test-Path -LiteralPath $statusDir)) {
+        New-Item -ItemType Directory -Path $statusDir -Force | Out-Null
+    }
+    $today = Join-Path $script:LogDir ('hub-{0}.log' -f (Get-Date -Format 'yyyyMMdd'))
+    $parts = @('# CGMD hub diagnostics (' + $Label + ') at ' + (Get-BeijingStamp))
+    if (Test-Path -LiteralPath $today) {
+        $parts += '--- hub log (tail 120) ---'
+        $parts += @([System.IO.File]::ReadAllLines($today, [System.Text.Encoding]::UTF8) | Select-Object -Last 120)
+    }
+    $callLog = Join-Path $script:StateDir 'last-run.log'
+    if (Test-Path -LiteralPath $callLog) {
+        $parts += '--- last call output (tail 120) ---'
+        $parts += @([System.IO.File]::ReadAllLines($callLog, [System.Text.Encoding]::UTF8) | Select-Object -Last 120)
+    }
+    $smokeLog = Join-Path $script:StateDir 'smoke-call.log'
+    if (Test-Path -LiteralPath $smokeLog) {
+        $parts += '--- last smoke output (tail 120) ---'
+        $parts += @([System.IO.File]::ReadAllLines($smokeLog, [System.Text.Encoding]::UTF8) | Select-Object -Last 120)
+    }
+    $selfCheckLog = Join-Path $script:StateDir 'selfcheck-call.log'
+    if (Test-Path -LiteralPath $selfCheckLog) {
+        $parts += '--- last selfcheck output (tail 120) ---'
+        $parts += @([System.IO.File]::ReadAllLines($selfCheckLog, [System.Text.Encoding]::UTF8) | Select-Object -Last 120)
+    }
+    $path = Join-Path $statusDir 'desktop_diagnostics.log'
+    try {
+        [System.IO.File]::WriteAllText($path, ($parts -join [Environment]::NewLine), (New-Object System.Text.UTF8Encoding($false)))
+        $null = Publish-Results -Repo $Repo -Branch $Branch -Message ('diag: ' + $Label + ' [desktop hub]')
+    } catch {
+        Write-HubLog ('diagnostics publish failed: ' + $_.Exception.Message) 'WARN'
+    }
+}
+
 function Publish-Heartbeat {
     param([string]$Repo, [string]$Branch, [string]$State = 'idle', [string]$TaskId = '', [int]$Minutes = 60)
     # A tiny file in git so that "the workstation watcher is alive" can be
@@ -308,19 +347,19 @@ try {
     if ($fetch.Code -ne 0) {
         Write-HubLog ("fetch failed: " + $fetch.Output) 'WARN'
     } else {
+        # Never skip the reset: a dirty tree used to pin the clone to an old
+        # commit, so a poller kept running stale code for hours.  Local results
+        # were published just above; whatever is left is machine noise.
         $dirty = Invoke-Git -Repo $repo -GitArgs @('status', '--porcelain')
-        $current = Invoke-Git -Repo $repo -GitArgs @('rev-parse', '--abbrev-ref', 'HEAD')
-        if (-not $dirty.Output) {
-            $null = Invoke-Git -Repo $repo -GitArgs @('checkout', '--quiet', $branch)
-            $sync = Invoke-Git -Repo $repo -GitArgs @('reset', '--hard', ('origin/' + $branch))
-            if ($sync.Code -ne 0) {
-                Write-HubLog ("sync failed: " + $sync.Output) 'WARN'
-            } else {
-                Write-HubLog ("synced to origin/{0}" -f $branch)
-            }
+        if ($dirty.Output) {
+            Write-HubLog ("discarding local changes before sync: {0}" -f ($dirty.Output -replace "`r?`n", '; ')) 'WARN'
+        }
+        $null = Invoke-Git -Repo $repo -GitArgs @('checkout', '--quiet', '--force', $branch)
+        $sync = Invoke-Git -Repo $repo -GitArgs @('reset', '--hard', ('origin/' + $branch))
+        if ($sync.Code -ne 0) {
+            Write-HubLog ("sync failed: " + $sync.Output) 'WARN'
         } else {
-            Write-HubLog ("working tree dirty ({0}), skipping hard sync" -f ($dirty.Output -replace "`r?`n", '; ')) 'WARN'
-            $null = Invoke-Git -Repo $repo -GitArgs @('checkout', '--quiet', $branch)
+            Write-HubLog ("synced to origin/{0}" -f $branch)
         }
     }
 
@@ -392,6 +431,7 @@ try {
             if (-not $NoPublish) {
                 $null = Publish-Results -Repo $repo -Branch $branch -Message 'smoke: gmx 100 ps report [desktop hub]'
             }
+            Publish-Diagnostics -Repo $repo -Branch $branch -Label 'gmx-smoke'
             Write-HubLog 'smoke cycle complete'
             Publish-Heartbeat -Repo $repo -Branch $branch -State 'smoke-done' -TaskId 'gmx-smoke' -Minutes $HeartbeatMinutes
             exit 0
@@ -547,6 +587,11 @@ try {
 }
 catch {
     Write-HubLog ("unhandled error: " + $_.Exception.Message + ' | ' + $_.ScriptStackTrace) 'ERROR'
+    try {
+        if ($repo -and (Test-Path -LiteralPath $repo)) {
+            Publish-Diagnostics -Repo $repo -Branch $branch -Label ('error: ' + $_.Exception.Message)
+        }
+    } catch { }
     Send-Beacon -Title '[CGMD] hub error' -Message ("poll error: " + $_.Exception.Message) -Tags @('rotating_light')
     exit 9
 }
