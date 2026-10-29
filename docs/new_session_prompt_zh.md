@@ -60,7 +60,7 @@ Arena Desk 面板（127.0.0.1:18765）和 :8765 局域网桥。
   结果同时落在 results/status/gmx_smoke.json（git 可查）。
 
 【全部可用任务（同一入口，caps 里也有说明）】
-  --kind caps      上面那张能力卡（其实是本地命令，不发单）
+  caps（子命令，不是 --kind）  上面那张能力卡；本地读文件、不发单
   --kind ping              活着吗
   --kind selfcheck         18 项自检（原生 gmx / CUDA / 面板 / 素材）
   --kind smoke --json-args '{"ps": 500}'    真实 GROMACS，默认 100 ps
