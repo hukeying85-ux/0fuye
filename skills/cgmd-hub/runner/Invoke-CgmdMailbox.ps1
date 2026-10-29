@@ -501,11 +501,58 @@ function Invoke-JobSync {
     # panel's own html/js/css change, not just the hub scripts).
     if ([bool](Get-Property $JobArgs 'desk' $false)) { $line += ' -Desk -Force' }
     $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds ([math]::Min($MaxJobSeconds, 900))
+
+    # A redeployed panel keeps running the *old* python if the process is not
+    # restarted, which is how a fixed server.py kept answering 404 on /mobile.
+    $restarted = $false
+    if ([bool](Get-Property $JobArgs 'desk' $false)) {
+        $restarted = Restart-Panel -DeskRoot ([string](Get-Property $script:Config 'desk_root' 'C:\0apps\ArenaDesk'))
+    }
+    $summary = 'sync exit ' + $code
+    if ([bool](Get-Property $JobArgs 'desk' $false)) {
+        $summary += $(if ($restarted) { ' | panel restarted' } else { ' | panel restart failed' })
+    }
     return [ordered]@{
-        status    = $(if ($code -eq 0) { 'ok' } else { 'fail' })
-        summary   = 'sync exit ' + $code
-        detail    = [ordered]@{ exit_code = $code }
+        status    = $(if ($code -eq 0 -or $code -eq 6) { 'ok' } else { 'fail' })
+        summary   = $summary
+        detail    = [ordered]@{ exit_code = $code; panel_restarted = $restarted }
         logs_tail = @(Get-Tail -Path $out -Count 25)
+    }
+}
+
+function Restart-Panel {
+    # Stop the panel process and let the scheduled task bring it back, so the
+    # newly deployed server.py / app.js are actually loaded.
+    param([string]$DeskRoot)
+    try {
+        $null = Invoke-Captured -CommandLine 'taskkill /F /IM ArenaDesk.exe /T' -TimeoutSeconds 60
+        $pythons = @(Get-CimInstance Win32_Process -Filter "Name='pythonw.exe' OR Name='python.exe'" -ErrorAction SilentlyContinue |
+                     Where-Object { $_.CommandLine -match 'server\.py' -and $_.CommandLine -match 'ArenaDesk' })
+        foreach ($proc in $pythons) {
+            try { Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue } catch { }
+        }
+        Start-Sleep -Seconds 2
+        $task = Get-ScheduledTask -TaskName 'arena-desk-panel' -TaskPath '\' -ErrorAction SilentlyContinue
+        if ($task) { Start-ScheduledTask -TaskName 'arena-desk-panel' -TaskPath '\' -ErrorAction SilentlyContinue }
+        else {
+            $launcher = Join-Path $script:ScriptDir '..\..\..\code\panel\launch_panel.ps1'
+            if (Test-Path -LiteralPath $launcher) {
+                $null = Invoke-Captured -CommandLine ('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $launcher + '"') -TimeoutSeconds 60
+            }
+        }
+        # give the panel time to bind 18765 again
+        for ($attempt = 1; $attempt -le 15; $attempt++) {
+            Start-Sleep -Seconds 2
+            try {
+                $probe = Invoke-WebRequest -Uri 'http://127.0.0.1:18765/api/state' -TimeoutSec 4 -UseBasicParsing -ErrorAction Stop
+                if ($probe.StatusCode -eq 200) { return $true }
+            } catch { }
+        }
+        Write-Log 'panel did not come back on 18765 within 30 s' 'WARN'
+        return $false
+    } catch {
+        Write-Log ('panel restart failed: ' + $_.Exception.Message) 'WARN'
+        return $false
     }
 }
 

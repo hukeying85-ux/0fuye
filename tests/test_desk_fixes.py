@@ -226,3 +226,23 @@ def test_martini_deps_do_not_fail_a_workstation_that_runs_native_gromacs():
     source = (RUNNER / "Test-CgmdHub.ps1").read_text(encoding="ascii")
     assert "only the Martini pipeline needs these" in source
     assert "the native GROMACS path does not" in source
+
+
+# ---------------------------------------------------------------------------
+# 6. a redeployed panel must actually be restarted, and the check must prove
+#    the fixed pages are served
+# ---------------------------------------------------------------------------
+def test_sync_job_restarts_the_panel_after_redeploy():
+    source = (RUNNER / "Invoke-CgmdMailbox.ps1").read_text(encoding="ascii")
+    assert "function Restart-Panel" in source
+    assert "ArenaDesk.exe" in source
+    assert "arena-desk-panel" in source
+    assert "panel restarted" in source
+    # exit 6 from Sync-Desktop means "warnings only"; that is a success here
+    assert "$code -eq 0 -or $code -eq 6" in source
+
+
+def test_desk_http_check_proves_the_boot_art_and_mobile_page():
+    source = (RUNNER / "Test-CgmdHub.ps1").read_text(encoding="ascii")
+    assert "'/mobile', '/assets/boot-mascot.jpg', '/style.css'" in source
+    assert "desk-http" in source

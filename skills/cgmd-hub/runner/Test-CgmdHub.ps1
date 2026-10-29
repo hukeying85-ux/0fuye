@@ -801,7 +801,25 @@ if ($NoRemote) {
         $panelVersion = [string](Get-Property $panelState 'version' '?')
         $taskCount = 0
         try { $taskCount = @($panelState.tasks).Count } catch { $taskCount = 0 }
-        Add-Check 'desk-http' 'Arena Desk panel' 'pass' ('127.0.0.1:18765 | version ' + $panelVersion + ' | ' + $taskCount + ' tasks')
+        # Prove the fixed pages are really served: the boot artwork (fallback
+        # for the missing dsh-boot.mp4) and the companion page that used to be
+        # a 404.  A stale panel process keeps serving the old code, hence the
+        # explicit restart in the sync job.
+        $assetCodes = @()
+        foreach ($probePath in @('/mobile', '/assets/boot-mascot.jpg', '/style.css')) {
+            $code = 0
+            try {
+                $response = Invoke-WebRequest -Uri ('http://127.0.0.1:18765' + $probePath) -TimeoutSec 6 `
+                    -UseBasicParsing -ErrorAction Stop
+                $code = [int]$response.StatusCode
+            } catch {
+                if ($null -ne $_.Exception.Response) { $code = [int]$_.Exception.Response.StatusCode }
+            }
+            $assetCodes += ($probePath + ' ' + $code)
+        }
+        $uiOk = ($assetCodes -notmatch '\s(404|0)$').Count -eq $assetCodes.Count
+        Add-Check 'desk-http' 'Arena Desk panel' $(if ($uiOk) { 'pass' } else { 'warn' }) `
+            ('127.0.0.1:18765 | version ' + $panelVersion + ' | ' + $taskCount + ' tasks | ' + ($assetCodes -join ' | '))
     }
 }
 
