@@ -387,6 +387,7 @@ if (-not $gmx) {
         fft          = 'FFT library:\s*(.+)'
         openmp       = 'OpenMP:\s*(.+)'
         compiler     = '(?:GCC|Clang|CC)\s+[^:]*:\s*(.+)'
+        data_prefix  = 'Data prefix:\s*(.+)'
     }
     foreach ($key in $patterns.Keys) {
         $match = [regex]::Match($versionText, $patterns[$key])
@@ -410,6 +411,39 @@ $report['host'] = [ordered]@{
 $v = Get-Property $software['gromacs'] 'version' 'not found'
 Say ('  [ok] gmx ' + $v + ' -> ' + $gmx) 'Green'
 
+# Where the bundled force fields and solvent boxes live.  A Windows build that
+# ships only gmx.exe (no share/top) cannot run grompp at all, so the answer has
+# to travel back in the report instead of being guessed at from here.
+$dataPrefix = [string](Get-Property $software['gromacs'] 'data_prefix' '')
+if (-not $dataPrefix) {
+    $parent = Split-Path -Parent (Split-Path -Parent $gmx)
+    if ($parent) { $dataPrefix = $parent }
+}
+$shareTop = ''
+$candidates = @()
+if ($dataPrefix) { $candidates += (Join-Path $dataPrefix 'share\top') }
+if ($dataPrefix) { $candidates += (Join-Path $dataPrefix 'top') }
+foreach ($candidate in $candidates) {
+    if ($shareTop) { continue }
+    if (Test-Path -LiteralPath $candidate) { $shareTop = $candidate }
+}
+$ffProbe = [ordered]@{
+    data_prefix   = $dataPrefix
+    share_top     = $shareTop
+    oplsaa_dir    = ''
+    files         = [ordered]@{}
+}
+if ($shareTop) {
+    $oplsaa = Join-Path $shareTop 'oplsaa.ff'
+    if (Test-Path -LiteralPath $oplsaa) { $ffProbe['oplsaa_dir'] = $oplsaa }
+    foreach ($item in @('oplsaa.ff\forcefield.itp', 'oplsaa.ff\ffbonded.itp', 'oplsaa.ff\ffnonbonded.itp',
+                        'oplsaa.ff\spce.itp', 'oplsaa.ff\spc.itp', 'oplsaa.ff\tip3p.itp', 'oplsaa.ff\ions.itp',
+                        'spc216.gro', 'charmm36.ff\forcefield.itp', 'amber99sb-ildn.ff\forcefield.itp')) {
+        $ffProbe['files'][$item] = (Test-Path -LiteralPath (Join-Path $shareTop $item))
+    }
+}
+$report['environment'] = $ffProbe
+
 if (-not $gmx) {
     if (-not $Quiet) { Write-Output ($report | ConvertTo-Json -Depth 8) }
     exit 3
@@ -418,19 +452,68 @@ if (-not $gmx) {
 # ---------------------------------------------------------------------------
 # 2. build the SPC water box with the force field bundled in GROMACS
 # ---------------------------------------------------------------------------
-$topText = @(
-    '; CGMD smoke test -- SPC water, stock GROMACS force field',
-    '#include "oplsaa.ff/forcefield.itp"',
-    '#include "oplsaa.ff/spce.itp"',
-    '#include "oplsaa.ff/ions.itp"',
-    '',
-    '[ system ]',
-    'CGMD smoke test -- SPC water',
-    '',
-    '[ molecules ]',
-    'SOL 0'
-) -join [Environment]::NewLine
-[System.IO.File]::WriteAllText((Join-Path $workdir 'smoke_box.top'), $topText + [Environment]::NewLine, (New-Object System.Text.UTF8Encoding($false)))
+function Write-SpcTopology {
+    param([string]$Path, [string]$Kind = 'oplsaa', [int]$Molecules = 0)
+    if ($Kind -eq 'inline') {
+        # Every parameter inline: no #include, no force-field directory, no
+        # liquid-file lookup.  SPC/E charges, OW-HW 0.1 nm, HWH 109.47 deg,
+        # SETTLE on the oxygen.  Used when grompp refuses the bundled
+        # oplsaa.ff (a Windows build crashed with 0xC0000005 there).
+        $lines = @(
+            '; CGMD smoke test -- self-contained SPC water (no force-field include)',
+            '[ defaults ]',
+            '1               3               no              1.0     1.0',
+            '',
+            '[ atomtypes ]',
+            '; name  at.num  mass      charge  ptype  sigma(nm)  epsilon(kJ/mol)',
+            '  OW    8       15.99940   0.000   A      0.315061   0.636386',
+            '  HW    1        1.00800   0.000   A      0.000000   0.000000',
+            '',
+            '[ moleculetype ]',
+            '; name  nrexcl',
+            'SOL     2',
+            '',
+            '[ atoms ]',
+            '; nr  type  resnr  residue  atom  cgnr  charge    mass',
+            '1     OW    1      SOL      OW    1     -0.8476   15.99940',
+            '2     HW    1      SOL      HW1   1      0.4238    1.00800',
+            '3     HW    1      SOL      HW2   1      0.4238    1.00800',
+            '',
+            '[ settles ]',
+            '; OW  funct  doh(nm)  dhh(nm)',
+            '1     1      0.1      0.16330',
+            '',
+            '[ exclusions ]',
+            '1  2  3',
+            '2  1  3',
+            '3  1  2',
+            '',
+            '[ system ]',
+            'CGMD smoke test -- SPC water',
+            '',
+            '[ molecules ]',
+            ('SOL ' + $Molecules)
+        )
+    } else {
+        $lines = @(
+            '; CGMD smoke test -- SPC water, stock GROMACS force field',
+            '#include "oplsaa.ff/forcefield.itp"',
+            '#include "oplsaa.ff/spce.itp"',
+            '#include "oplsaa.ff/ions.itp"',
+            '',
+            '[ system ]',
+            'CGMD smoke test -- SPC water',
+            '',
+            '[ molecules ]',
+            'SOL 0'
+        )
+    }
+    $text = ($lines -join [Environment]::NewLine) + [Environment]::NewLine
+    [System.IO.File]::WriteAllText($Path, $text, (New-Object System.Text.UTF8Encoding($false)))
+    return $Path
+}
+
+$topFile = Write-SpcTopology -Path (Join-Path $workdir 'smoke_box.top') -Kind 'oplsaa'
 
 $edge = ('{0:F3}' -f [double]$BoxNm)
 $solvate = Invoke-Program -Exe $gmx -WorkDirectory $workdir -Timeout 300 -Arguments @(
@@ -472,7 +555,7 @@ $report['system'] = [ordered]@{
     molecules  = [int]($atoms / 3)
     box_nm     = @($BoxNm, $BoxNm, $BoxNm)
     gro        = $groPath
-    top        = (Join-Path $workdir 'smoke_box.top')
+    top        = $topFile
     topology   = [ordered]@{ force_field = 'oplsaa.ff (bundled with GROMACS)'; water = 'SPC/E (spc216.gro)' }
 }
 
@@ -552,6 +635,7 @@ function Invoke-Stage {
         returncode      = $result.Code
         seconds         = $result.Seconds
         stderr_tail     = @(($result.Err -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 6)
+        output_tail     = @((($result.Out + "`n" + $result.Err) -split "`r?`n") | Where-Object { $_ } | Select-Object -Last 30)
         missing_markers = $missing
     })
     $okStage = (($result.Code -eq 0) -or ($null -eq $result.Code)) -and ($missing.Count -eq 0)
@@ -578,8 +662,27 @@ function Save-Report {
 # 4. minimise
 # ---------------------------------------------------------------------------
 Say '  running grompp + mdrun (energy minimisation)' 'Cyan'
-if (-not (Invoke-Stage -Name 'grompp-em' -Arguments @('grompp', '-f', 'smoke_em.mdp', '-c', 'smoke_box.gro', '-p', 'smoke_box.top', '-o', 'smoke_em.tpr', '-maxwarn', '2'))) {
-    $report['stage_error'] = 'grompp (energy minimisation) failed'
+$emOk = Invoke-Stage -Name 'grompp-em' -Arguments @('grompp', '-f', 'smoke_em.mdp', '-c', 'smoke_box.gro', '-p', $topFile, '-o', 'smoke_em.tpr', '-maxwarn', '2')
+if (-not $emOk) {
+    # A Windows build of GROMACS died with 0xC0000005 inside grompp while
+    # reading the bundled oplsaa.ff includes.  Do not give up: redo the same
+    # system with a topology that carries every parameter inline, then keep the
+    # run going.  Which route worked is recorded in the report.
+    Say '  [warn] grompp failed on the bundled force field, retrying with an inline SPC topology' 'Yellow'
+    $topFile = Write-SpcTopology -Path (Join-Path $workdir 'smoke_box_inline.top') -Kind 'inline' -Molecules ([int]($atoms / 3))
+    $report['system']['top'] = $topFile
+    $report['system']['topology'] = [ordered]@{
+        force_field = 'inline (self-contained SPC parameters)'
+        water       = 'SPC/E, SETTLE on OW'
+        reason      = 'grompp failed on oplsaa.ff; every parameter is now written to the topology'
+    }
+    if (-not $notes.Contains('grompp failed on the bundled oplsaa.ff, retried with an inline SPC topology')) {
+        [void]$notes.Add('grompp failed on the bundled oplsaa.ff, retried with an inline SPC topology')
+    }
+    $emOk = Invoke-Stage -Name 'grompp-em-inline' -Arguments @('grompp', '-f', 'smoke_em.mdp', '-c', 'smoke_box.gro', '-p', $topFile, '-o', 'smoke_em.tpr', '-maxwarn', '2')
+}
+if (-not $emOk) {
+    $report['stage_error'] = 'grompp (energy minimisation) failed, with the bundled force field and with the inline topology'
     Save-Report
     Say ('  [fail] ' + $report['stage_error']) 'Red'
     exit 3
@@ -595,7 +698,7 @@ if (-not (Invoke-Stage -Name 'mdrun-em' -Arguments @('mdrun', '-deffnm', 'smoke_
 # 5. 100 ps of dynamics, GPU first then CPU
 # ---------------------------------------------------------------------------
 Say ('  running ' + $Ps + ' ps (' + $steps + ' steps x 0.002 ps)' ) 'Cyan'
-if (-not (Invoke-Stage -Name 'grompp-md' -Arguments @('grompp', '-f', 'smoke_md.mdp', '-c', 'smoke_em.gro', '-p', 'smoke_box.top', '-o', 'smoke_md.tpr', '-maxwarn', '2'))) {
+if (-not (Invoke-Stage -Name 'grompp-md' -Arguments @('grompp', '-f', 'smoke_md.mdp', '-c', 'smoke_em.gro', '-p', $topFile, '-o', 'smoke_md.tpr', '-maxwarn', '2'))) {
     $report['stage_error'] = 'grompp (production) failed'
     Save-Report
     Say ('  [fail] ' + $report['stage_error']) 'Red'

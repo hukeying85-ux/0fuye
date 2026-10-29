@@ -430,3 +430,25 @@ def test_selfcheck_accepts_a_native_gmx_when_wsl_is_absent():
     assert "Find-NativeGmx" in source
     assert "Get-GmxVersionLine" in source
     assert "native windows" in source
+
+
+def test_native_runner_has_an_inline_topology_fallback():
+    """GROMACS 2025.1 on Windows crashed in grompp on the bundled oplsaa.ff.
+
+    The runner must be able to drop the #include entirely and write every SPC
+    parameter inline, and it must record which route produced the run.
+    """
+    source = open(os.path.join(HUB, "Run-Gmx-Native.ps1"), encoding="ascii").read()
+    assert "Write-SpcTopology" in source
+    assert "-Kind 'inline'" in source
+    assert "[ settles ]" in source
+    assert "grompp-em-inline" in source
+    assert "inline (self-contained SPC parameters)" in source
+
+
+def test_native_runner_records_the_force_field_probe():
+    source = open(os.path.join(HUB, "Run-Gmx-Native.ps1"), encoding="ascii").read()
+    assert "Data prefix:" in source          # data_prefix from gmx --version
+    assert "share\\top" in source
+    assert "report['environment']" in source
+    assert "output_tail" in source           # full failure text, not just 6 lines
