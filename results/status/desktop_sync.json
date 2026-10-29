@@ -1,11 +1,11 @@
 {
     "schema":  "cgmd.desksync.v1",
-    "synced_at":  "2026-10-29T11:23:36+08:00",
+    "synced_at":  "2026-10-29T11:31:42+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "repo":  "C:\\cgmd\\0fuye",
     "branch":  "arena/32cd826e-0fuye",
-    "from_sha":  "01754c66ff319488c2c5b2853ec715ac7ef4bd19",
-    "to_sha":  "01754c66ff319488c2c5b2853ec715ac7ef4bd19",
+    "from_sha":  "df80d3a8b1c1d283c486184e1e5aeaaf03a601b9",
+    "to_sha":  "df80d3a8b1c1d283c486184e1e5aeaaf03a601b9",
     "incoming":  0,
     "desk":  {
                  "requested":  true,
@@ -23,5 +23,5 @@
                       "exit_code":  7,
                       "summary":  "10 pass / 0 warn / 7 fail"
                   },
-    "seconds":  47
+    "seconds":  46.6
 }

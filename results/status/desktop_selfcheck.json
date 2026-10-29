@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-29T11:23:36+08:00",
+    "checked_at":  "2026-10-29T11:31:41+08:00",
     "overall":  "fail",
     "exit_code":  7,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
@@ -34,7 +34,7 @@
                     "passed":  10,
                     "warnings":  0,
                     "failed":  7,
-                    "seconds":  26.2
+                    "seconds":  26.5
                 },
     "checks":  [
                    {
@@ -49,14 +49,14 @@
                        "title":  "origin lock",
                        "status":  "pass",
                        "detail":  "https://github.com/hukeying85-ux/0fuye.git",
-                       "seconds":  0.05
+                       "seconds":  0.06
                    },
                    {
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ 01754c6 (ahead 0, behind 0)",
-                       "seconds":  1.77
+                       "detail":  "arena/32cd826e-0fuye @ df80d3a (ahead 0, behind 0)",
+                       "seconds":  1.81
                    },
                    {
                        "id":  "creds",
@@ -146,7 +146,7 @@
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 11/30/1999 00:00:00 | result 267011",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 11:30:30 | result 0",
                        "seconds":  0
                    },
                    {
@@ -154,7 +154,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  2.37
+                       "seconds":  2.39
                    }
                ]
 }
