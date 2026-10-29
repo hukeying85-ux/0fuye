@@ -1,8 +1,8 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-29T14:47:46+08:00",
-    "overall":  "fail",
-    "exit_code":  7,
+    "checked_at":  "2026-10-29T14:49:24+08:00",
+    "overall":  "warn",
+    "exit_code":  6,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
     "host":  {
                  "computer":  "DESKTOP-IEUDGS5",
@@ -15,7 +15,10 @@
                  "gpu_id":  0
              },
     "versions":  {
-                     "gromacs":  "2018.1",
+                     "gromacs":  "2025.1",
+                     "gromacs_native":  "2025.1",
+                     "gromacs_wsl":  "2018.1",
+                     "gromacs_gpu":  "CUDA",
                      "nvidia":  "NVIDIA RTX A4000, 16376 MiB",
                      "python":  "3.6.9",
                      "vermouth":  "",
@@ -31,10 +34,10 @@
              },
     "summary":  {
                     "checks":  18,
-                    "passed":  14,
-                    "warnings":  2,
-                    "failed":  2,
-                    "seconds":  25
+                    "passed":  15,
+                    "warnings":  3,
+                    "failed":  0,
+                    "seconds":  26.2
                 },
     "checks":  [
                    {
@@ -42,21 +45,21 @@
                        "title":  "repository clone",
                        "status":  "pass",
                        "detail":  "C:\\cgmd\\0fuye",
-                       "seconds":  0.03
+                       "seconds":  0.06
                    },
                    {
                        "id":  "origin",
                        "title":  "origin lock",
                        "status":  "pass",
                        "detail":  "https://github.com/hukeying85-ux/0fuye.git",
-                       "seconds":  0.05
+                       "seconds":  0.11
                    },
                    {
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ 7c7056f (ahead 0, behind 0)",
-                       "seconds":  1.97
+                       "detail":  "arena/32cd826e-0fuye @ d0f86eb (ahead 0, behind 0)",
+                       "seconds":  1.92
                    },
                    {
                        "id":  "creds",
@@ -70,7 +73,7 @@
                        "title":  "WSL2 distro",
                        "status":  "pass",
                        "detail":  "Ubuntu-18.04 | Ubuntu 18.04.6 LTS | 48 cores | 31.2 GB RAM",
-                       "seconds":  15.88
+                       "seconds":  16.79
                    },
                    {
                        "id":  "gpu",
@@ -82,8 +85,8 @@
                    {
                        "id":  "gromacs",
                        "title":  "GROMACS + CUDA",
-                       "status":  "warn",
-                       "detail":  "GROMACS 2018.1 without GPU support; production will run on CPU",
+                       "status":  "pass",
+                       "detail":  "GROMACS 2025.1 native windows (GPU support: CUDA) | wsl 2018.1 (cpu only) unused",
                        "seconds":  0
                    },
                    {
@@ -96,15 +99,15 @@
                    {
                        "id":  "python",
                        "title":  "python packages",
-                       "status":  "fail",
-                       "detail":  "missing: vermouth, insane, MDAnalysis, matplotlib | bash code/cgmd/setup_env.sh --install --yes",
+                       "status":  "warn",
+                       "detail":  "missing: vermouth, insane, MDAnalysis, matplotlib | bash code/cgmd/setup_env.sh --install --yes | only the Martini pipeline needs these",
                        "seconds":  0
                    },
                    {
                        "id":  "tools",
                        "title":  "martinize2 + insane",
-                       "status":  "fail",
-                       "detail":  "neither martinize2 nor insane on PATH",
+                       "status":  "warn",
+                       "detail":  "neither on PATH | only the Martini pipeline needs them; the native GROMACS path does not",
                        "seconds":  0
                    },
                    {
@@ -153,7 +156,7 @@
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 14:46:46 | result 0",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 14:48:48 | result 0",
                        "seconds":  0
                    },
                    {
@@ -161,7 +164,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  2.38
+                       "seconds":  2.41
                    }
                ]
 }
