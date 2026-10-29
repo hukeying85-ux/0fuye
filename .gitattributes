@@ -1,0 +1,6 @@
+*.sh text eol=lf
+*.py text eol=lf
+*.mdp text eol=lf
+*.itp text eol=lf
+*.top text eol=lf
+*.gro text eol=lf

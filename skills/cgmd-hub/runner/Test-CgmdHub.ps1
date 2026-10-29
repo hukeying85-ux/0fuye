@@ -203,7 +203,7 @@ function Invoke-WslProbe {
     param([string]$Distro, [string]$ScriptText, [int]$TimeoutSeconds = 120)
     $exe = Get-WslExe
     if (-not $exe) { return $null }
-    $bytes = [System.Text.Encoding]::ASCII.GetBytes($ScriptText)
+    $bytes = [System.Text.Encoding]::ASCII.GetBytes(($ScriptText -replace "`r", ''))
     $payload = [Convert]::ToBase64String($bytes)
     $inner = 'echo ' + $payload + ' | base64 -d | bash'
     # cmd.exe/wsl.exe re-parse the command line, so the bash payload is wrapped
