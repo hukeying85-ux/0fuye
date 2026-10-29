@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-29T15:05:47+08:00",
+    "checked_at":  "2026-10-29T16:20:45+08:00",
     "overall":  "warn",
     "exit_code":  6,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
@@ -37,7 +37,7 @@
                     "passed":  15,
                     "warnings":  3,
                     "failed":  0,
-                    "seconds":  27.5
+                    "seconds":  25.2
                 },
     "checks":  [
                    {
@@ -58,8 +58,8 @@
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ 234594e (ahead 0, behind 0)",
-                       "seconds":  1.83
+                       "detail":  "arena/32cd826e-0fuye @ ec6ec5e (ahead 0, behind 0)",
+                       "seconds":  1.76
                    },
                    {
                        "id":  "creds",
@@ -73,7 +73,7 @@
                        "title":  "WSL2 distro",
                        "status":  "pass",
                        "detail":  "Ubuntu-18.04 | Ubuntu 18.04.6 LTS | 48 cores | 31.2 GB RAM",
-                       "seconds":  17.59
+                       "seconds":  16.5
                    },
                    {
                        "id":  "gpu",
@@ -114,7 +114,7 @@
                        "id":  "disk",
                        "title":  "free space",
                        "status":  "pass",
-                       "detail":  "855.7 GB free in WSL home (workdir ~/cgmd-runs)",
+                       "detail":  "855.6 GB free in WSL home (workdir ~/cgmd-runs)",
                        "seconds":  0
                    },
                    {
@@ -149,14 +149,14 @@
                        "id":  "gmxrun",
                        "title":  "last 100 ps mdrun",
                        "status":  "pass",
-                       "detail":  "ok | gmx 2025.1 | 100 ps | 2026-10-29T14:37:58+08:00",
+                       "detail":  "ok | gmx 2025.1 | 100 ps | 2026-10-29T15:32:00+08:00",
                        "seconds":  0
                    },
                    {
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 15:04:04 | result 0",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 16:19:19 | result 0",
                        "seconds":  0
                    },
                    {
@@ -164,7 +164,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  3.35
+                       "seconds":  2.17
                    }
                ]
 }
