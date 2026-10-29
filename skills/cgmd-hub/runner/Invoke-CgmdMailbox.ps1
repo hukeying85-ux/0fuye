@@ -58,6 +58,8 @@ $script:LogDir = Join-Path $script:HubRoot 'logs'
 $script:ScriptDir = $PSScriptRoot
 $script:Worktree = Join-Path $script:StateDir 'mailbox'
 $script:LedgerPath = Join-Path $script:StateDir 'mailbox-ledger.json'
+$script:AttemptsPath = Join-Path $script:StateDir 'mailbox-attempts.json'
+$script:MaxAttempts = 3
 $script:LastPath = Join-Path $script:StateDir 'mailbox-last.json'
 $script:Stopped = $false
 
@@ -706,6 +708,18 @@ try {
         Write-Log ('mailbox: {0} queued, running at most {1}' -f $requests.Count, $MaxJobs)
         $ledger = Read-JsonFile -Path $script:LedgerPath
         if ($null -eq $ledger) { $ledger = [ordered]@{} }
+        # Attempts per job: a job that cannot be completed must still produce
+        # an answer, otherwise the caller waits forever and the desk re-runs it
+        # on every single poll.
+        $attemptsPath = Join-Path $script:StateDir 'mailbox-attempts.json'
+        $attempts = [ordered]@{}
+        $storedAttempts = Read-JsonFile -Path $attemptsPath
+        if ($null -ne $storedAttempts) {
+            foreach ($prop in $storedAttempts.PSObject.Properties) {
+                $attempts[$prop.Name] = [int]$prop.Value
+            }
+        }
+        $script:MaxAttempts = [int](Get-Property $script:Config 'mailbox_max_attempts' 3)
 
         foreach ($requestFile in ($requests | Select-Object -First $MaxJobs)) {
             $jobId = [System.IO.Path]::GetFileNameWithoutExtension($requestFile.Name)
@@ -720,6 +734,28 @@ try {
                 $request = Read-JsonFile -Path $requestFile.FullName
             } catch {
                 Write-Log ('job {0} has broken JSON: {1}' -f $jobId, $_.Exception.Message) 'WARN'
+            }
+            if (-not $attempts.Contains($jobId)) { $attempts[$jobId] = 0 }
+            $attempts[$jobId] = [int]$attempts[$jobId] + 1
+            if ($attempts[$jobId] -gt $script:MaxAttempts) {
+                # Give up loudly instead of looping forever.
+                Write-Log ('job {0} exceeded {1} attempts, answering with an error' -f $jobId, $script:MaxAttempts) 'WARN'
+                $failed = [ordered]@{
+                    schema      = 'cgmd.mailbox.result.v1'
+                    id          = $jobId
+                    kind        = [string](Get-Property $request 'kind' 'unknown')
+                    status      = 'error'
+                    summary     = ('the desk tried {0} times and could not finish this job' -f $script:MaxAttempts)
+                    detail      = [ordered]@{ attempts = $attempts[$jobId]; hint = 'see results/status/hub_mailbox.json log_tail' }
+                    logs_tail   = @(Get-Tail -Path (Join-Path $script:LogDir ('mailbox-{0}.log' -f (Get-Date -Format 'yyyyMMdd'))) -Count 30)
+                    note        = [string](Get-Property $request 'note' '')
+                    worker      = $env:COMPUTERNAME
+                    finished_at = Get-BeijingStamp
+                }
+                Write-JsonFile -Path $answerPath -Data $failed
+                Remove-Item -LiteralPath $requestFile.FullName -Force -ErrorAction SilentlyContinue
+                $jobs += $failed
+                continue
             }
             $started = Get-Date
             $outcome = $null
@@ -759,6 +795,7 @@ try {
         if ($jobs.Count -gt 0) {
             $null = Publish-MailboxChanges -Message ('mailbox: {0} answer(s) from {1}' -f $jobs.Count, $env:COMPUTERNAME)
         }
+        Write-JsonFile -Path $script:AttemptsPath -Data $attempts
         Write-JsonFile -Path $script:LedgerPath -Data $ledger
         # Remember the last few answers: an idle cycle must not make the
         # published report look like nothing ever ran.
@@ -794,6 +831,12 @@ try {
         init_note    = $script:InitNote
         worktree     = $script:Worktree
         queued       = $queuedCount
+        max_jobs     = $MaxJobs
+        allow_shell  = [bool]$AllowShell
+        inbox        = @($requests | ForEach-Object { $_.Name })
+        attempts     = $attempts
+        log_tail     = @(Get-Tail -Path (Join-Path $script:LogDir ('mailbox-{0}.log' -f (Get-Date -Format 'yyyyMMdd'))) -Count 60)
+        call_tail    = @(Get-Tail -Path (Join-Path $script:StateDir 'mailbox-call.log') -Count 40)
         processed    = @($jobs | ForEach-Object { [ordered]@{ id = $_['id']; kind = $_['kind']; status = $_['status']; summary = $_['summary'] } })
         recent       = @(Get-Property (Read-JsonFile -Path (Join-Path $script:StateDir 'mailbox-recent.json')) 'items' @())
     })
