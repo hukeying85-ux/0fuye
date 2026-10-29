@@ -143,6 +143,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hu
 * 力场用 GROMACS 自带的 `oplsaa.ff` + `spce.itp`，`gmx solvate -cs spc216.gro` 灌 2.5 nm 盒子（约 500 个 SPC 水）；
 * EM → `50000 × 0.002 ps = 100 ps` NPT 300 K（PME + LINCS h-bonds + v-rescale + C-rescale）；
 * 先 `-nb gpu`，失败自动回退 CPU；报告字段与 Python 通道一致（`cgmd.gmxsmoke.v1`）→ `results/status/gmx_smoke.json`，自动 push；
+* **已实测通过**（2026-10-29，`DESKTOP-IEUDGS5`）：GROMACS 2025.1 / mixed / AVX2_256 / CUDA 12.8（驱动 13.2）/ FFTW3，RTX A4000 16 GB（驱动 596.71），`ps_completed = 100`，`accelerator = gpu`，`540–576 ns/day`，端到端 23 s。细节见 `docs/gmx_smoke_native_zh.md`；
+* **两条 Windows 坑（脚本已内置兜底，勿删）**：① 这套 2025.1 预编译版 `gmx grompp` 在读自带 `oplsaa.ff` 时会以 `0xC0000005` 崩溃，脚本自动改用「参数全内联的自带 SPC 拓扑」(`smoke_box_inline.top`) 重跑，日志写明原因；② PS 5.1 的 `Start-Process -WorkingDirectory ''` 会静默报错，导致 `gmx --version` / `nvidia-smi` 拿不到输出（版本与显卡字段为空），已改成始终传一个非空目录；
 * 自检同步升级：WSL 探测失败但 Windows 有 `gmx.exe` 时，`gromacs`/`gpu` 直接判 pass（`native windows`），不再误报 7 项 fail。
 
 ```powershell
