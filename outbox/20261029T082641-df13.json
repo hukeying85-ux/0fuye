@@ -1,0 +1,85 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261029T082641-df13",
+    "kind":  "deskfix",
+    "status":  "ok",
+    "summary":  "panel up | boot task trigger 1 | launched True",
+    "detail":  {
+                   "desk_root":  "C:\\0apps\\ArenaDesk",
+                   "panel_up":  true,
+                   "launched":  true,
+                   "peer_repos":  [
+                                      "hukeying85-ux/JevHarness"
+                                  ],
+                   "tasks":  [
+                                 {
+                                     "name":  "arena-desk-boot-demo",
+                                     "exists":  true,
+                                     "state":  "Running",
+                                     "last_result":  "267009",
+                                     "last_run":  "2026-10-29 16:27:27",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe --boot"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-open",
+                                     "exists":  true,
+                                     "state":  "Disabled",
+                                     "last_result":  "4294967295",
+                                     "last_run":  "2026-10-29 11:23:23",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-open-manual",
+                                     "exists":  true,
+                                     "state":  "Ready",
+                                     "last_result":  "267011",
+                                     "last_run":  "",
+                                     "triggers":  [
+                                                      "?"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-panel",
+                                     "exists":  true,
+                                     "state":  "Running",
+                                     "last_result":  "267009",
+                                     "last_run":  "2026-10-29 16:24:24",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe \"C:\\0apps\\ArenaDesk\\server.py\""
+                                                 ]
+                                 }
+                             ],
+                   "notes":  [
+                                 "peer_repos -\u003e hukeying85-ux/JevHarness in C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
+                                 "arena-desk-boot-demo re-registered WITH an AtLogOn trigger",
+                                 "arena-desk-open disabled at logon (the animation task opens the window instead)",
+                                 "arena-desk-open-manual registered (no trigger, for \"skip the animation\")",
+                                 "arena-desk-boot-demo started now"
+                             ]
+               },
+    "logs_tail":  [
+
+                  ],
+    "note":  "production peer list",
+    "requested_by":  "user",
+    "started_at":  "2026-10-29T16:26:56+08:00",
+    "finished_at":  "2026-10-29T16:27:08+08:00",
+    "seconds":  12.09,
+    "worker":  "DESKTOP-IEUDGS5"
+}
