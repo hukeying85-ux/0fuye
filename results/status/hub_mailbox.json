@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:49:28+08:00",
+    "generated_at":  "2026-10-29T14:49:55+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T064849-5f39.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -21,7 +21,6 @@
                      "20261029T064849-5f39":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:16:57 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:16:57 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:17:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:17:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
@@ -80,18 +79,14 @@
                      "2026-10-29 14:47:53 [INFO] job 20261029T064657-a850 (sync) -\u003e fail: sync exit 7",
                      "2026-10-29 14:48:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:48:56 [INFO] job kind=selfcheck",
-                     "2026-10-29 14:49:24 [INFO] job 20261029T064849-5f39 (selfcheck) -\u003e fail: selfcheck: 0 pass / 0 warn / 0 fail"
+                     "2026-10-29 14:49:24 [INFO] job 20261029T064849-5f39 (selfcheck) -\u003e fail: selfcheck: 0 pass / 0 warn / 0 fail",
+                     "2026-10-29 14:49:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
-                      {
-                          "id":  "20261029T064849-5f39",
-                          "kind":  "selfcheck",
-                          "status":  "fail",
-                          "summary":  "selfcheck: 0 pass / 0 warn / 0 fail"
-                      }
+
                   ],
     "recent":  [
                    {
