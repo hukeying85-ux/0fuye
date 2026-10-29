@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
+.cache/
 
 # Private research inputs and heavy MD output must stay off this public branch.
 google_drive/
