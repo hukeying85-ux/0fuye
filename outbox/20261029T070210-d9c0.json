@@ -1,0 +1,81 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261029T070210-d9c0",
+    "kind":  "deskfix",
+    "status":  "ok",
+    "summary":  "panel up | boot task trigger 1 | launched True",
+    "detail":  {
+                   "desk_root":  "C:\\0apps\\ArenaDesk",
+                   "panel_up":  true,
+                   "launched":  true,
+                   "tasks":  [
+                                 {
+                                     "name":  "arena-desk-boot-demo",
+                                     "exists":  true,
+                                     "state":  "Running",
+                                     "last_result":  "267009",
+                                     "last_run":  "2026-10-29 15:03:03",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe --boot"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-open",
+                                     "exists":  true,
+                                     "state":  "Disabled",
+                                     "last_result":  "4294967295",
+                                     "last_run":  "2026-10-29 11:23:23",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-open-manual",
+                                     "exists":  true,
+                                     "state":  "Ready",
+                                     "last_result":  "267011",
+                                     "last_run":  "",
+                                     "triggers":  [
+                                                      "?"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-panel",
+                                     "exists":  true,
+                                     "state":  "Running",
+                                     "last_result":  "267009",
+                                     "last_run":  "2026-10-29 15:01:01",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe \"C:\\0apps\\ArenaDesk\\server.py\""
+                                                 ]
+                                 }
+                             ],
+                   "notes":  [
+                                 "arena-desk-boot-demo re-registered WITH an AtLogOn trigger",
+                                 "arena-desk-open disabled at logon (the animation task opens the window instead)",
+                                 "arena-desk-open-manual registered (no trigger, for \"skip the animation\")",
+                                 "arena-desk-boot-demo started now"
+                             ]
+               },
+    "logs_tail":  [
+
+                  ],
+    "note":  "play the animation again with the availability fix",
+    "requested_by":  "user",
+    "started_at":  "2026-10-29T15:02:59+08:00",
+    "finished_at":  "2026-10-29T15:03:09+08:00",
+    "seconds":  10.38,
+    "worker":  "DESKTOP-IEUDGS5"
+}
