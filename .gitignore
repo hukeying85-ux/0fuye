@@ -1,3 +1,16 @@
 __pycache__/
 *.pyc
 .venv/
+
+# Private research inputs and heavy MD output must stay off this public branch.
+google_drive/
+sources/
+runs/
+*.xtc
+*.trr
+*.tpr
+*.cpt
+*.gro
+*.edr
+*.dcd
+*.h5
