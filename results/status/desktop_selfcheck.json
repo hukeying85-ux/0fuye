@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-29T11:09:19+08:00",
+    "checked_at":  "2026-10-29T11:14:16+08:00",
     "overall":  "fail",
     "exit_code":  7,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
@@ -34,7 +34,7 @@
                     "passed":  10,
                     "warnings":  0,
                     "failed":  7,
-                    "seconds":  17.4
+                    "seconds":  17.1
                 },
     "checks":  [
                    {
@@ -42,7 +42,7 @@
                        "title":  "repository clone",
                        "status":  "pass",
                        "detail":  "C:\\cgmd\\0fuye",
-                       "seconds":  0.04
+                       "seconds":  0.05
                    },
                    {
                        "id":  "origin",
@@ -55,8 +55,8 @@
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ b334e99 (ahead 0, behind 0)",
-                       "seconds":  1.85
+                       "detail":  "arena/32cd826e-0fuye @ 6379b79 (ahead 0, behind 0)",
+                       "seconds":  1.82
                    },
                    {
                        "id":  "creds",
@@ -146,7 +146,7 @@
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 11:08:08 | result 0",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 11:13:13 | result 0",
                        "seconds":  0
                    },
                    {
@@ -154,7 +154,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  2.13
+                       "seconds":  2.25
                    }
                ]
 }
