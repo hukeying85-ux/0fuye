@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T16:27:14+08:00",
+    "generated_at":  "2026-10-29T16:27:57+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T082641-df13.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -39,7 +39,6 @@
                      "20261029T082641-df13":  1
                  },
     "log_tail":  [
-                     "2026-10-29 15:39:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:40:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:41:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:42:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -98,7 +97,8 @@
                      "2026-10-29 16:26:29 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082516-de56 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
                      "2026-10-29 16:26:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 16:26:56 [INFO] job kind=deskfix",
-                     "2026-10-29 16:27:08 [INFO] job 20261029T082641-df13 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True"
+                     "2026-10-29 16:27:08 [INFO] job 20261029T082641-df13 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True",
+                     "2026-10-29 16:27:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -115,12 +115,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261029T082641-df13",
-                          "kind":  "deskfix",
-                          "status":  "ok",
-                          "summary":  "panel up | boot task trigger 1 | launched True"
-                      }
+
                   ],
     "recent":  [
                    {
