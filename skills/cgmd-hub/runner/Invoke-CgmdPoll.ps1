@@ -190,7 +190,7 @@ function Invoke-MailboxOnce {
     $signature = [ordered]@{
         state     = [string](Get-Property $last 'state' '')
         queued    = [int](Get-Property $last 'queued' 0)
-        processed = @(@(Get-Property $last 'processed' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
+        processed = @(@(Get-Property $last 'recent' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
     }
     $previous = Read-JsonFile -Path $target
     $unchanged = $false
@@ -198,7 +198,7 @@ function Invoke-MailboxOnce {
         $oldSignature = [ordered]@{
             state     = [string](Get-Property $previous 'state' '')
             queued    = [int](Get-Property $previous 'queued' 0)
-            processed = @(@(Get-Property $previous 'processed' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
+            processed = @(@(Get-Property $previous 'recent' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
         }
         $unchanged = (($signature | ConvertTo-Json -Compress) -eq ($oldSignature | ConvertTo-Json -Compress))
     }

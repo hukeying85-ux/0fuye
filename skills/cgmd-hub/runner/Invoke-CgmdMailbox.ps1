@@ -760,6 +760,19 @@ try {
             $null = Publish-MailboxChanges -Message ('mailbox: {0} answer(s) from {1}' -f $jobs.Count, $env:COMPUTERNAME)
         }
         Write-JsonFile -Path $script:LedgerPath -Data $ledger
+        # Remember the last few answers: an idle cycle must not make the
+        # published report look like nothing ever ran.
+        if ($jobs.Count -gt 0) {
+            $recentPath = Join-Path $script:StateDir 'mailbox-recent.json'
+            $recent = @(Get-Property (Read-JsonFile -Path $recentPath) 'items' @())
+            $fresh = @($jobs | ForEach-Object {
+                [ordered]@{ id = $_['id']; kind = $_['kind']; status = $_['status'];
+                            summary = $_['summary']; finished_at = $_['finished_at'] }
+            })
+            $merged = @($fresh) + @($recent)
+            $newest = @($merged | Select-Object -First 20)
+            Write-JsonFile -Path $recentPath -Data ([ordered]@{ items = $newest })
+        }
     }
 } catch {
     $mailboxState = 'error'
@@ -782,6 +795,7 @@ try {
         worktree     = $script:Worktree
         queued       = $queuedCount
         processed    = @($jobs | ForEach-Object { [ordered]@{ id = $_['id']; kind = $_['kind']; status = $_['status']; summary = $_['summary'] } })
+        recent       = @(Get-Property (Read-JsonFile -Path (Join-Path $script:StateDir 'mailbox-recent.json')) 'items' @())
     })
 } catch { }
 
