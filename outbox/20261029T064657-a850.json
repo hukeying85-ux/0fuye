@@ -1,0 +1,19 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261029T064657-a850",
+    "kind":  "sync",
+    "status":  "fail",
+    "summary":  "sync exit 7",
+    "detail":  {
+                   "exit_code":  7
+               },
+    "logs_tail":  [
+                      "CGMD_EXIT_CODE=7 "
+                  ],
+    "note":  "after the $Json collision fix: redeploy + selfcheck",
+    "requested_by":  "user",
+    "started_at":  "2026-10-29T14:47:00+08:00",
+    "finished_at":  "2026-10-29T14:47:53+08:00",
+    "seconds":  52.79,
+    "worker":  "DESKTOP-IEUDGS5"
+}
