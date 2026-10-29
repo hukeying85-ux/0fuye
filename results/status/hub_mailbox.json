@@ -1,14 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T13:21:56+08:00",
+    "generated_at":  "2026-10-29T14:16:28+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
-    "state":  "ran",
+    "state":  "error",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "processed":  [
 
-                  ]
+                  ],
+    "recent":  [
+
+               ]
 }
