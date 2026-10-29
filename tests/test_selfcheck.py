@@ -180,3 +180,51 @@ def test_cli_show_prints_the_table(capsys):
     assert selfcheck.main(["show", FIXTURE]) == 0
     out = capsys.readouterr().out.lower()
     assert "gromacs" in out and "pass" in out and "warn" in out
+
+
+# ---------------------------------------------------------------------------
+# one-command sync (git + Arena Desk + self-check)
+# ---------------------------------------------------------------------------
+SYNC_SCRIPT = os.path.join(HUB, "runner", "Sync-Desktop.ps1")
+
+
+def test_sync_script_exists_and_is_ascii():
+    assert os.path.exists(SYNC_SCRIPT)
+    with open(SYNC_SCRIPT, "rb") as handle:
+        handle.read().decode("ascii")
+
+
+def test_sync_script_covers_the_whole_chain():
+    source = open(SYNC_SCRIPT, encoding="ascii").read()
+    assert "reset" in source and "--hard" in source          # pull the branch tip
+    assert "code" in source and "panel" in source            # Arena Desk location
+    assert "deploy.ps1" in source                            # desk deployment
+    assert "Test-CgmdHub.ps1" in source                      # self-check
+    assert "desktop_sync.json" in source                     # sync record
+    assert "cgmd.desksync.v1" in source                      # its schema
+    # exit codes: 4 config, 5 origin lock, 8 git, 9 desk deploy, 7 self-check
+    assert "exit 4" in source and "exit 5" in source and "exit 8" in source
+    for code in ("= 9", "= 7"):
+        assert code in source, code
+    assert "exit $exitCode" in source
+
+
+def test_poller_can_trigger_the_desk_sync():
+    source = open(os.path.join(HUB, "runner", "Invoke-CgmdPoll.ps1"), encoding="ascii").read()
+    assert "Sync-Desktop.ps1" in source
+    assert "wantDesk" in source
+
+
+def test_request_carries_the_desk_flag():
+    request = selfcheck.new_request(note="desk please", desk=True)
+    assert request["desk"] is True
+    assert selfcheck.validate_request(request) == []
+    assert "desk=false" not in request["how"]
+    plain = selfcheck.new_request()
+    assert plain["desk"] is False
+
+
+def test_desk_flag_must_be_boolean():
+    request = selfcheck.new_request()
+    request["desk"] = "yes"
+    assert any("desk must be a boolean" in problem for problem in selfcheck.validate_request(request))

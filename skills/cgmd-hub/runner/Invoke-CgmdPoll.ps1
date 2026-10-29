@@ -274,21 +274,36 @@ try {
         }
     }
 
-    # --- 1b. on-demand self-check ----------------------------------------
+    # --- 1b. on-demand self-check / desk deployment -----------------------
     # Any client (Arena agent, laptop, phone) may drop
-    # results/status/selfcheck_request.json into the branch; the desktop then
-    # runs Test-CgmdHub.ps1 once, publishes the report and deletes the request.
+    # results/status/selfcheck_request.json into the branch.  With desk=false
+    # the desktop runs Test-CgmdHub.ps1 (17 checks); with desk=true it runs
+    # Sync-Desktop.ps1 -Desk, which pulls the branch tip, redeploys Arena Desk
+    # and then checks.  Either way the report is published and the request
+    # file is deleted so the next poll does not repeat the work.
     $requestFile = Join-Path $repo 'results\status\selfcheck_request.json'
     if (Test-Path -LiteralPath $requestFile) {
         $selfCheckScript = Join-Path $PSScriptRoot 'Test-CgmdHub.ps1'
-        if (-not (Test-Path -LiteralPath $selfCheckScript)) {
-            Write-HubLog ('self-check requested but ' + $selfCheckScript + ' is missing') 'ERROR'
+        $syncScript = Join-Path $PSScriptRoot 'Sync-Desktop.ps1'
+        $request = Read-JsonFile -Path $requestFile
+        $wantDesk = [bool](Get-Property $request 'desk' $false)
+        $runnerScript = $selfCheckScript
+        $runnerArgs = '-Quiet'
+        if ($wantDesk -and (Test-Path -LiteralPath $syncScript)) {
+            # desk=true means: pull the branch tip, redeploy Arena Desk, then check
+            $runnerScript = $syncScript
+            $runnerArgs = '-Desk -Quiet'
+        }
+        if (-not (Test-Path -LiteralPath $runnerScript)) {
+            Write-HubLog ('request seen but ' + $runnerScript + ' is missing') 'ERROR'
         } else {
-            Write-HubLog 'self-check requested, running Test-CgmdHub.ps1'
-            Send-Beacon -Title '[CGMD] self-check' -Message ('desktop ' + $env:COMPUTERNAME + ' is running the self-check now') -Tags @('mag')
+            Write-HubLog ('remote request: desk=' + $wantDesk + ', running ' + (Split-Path -Leaf $runnerScript))
+            $requestTitle = '[CGMD] self-check'
+            if ($wantDesk) { $requestTitle = '[CGMD] sync + desk deploy' }
+            Send-Beacon -Title $requestTitle -Message ('desktop ' + $env:COMPUTERNAME + ' is executing the request now') -Tags @('mag')
             $callLog = Join-Path $script:StateDir 'selfcheck-call.log'
-            $callLine = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $selfCheckScript + '" -Quiet'
-            $code = Invoke-Captured -CommandLine $callLine -OutFile $callLog -TimeoutSeconds 900
+            $callLine = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runnerScript + '" ' + $runnerArgs
+            $code = Invoke-Captured -CommandLine $callLine -OutFile $callLog -TimeoutSeconds 1800
             Write-HubLog ("self-check finished with exit code {0}" -f $code)
             $verdictFile = Join-Path $repo 'results\status\desktop_selfcheck.json'
             $verdict = Read-JsonFile -Path $verdictFile

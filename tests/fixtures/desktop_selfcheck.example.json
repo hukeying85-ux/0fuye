@@ -24,8 +24,8 @@
     "martini3": "/home/cgmd/martini3"
   },
   "summary": {
-    "checks": 14,
-    "passed": 13,
+    "checks": 17,
+    "passed": 16,
     "warnings": 1,
     "failed": 0,
     "seconds": 18.4
@@ -128,6 +128,33 @@
       "status": "pass",
       "detail": "POST https://ntfy.sh/arena-beacon-95bc796a66",
       "seconds": 0.62
+    },
+    {
+      "id": "desk-src",
+      "title": "Arena Desk source",
+      "status": "pass",
+      "detail": "C:\\cgmd\\0fuye\\code\\panel (12 core files)",
+      "seconds": 0.02
+    },
+    {
+      "id": "desk-app",
+      "title": "Arena Desk deployed",
+      "status": "pass",
+      "detail": "E:\\0apps\\ArenaDesk | version 2.8.0",
+      "seconds": 0.03
+    },
+    {
+      "id": "desk-http",
+      "title": "Arena Desk panel",
+      "status": "pass",
+      "detail": "127.0.0.1:18765 | version 2.8.0 | 6 tasks",
+      "seconds": 0.41
     }
-  ]
+  ],
+  "desk": {
+    "panel_dir": "C:\\cgmd\\0fuye\\code\\panel",
+    "root": "E:\\0apps\\ArenaDesk",
+    "version": "2.8.0",
+    "http": "up"
+  }
 }

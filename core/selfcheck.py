@@ -9,7 +9,7 @@ CLI
 ---
     python3 -m core.selfcheck show   results/status/desktop_selfcheck.json
     python3 -m core.selfcheck check  results/status/desktop_selfcheck.json
-    python3 -m core.selfcheck request --note "why" --write
+    python3 -m core.selfcheck request --note "why" [--desk] --write
     python3 -m core.selfcheck status --write
 """
 
@@ -61,6 +61,9 @@ CHECK_IDS = (
     "launcher",
     "task",
     "beacon",
+    "desk-src",
+    "desk-app",
+    "desk-http",
 )
 
 STATUSES = ("pass", "warn", "fail")
@@ -79,15 +82,32 @@ def beijing_iso() -> str:
 # ---------------------------------------------------------------------------
 # request document
 # ---------------------------------------------------------------------------
-def new_request(note: str = "", requested_by: str = "arena-agent") -> dict:
-    return {
+def new_request(note: str = "", requested_by: str = "arena-agent", desk: bool = False) -> dict:
+    """A request asks the desktop to refresh itself on its next poll.
+
+    ``desk=True`` also redeploys Arena Desk (``code/panel/deploy.ps1``) through
+    ``Sync-Desktop.ps1 -Desk``; otherwise only ``Test-CgmdHub.ps1`` runs.
+    """
+    request = {
         "schema": REQUEST_SCHEMA,
         "requested_at": beijing_iso(),
         "requested_by": requested_by,
         "note": note,
-        "how": "the desktop hub runs Test-CgmdHub.ps1 on its next poll, publishes "
-               "results/status/desktop_selfcheck.json and deletes this file",
+        "desk": bool(desk),
     }
+    if desk:
+        request["how"] = (
+            "the desktop hub runs Sync-Desktop.ps1 -Desk on its next poll: git "
+            "reset to the branch tip, redeploy Arena Desk, run the 17-point "
+            "self-check, push results/status/desktop_sync.json + "
+            "desktop_selfcheck.json, then delete this file"
+        )
+    else:
+        request["how"] = (
+            "the desktop hub runs Test-CgmdHub.ps1 on its next poll, publishes "
+            "results/status/desktop_selfcheck.json and deletes this file"
+        )
+    return request
 
 
 def validate_request(request: dict) -> list:
@@ -101,6 +121,8 @@ def validate_request(request: dict) -> list:
         problems.append("requested_at must be an ISO-8601 timestamp with a T separator")
     if "requested_by" not in request:
         problems.append("requested_by is required")
+    if "desk" in request and not isinstance(request["desk"], bool):
+        problems.append("desk must be a boolean when present")
     return problems
 
 
@@ -273,7 +295,7 @@ def _cmd_show(args: argparse.Namespace) -> int:
 
 
 def _cmd_request(args: argparse.Namespace) -> int:
-    request = new_request(note=args.note or "", requested_by=args.by)
+    request = new_request(note=args.note or "", requested_by=args.by, desk=bool(args.desk))
     path = args.path or REQUEST_PATH
     if args.write:
         dump(request, path)
@@ -327,6 +349,7 @@ def main(argv=None) -> int:
     p_request.add_argument("--by", default="arena-agent")
     p_request.add_argument("--path", default="")
     p_request.add_argument("--write", action="store_true")
+    p_request.add_argument("--desk", action="store_true", help="also redeploy Arena Desk")
     p_request.set_defaults(func=_cmd_request)
 
     p_status = sub.add_parser("status", help="is the desktop ready for a task?")

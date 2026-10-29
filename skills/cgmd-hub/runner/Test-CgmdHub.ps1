@@ -30,6 +30,9 @@
         launcher  CGMDHub.exe (/target:winexe) has been compiled
         task      the silent poll task is registered and reported its last run
         beacon    the ntfy topic accepts a POST
+        desk-src  code/panel (Arena Desk) is complete inside the clone
+        desk-app  ArenaDesk.exe is deployed with a version marker
+        desk-http the panel answers on http://127.0.0.1:18765/api/state
 
     Exit codes:  0 all pass | 6 warnings only | 7 at least one failure |
                  5 origin lock violation | 4 configuration missing.
@@ -548,6 +551,72 @@ if (Test-Path -LiteralPath $launcher) {
 }
 
 # ---------------------------------------------------------------------------
+# 7b. Arena Desk (code/panel) - optional for CGMD compute, reported either way
+# ---------------------------------------------------------------------------
+$panelDir = Join-Path (Join-Path $repo 'code') 'panel'
+$panelFiles = @(
+    'server.py', 'index.html', 'style.css', 'app.js', 'deploy.ps1',
+    'launch_panel.ps1', 'control.ps1', 'ArenaDesk.cs', 'catalog.json',
+    'personal_hub.json', 'desktop_ops.py', 'session_coord.py'
+)
+if (Test-Path -LiteralPath $panelDir) {
+    $missingPanel = @()
+    foreach ($name in $panelFiles) {
+        if (-not (Test-Path -LiteralPath (Join-Path $panelDir $name))) { $missingPanel += $name }
+    }
+    if ($missingPanel.Count -eq 0) {
+        Add-Check 'desk-src' 'Arena Desk source' 'pass' ($panelDir + ' (' + $panelFiles.Count + ' core files)')
+    } else {
+        Add-Check 'desk-src' 'Arena Desk source' 'fail' ('incomplete clone, missing: ' + ($missingPanel -join ', ') + ' | run Sync-Desktop.ps1')
+    }
+} else {
+    Add-Check 'desk-src' 'Arena Desk source' 'warn' 'code/panel not in this clone (older branch); pull the branch again'
+}
+
+$deskRoot = ''
+$deskVersion = ''
+$panelState = $null
+foreach ($drive in @('E:\', 'D:\', 'C:\')) {
+    if (-not (Test-Path -LiteralPath $drive)) { continue }
+    $candidate = Join-Path $drive '0apps\ArenaDesk'
+    if (Test-Path -LiteralPath (Join-Path $candidate 'ArenaDesk.exe')) { $deskRoot = $candidate; break }
+    if (-not $deskRoot -and (Test-Path -LiteralPath $candidate)) { $deskRoot = $candidate; break }
+}
+if (-not $deskRoot) {
+    Add-Check 'desk-app' 'Arena Desk deployed' 'warn' 'no 0apps\ArenaDesk on E:/D:/C: | run Sync-Desktop.ps1 -Desk'
+} elseif (-not (Test-Path -LiteralPath (Join-Path $deskRoot 'ArenaDesk.exe'))) {
+    Add-Check 'desk-app' 'Arena Desk deployed' 'warn' ($deskRoot + ' exists but ArenaDesk.exe is missing | run Sync-Desktop.ps1 -Desk')
+} else {
+    $versionFile = Join-Path (Join-Path $deskRoot 'data') 'deployed-version.txt'
+    if (Test-Path -LiteralPath $versionFile) {
+        try { $deskVersion = ([System.IO.File]::ReadAllText($versionFile)).Trim() } catch { $deskVersion = '' }
+    }
+    if ($deskVersion) {
+        Add-Check 'desk-app' 'Arena Desk deployed' 'pass' ($deskRoot + ' | version ' + $deskVersion)
+    } else {
+        Add-Check 'desk-app' 'Arena Desk deployed' 'warn' ($deskRoot + ' | no data\deployed-version.txt yet')
+    }
+}
+
+if ($NoRemote) {
+    Add-Check 'desk-http' 'Arena Desk panel' 'warn' 'skipped (NoRemote)'
+} else {
+    try {
+        $panelState = Invoke-RestMethod -Uri 'http://127.0.0.1:18765/api/state' -TimeoutSec 6 -ErrorAction Stop
+    } catch {
+        $panelState = $null
+    }
+    if ($null -eq $panelState) {
+        Add-Check 'desk-http' 'Arena Desk panel' 'warn' 'no answer on 127.0.0.1:18765 | start it with code/panel/launch_panel.ps1'
+    } else {
+        $panelVersion = [string](Get-Property $panelState 'version' '?')
+        $taskCount = 0
+        try { $taskCount = @($panelState.tasks).Count } catch { $taskCount = 0 }
+        Add-Check 'desk-http' 'Arena Desk panel' 'pass' ('127.0.0.1:18765 | version ' + $panelVersion + ' | ' + $taskCount + ' tasks')
+    }
+}
+
+# ---------------------------------------------------------------------------
 # 8. scheduled task
 # ---------------------------------------------------------------------------
 $taskCheck = $null
@@ -632,6 +701,12 @@ $report = [pscustomobject]@{
         mdanalysis = [string]$probe['MOD_MDANALYSIS']
         matplotlib = [string]$probe['MOD_MATPLOTLIB']
         martini3   = [string]$probe['M3_DIR']
+    }
+    desk       = [pscustomobject]@{
+        panel_dir = $panelDir
+        root      = $deskRoot
+        version   = $deskVersion
+        http      = $(if ($null -ne $panelState) { 'up' } else { 'down' })
     }
     summary    = [pscustomobject]@{
         checks   = $script:Checks.Count
