@@ -220,6 +220,90 @@ function Initialize-Mailbox {
     return $true
 }
 
+function New-MailboxBranch {
+    # Nobody has queued anything yet, so open the queue ourselves.  Without
+    # this the branch only appears after the first client, and a client that
+    # cannot push (read-only token, CI, a phone) could never start.
+    $readme = @(
+        '# CGMD mailbox',
+        '',
+        'Queue work for the workstation from any session, branch or machine:',
+        '',
+        '    python3 -m core.hub_mailbox run --kind smoke --timeout 1800',
+        '',
+        '* inbox/<id>.json   request  (cgmd.mailbox.request.v1)',
+        '* outbox/<id>.json  result   (cgmd.mailbox.result.v1)',
+        '',
+        'The desk claims at most mailbox_jobs_per_poll jobs per cycle (60 s),',
+        'answers them here and never touches the caller branch.',
+        ''
+    ) -join [Environment]::NewLine
+    $temp = Join-Path $script:StateDir 'mailbox-README.md'
+    [System.IO.File]::WriteAllText($temp, $readme, (New-Object System.Text.UTF8Encoding($false)))
+    $blob = (Invoke-Git -Directory $RepoPath -GitArgs @('hash-object', '-w', $temp)).Output
+    if (-not $blob) { return $false }
+    $entry = '100644 blob ' + $blob + "`tREADME.md"
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $tree = ($entry | & git -C $RepoPath mktree 2>&1 | Out-String).Trim()
+    } finally {
+        $ErrorActionPreference = $previous
+    }
+    if (-not $tree -or $tree.Length -lt 8) { Write-Log ('mktree failed: ' + $tree) 'WARN'; return $false }
+    $commit = (Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'user.name=CGMD-Desk',
+        '-c', 'user.email=hukeying85-ux@users.noreply.github.com',
+        'commit-tree', $tree, '-m', 'mailbox: open the queue')).Output
+    if (-not $commit) { return $false }
+    $push = Invoke-Git -Directory $RepoPath -GitArgs @('push', '--quiet', 'origin', ($commit + ':refs/heads/' + $Ref))
+    if ($push.Code -ne 0) {
+        Write-Log ('mailbox branch creation failed: ' + $push.Output) 'WARN'
+        return $false
+    }
+    Write-Log ('created the mailbox branch ' + $Ref + ' (' + $commit.Substring(0, 8) + ')')
+    return $true
+}
+
+function Get-MailboxBranchExists {
+    $remote = Invoke-Git -Directory $RepoPath -GitArgs @('ls-remote', '--heads', 'origin', $Ref)
+    if ($remote.Code -ne 0) { return $false }
+    return ($remote.Output -match [regex]::Escape('refs/heads/' + $Ref))
+}
+
+function Add-SelfTestRequest {
+    # Weekly proof that the bus works end to end on this machine, with nobody
+    # asking for it: queue a ping from the desk itself and let the normal path
+    # answer it.
+    $marker = Join-Path $script:StateDir 'mailbox-selftest.json'
+    $previous = Read-JsonFile -Path $marker
+    if ($null -ne $previous) {
+        $stamp = [string](Get-Property $previous 'last_at' '')
+        if ($stamp) {
+            try {
+                if (([datetimeoffset]::Now - [datetimeoffset]::Parse($stamp)).TotalDays -lt 7) { return $false }
+            } catch { }
+        }
+    }
+    $inbox = Join-Path $script:Worktree 'inbox'
+    if (-not (Test-Path -LiteralPath $inbox)) { New-Item -ItemType Directory -Path $inbox -Force | Out-Null }
+    $jobId = 'selftest-' + (Get-Date -Format 'yyyyMMddTHHmmss')
+    $request = [ordered]@{
+        schema     = 'cgmd.mailbox.request.v1'
+        id         = $jobId
+        kind       = 'ping'
+        args       = [ordered]@{ selftest = $true }
+        note       = 'weekly self test of the mailbox bus'
+        from       = 'desk-self-test'
+        host       = $env:COMPUTERNAME
+        created_at = Get-BeijingStamp
+        timeout_s  = 120
+    }
+    Write-JsonFile -Path (Join-Path $inbox ($jobId + '.json')) -Data $request
+    Write-JsonFile -Path $marker -Data ([ordered]@{ last_at = Get-BeijingStamp; last_id = $jobId })
+    Write-Log ('queued a mailbox self test: ' + $jobId)
+    return $true
+}
+
 function Publish-MailboxChanges {
     param([string]$Message)
     $add = Invoke-Git -Directory $script:Worktree -GitArgs @('add', '-A')
@@ -511,14 +595,38 @@ try {
         $mailboxState = 'disabled'
         Write-Log 'mailbox disabled in the config'
     } elseif (-not (Initialize-Mailbox)) {
-        $mailboxState = 'no-branch'
-        Write-Log 'mailbox unavailable this cycle'
-    } else {
+        if (-not (Get-MailboxBranchExists)) {
+            Write-Log 'mailbox branch does not exist on origin yet, creating it'
+            $created = New-MailboxBranch
+            if ($created -and (Initialize-Mailbox)) {
+                $mailboxState = 'created'
+            } else {
+                $mailboxState = 'no-branch'
+            }
+        } else {
+            $mailboxState = 'no-branch'
+        }
+        if ($mailboxState -ne 'created' -and $mailboxState -ne 'ran') {
+            Write-Log 'mailbox unavailable this cycle'
+        }
+    }
+    if ($mailboxState -eq 'created') {
+        $createdInbox = Join-Path $script:Worktree 'inbox'
+        if (-not (Test-Path -LiteralPath $createdInbox)) {
+            New-Item -ItemType Directory -Path $createdInbox -Force | Out-Null
+        }
+        $null = Add-SelfTestRequest
+        $null = Publish-MailboxChanges -Message 'mailbox: open the queue [desktop hub]'
+        $mailboxState = 'ran'
+    }
+    if ($mailboxState -eq 'ran') {
         $inboxDir = Join-Path $script:Worktree 'inbox'
         $outboxDir = Join-Path $script:Worktree 'outbox'
         if (-not (Test-Path -LiteralPath $outboxDir)) {
             New-Item -ItemType Directory -Path $outboxDir -Force | Out-Null
         }
+        # weekly proof that the bus works, queued by the desk itself
+        $null = Add-SelfTestRequest
         $requests = @()
         if (Test-Path -LiteralPath $inboxDir) {
             $requests = @(Get-ChildItem -LiteralPath $inboxDir -Filter '*.json' -File -ErrorAction SilentlyContinue |
