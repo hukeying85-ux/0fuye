@@ -646,6 +646,138 @@ function Invoke-JobGmx {
     }
 }
 
+function Get-FileHashShort {
+    param([string]$Path)
+    if (-not $Path -or -not (Test-Path -LiteralPath $Path)) { return '' }
+    try {
+        return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.Substring(0, 12).ToLower()
+    } catch { return '' }
+}
+
+function Find-DeskRoot {
+    # Where Arena Desk is actually deployed (any drive - this box has no E:).
+    $candidates = @()
+    if ($script:Config) {
+        $configured = [string](Get-Property $script:Config 'desk_root' '')
+        if ($configured) { $candidates += $configured }
+    }
+    foreach ($drv in @('C:\', 'D:\', 'E:\', 'F:\', 'G:\')) {
+        if (-not (Test-Path -LiteralPath $drv)) { continue }
+        $candidates += (Join-Path $drv '0apps\ArenaDesk')
+    }
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath (Join-Path $candidate 'server.py')) { return $candidate }
+    }
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+    return ''
+}
+
+function Invoke-JobDeskdiag {
+    # Ground truth, not inference: what is on disk, what is served, and whether
+    # the boot animation task exists.  Every "the desk is still broken" report so
+    # far came from comparing the repo against something nobody measured.
+    $repoPanel = Join-Path $RepoPath 'code\panel'
+    $deskRoot = Find-DeskRoot
+    $files = @('index.html', 'app.js', 'style.css', 'server.py', 'desktop_ops.py')
+    $drift = @()
+    $rows = [ordered]@{}
+    foreach ($name in $files) {
+        $repoPath = Join-Path $repoPanel $name
+        $deskPath = ''
+        if ($deskRoot) { $deskPath = Join-Path $deskRoot $name }
+        $repoHash = Get-FileHashShort -Path $repoPath
+        $deskHash = Get-FileHashShort -Path $deskPath
+        $rows[$name] = [ordered]@{
+            repo = $repoHash
+            desk = $deskHash
+            same = ($repoHash -ne '' -and $repoHash -eq $deskHash)
+            desk_path = $deskPath
+        }
+        if ($repoHash -and $deskHash -and $repoHash -ne $deskHash) { $drift += $name }
+        if ($repoHash -and -not $deskHash) { $drift += ($name + ' (missing)') }
+    }
+
+    # what the browser is actually being served right now
+    $served = [ordered]@{ ok = $false; has_boot_fallback = $false; has_boot_fallback_css = $false;
+                          has_app_js_fallback = $false; bytes = 0; status = 0 }
+    try {
+        $response = Invoke-WebRequest -Uri 'http://127.0.0.1:18765/' -TimeoutSec 8 -UseBasicParsing -ErrorAction Stop
+        $body = [string]$response.Content
+        $served['ok'] = $true
+        $served['status'] = [int]$response.StatusCode
+        $served['bytes'] = $body.Length
+        $served['has_boot_fallback'] = ($body -match 'id="boot-fallback"')
+        $js = ''
+        try {
+            $js = [string](Invoke-WebRequest -Uri 'http://127.0.0.1:18765/app.js' -TimeoutSec 8 -UseBasicParsing -ErrorAction Stop).Content
+        } catch { }
+        $served['has_app_js_fallback'] = ($js -match 'showBootFallback')
+        $css = ''
+        try {
+            $css = [string](Invoke-WebRequest -Uri 'http://127.0.0.1:18765/style.css' -TimeoutSec 8 -UseBasicParsing -ErrorAction Stop).Content
+        } catch { }
+        $served['has_boot_fallback_css'] = ($css -match 'dsvs-boot-fallback')
+    } catch {
+        $served['error'] = $_.Exception.Message
+    }
+
+    # the clips the overlay wants, on disk
+    $clips = [ordered]@{}
+    foreach ($clip in @('dsh-boot.mp4', 'dsh-bg.mp4', 'boot-mascot.jpg', 'wallpaper-anime.jpg')) {
+        $here = Join-Path $repoPanel ('assets\' + $clip)
+        $there = ''
+        if ($deskRoot) { $there = Join-Path $deskRoot ('assets\' + $clip) }
+        $clips[$clip] = [ordered]@{
+            repo = (Test-Path -LiteralPath $here)
+            desk = $(if ($there) { Test-Path -LiteralPath $there } else { $false })
+        }
+    }
+
+    # boot animation plumbing: the scheduled tasks and the preference file
+    $tasks = @()
+    foreach ($name in @('arena-desk-boot-demo', 'arena-desk-open', 'arena-desk-panel')) {
+        $entry = [ordered]@{ name = $name; exists = $false; state = ''; last_result = ''; last_run = '' }
+        try {
+            $task = Get-ScheduledTask -TaskName $name -TaskPath '\' -ErrorAction Stop
+            $entry['exists'] = $true
+            $entry['state'] = [string]$task.State
+            try {
+                $info = Get-ScheduledTaskInfo -TaskName $name -TaskPath '\' -ErrorAction Stop
+                $entry['last_result'] = [string]$info.LastTaskResult
+                $entry['last_run'] = $(if ($info.LastRunTime) { ([datetime]$info.LastRunTime).ToString('yyyy-MM-dd HH:mm:ss') } else { '' })
+            } catch { }
+        } catch { }
+        $tasks += $entry
+    }
+    $appearance = $null
+    if ($deskRoot) { $appearance = Read-JsonFile -Path (Join-Path $deskRoot 'data\appearance.json') }
+
+    $status = 'ok'
+    if ($drift.Count -gt 0) { $status = 'drift' }
+    elseif (-not $served['ok']) { $status = 'offline' }
+    elseif (-not $served['has_boot_fallback']) { $status = 'stale-panel' }
+
+    $summary = ('desk {0} | drift {1} | served boot-fallback {2} | tasks {3}' -f
+        $deskRoot, $drift.Count, $served['has_boot_fallback'],
+        (@($tasks | Where-Object { $_['exists'] }).Count))
+    return [ordered]@{
+        status  = $status
+        summary = $summary
+        detail  = [ordered]@{
+            repo_panel   = $repoPanel
+            desk_root    = $deskRoot
+            files        = $rows
+            drift        = $drift
+            served       = $served
+            clips        = $clips
+            tasks        = $tasks
+            appearance   = $appearance
+        }
+    }
+}
+
 function Invoke-JobShell {
     param($JobArgs)
     if (-not $AllowShell) {
@@ -678,6 +810,7 @@ function Invoke-Job {
         'sync'      { return Invoke-JobSync -JobArgs $jobArgs }
         'smoke'     { return Invoke-JobSmoke -JobArgs $jobArgs }
         'gmx'       { return Invoke-JobGmx -JobArgs $jobArgs }
+        'deskdiag'  { return Invoke-JobDeskdiag }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
         'pipeline'  { return [ordered]@{ status = 'unsupported'
                                          summary = 'the Martini pipeline job kind is not wired yet; use smoke or gmx' } }
