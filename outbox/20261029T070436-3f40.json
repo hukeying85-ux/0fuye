@@ -1,0 +1,20 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261029T070436-3f40",
+    "kind":  "sync",
+    "status":  "ok",
+    "summary":  "sync exit 6 | panel restarted",
+    "detail":  {
+                   "exit_code":  6,
+                   "panel_restarted":  true
+               },
+    "logs_tail":  [
+                      "CGMD_EXIT_CODE=6 "
+                  ],
+    "note":  "deploy the visibility fix",
+    "requested_by":  "user",
+    "started_at":  "2026-10-29T15:04:58+08:00",
+    "finished_at":  "2026-10-29T15:06:03+08:00",
+    "seconds":  65.64,
+    "worker":  "DESKTOP-IEUDGS5"
+}
