@@ -25,8 +25,6 @@ CLI
     python3 -m cgmd.smoke --show results/status/gmx_smoke.json
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import os
@@ -548,7 +546,18 @@ def run_smoke(
         return report
 
     mdrun_base = [gmx, "mdrun", "-deffnm", "smoke_md", "-ntomp", str(ntomp)]
-    gpu_args = ["-nb", "gpu", "-pme", "cpu", "-bonded", "gpu", "-gpu_id", str(gpu_id)]
+    # -pme / -bonded thread assignment only exists in GROMACS >= 2021; older
+    # builds (Ubuntu 18.04 ships 2018/2019) reject those flags outright.
+    version_text = str(((report.get("software") or {}).get("gromacs") or {}).get("version") or "")
+    major = 0
+    match_major = re.match(r"(\d{4})", version_text)
+    if match_major:
+        major = int(match_major.group(1))
+    if major and major < 2021:
+        gpu_args = ["-nb", "gpu", "-gpu_id", str(gpu_id)]
+        report["notes"].append("GROMACS {} is older than 2021: using -nb gpu only".format(version_text))
+    else:
+        gpu_args = ["-nb", "gpu", "-pme", "cpu", "-bonded", "gpu", "-gpu_id", str(gpu_id)]
     used = "gpu"
     if not stage("mdrun-md-gpu", mdrun_base + gpu_args):
         used = "cpu"

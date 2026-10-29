@@ -378,7 +378,17 @@ try {
                 if ($smokeStatus -eq 'ok') { $smokeTags = @('white_check_mark') }
             }
             Send-Beacon -Title '[CGMD] gmx smoke result' -Message $smokeMessage -Tags $smokeTags
-            Remove-Item -LiteralPath $requestFile -Force -ErrorAction SilentlyContinue
+            # Never swallow a request without a report: retry up to three polls
+            # (so a fix pushed by the operator is picked up) and only then give up.
+            $attempts = 1 + [int](Get-Property $request 'attempts' 0)
+            if ($null -eq $smokeReport -and $attempts -lt 3) {
+                $request | Add-Member -NotePropertyName 'attempts' -NotePropertyValue $attempts -Force
+                $request | Add-Member -NotePropertyName 'last_attempt_at' -NotePropertyValue (Get-BeijingStamp) -Force
+                Write-JsonFile -Path $requestFile -Data $request
+                Write-HubLog ('no smoke report produced; keeping the request for retry {0}/3' -f $attempts) 'WARN'
+            } else {
+                Remove-Item -LiteralPath $requestFile -Force -ErrorAction SilentlyContinue
+            }
             if (-not $NoPublish) {
                 $null = Publish-Results -Repo $repo -Branch $branch -Message 'smoke: gmx 100 ps report [desktop hub]'
             }
