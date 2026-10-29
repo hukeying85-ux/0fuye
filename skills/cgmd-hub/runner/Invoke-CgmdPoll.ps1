@@ -274,6 +274,45 @@ try {
         }
     }
 
+    # --- 1b. on-demand self-check ----------------------------------------
+    # Any client (Arena agent, laptop, phone) may drop
+    # results/status/selfcheck_request.json into the branch; the desktop then
+    # runs Test-CgmdHub.ps1 once, publishes the report and deletes the request.
+    $requestFile = Join-Path $repo 'results\status\selfcheck_request.json'
+    if (Test-Path -LiteralPath $requestFile) {
+        $selfCheckScript = Join-Path $PSScriptRoot 'Test-CgmdHub.ps1'
+        if (-not (Test-Path -LiteralPath $selfCheckScript)) {
+            Write-HubLog ('self-check requested but ' + $selfCheckScript + ' is missing') 'ERROR'
+        } else {
+            Write-HubLog 'self-check requested, running Test-CgmdHub.ps1'
+            Send-Beacon -Title '[CGMD] self-check' -Message ('desktop ' + $env:COMPUTERNAME + ' is running the self-check now') -Tags @('mag')
+            $callLog = Join-Path $script:StateDir 'selfcheck-call.log'
+            $callLine = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $selfCheckScript + '" -Quiet'
+            $code = Invoke-Captured -CommandLine $callLine -OutFile $callLog -TimeoutSeconds 900
+            Write-HubLog ("self-check finished with exit code {0}" -f $code)
+            $verdictFile = Join-Path $repo 'results\status\desktop_selfcheck.json'
+            $verdict = Read-JsonFile -Path $verdictFile
+            $overall = [string](Get-Property $verdict 'overall' 'unknown')
+            $summary = Get-Property $verdict 'summary' $null
+            $message = ('self-check: ' + $overall)
+            if ($null -ne $summary) {
+                $message += (' (' + (Get-Property $summary 'passed' 0) + ' pass / ' +
+                             (Get-Property $summary 'warnings' 0) + ' warn / ' +
+                             (Get-Property $summary 'failed' 0) + ' fail)')
+            }
+            $verdictTags = @('white_check_mark')
+            if ($overall -eq 'warn') { $verdictTags = @('warning') }
+            if ($overall -eq 'fail' -or $overall -eq 'unknown') { $verdictTags = @('rotating_light') }
+            Send-Beacon -Title '[CGMD] self-check result' -Message $message -Tags $verdictTags
+            Remove-Item -LiteralPath $requestFile -Force -ErrorAction SilentlyContinue
+            if (-not $NoPublish) {
+                $null = Publish-Results -Repo $repo -Branch $branch -Message 'selfcheck: desktop report [desktop hub]'
+            }
+            Write-HubLog 'self-check cycle complete'
+            exit 0
+        }
+    }
+
     # --- 2. inspect the task document ------------------------------------
     $taskFile = Join-Path $repo 'results\status\cgmd_task.json'
     $task = Read-JsonFile -Path $taskFile

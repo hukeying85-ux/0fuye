@@ -17,7 +17,9 @@
       5. hub config - writes config/cgmd_hub.local.json (git-ignored);
       6. silence    - compiles CGMDHub.exe (/target:winexe);
       7. scheduling - registers the 60 s silent poll task (wscript, no window);
-      8. validation - runs one silent poll and one phone beacon.
+      8. validation - runs one silent poll, one phone beacon and the full
+                      Test-CgmdHub.ps1 self-check (exit code 0/6/7), which
+                      pushes results/status/desktop_selfcheck.json.
 
     Every .ps1 file here is pure ASCII on purpose so that Windows PowerShell
     5.1 in a non-UTF8 code page can never mis-parse it.
@@ -42,6 +44,10 @@
 
 .PARAMETER GitHubUser
     Locked GitHub account, default hukeying85-ux.
+
+.PARAMETER LockedRepo
+    owner/name the clone is locked to.  Default: derived from RepoUrl, so the
+    hub only ever pushes to the repository it was bootstrapped from.
 
 .PARAMETER GitHubToken
     Personal access token.  When omitted you are prompted once (hidden input)
@@ -77,9 +83,22 @@ param(
     [switch]$SkipWslSetup,
     [switch]$SkipTask,
     [switch]$SkipFirstPoll,
+    [string]$LockedRepo = '',
     [switch]$InstallWslDeps,
-    [switch]$NoBeaconTest
+    [switch]$NoBeaconTest,
+    [switch]$SkipSelfCheck
 )
+
+# The clone is locked to exactly one repository: whatever RepoUrl points at,
+# unless LockedRepo says otherwise.  Anything else is refused, so a stray
+# remote can never receive commits from this workstation.
+if (-not $LockedRepo) {
+    if ($RepoUrl -match 'github[.]com[/:]([^/]+)/([^/]+?)(?:[.]git)?$') {
+        $LockedRepo = $Matches[1] + '/' + $Matches[2]
+    } else {
+        $LockedRepo = 'hukeying85-ux/0fuye'
+    }
+}
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -248,8 +267,8 @@ if (-not (Test-Path -LiteralPath (Join-Path $RepoPath '.git'))) {
 
 $RepoPath = (Resolve-Path -LiteralPath $RepoPath).Path
 $origin = Invoke-Git -Repo $RepoPath -GitArgs @('remote', 'get-url', 'origin')
-if ($origin.Output -notmatch 'hukeying85-ux/0fuye') {
-    Write-Err ('origin is "' + $origin.Output + '" but this hub is locked to hukeying85-ux/0fuye')
+if ($origin.Output -notmatch [regex]::Escape($LockedRepo)) {
+    Write-Err ('origin is "' + $origin.Output + '" but this hub is locked to ' + $LockedRepo)
     throw 'origin mismatch: refusing to touch a foreign repository'
 }
 Write-Ok ('origin locked to ' + $origin.Output)
@@ -368,7 +387,7 @@ $cfgPath = Join-Path $script:ConfigDir 'cgmd_hub.local.json'
 $cfg = [ordered]@{
     repo_path         = $RepoPath
     branch            = $Branch
-    locked_repo       = 'hukeying85-ux/0fuye'
+    locked_repo       = $LockedRepo
     github_user       = $GitHubUser
     wsl_distro        = $WslDistro
     wsl_workdir_root  = $WslWorkDir
@@ -456,6 +475,23 @@ if (-not $NoBeaconTest) {
     }
 }
 
+if (-not $SkipSelfCheck) {
+    $selfCheckScript = Join-Path $script:RunnerDir 'Test-CgmdHub.ps1'
+    if (Test-Path -LiteralPath $selfCheckScript) {
+        & $selfCheckScript -Push
+        $selfCheckCode = $LASTEXITCODE
+        switch ($selfCheckCode) {
+            0 { Write-Ok 'full self-check PASS (report pushed to the branch)' }
+            6 { Write-Warn 'full self-check passed with warnings - see results/status/desktop_selfcheck.json' }
+            5 { Write-Err 'self-check: origin is not the locked repository' }
+            4 { Write-Err 'self-check: hub configuration missing' }
+            default { Write-Err ('self-check failed with exit code ' + $selfCheckCode + ' - see results/status/desktop_selfcheck.json') }
+        }
+    } else {
+        Write-Warn 'Test-CgmdHub.ps1 not found, skipping the full self-check'
+    }
+}
+
 $statePath = Join-Path $script:StateDir 'hub-state.json'
 if (Test-Path -LiteralPath $statePath) {
     $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
@@ -480,7 +516,8 @@ Write-Host '  ----------'
 Write-Host ('  1. Watch the hub:      Get-Content "' + (Join-Path $script:LogDir 'hub-*.log') + '" -Tail 20 -Wait')
 Write-Host '  2. Queue a task:       edit results\status\cgmd_task.json (status = pending) and push'
 Write-Host  '  3. Phone beacon test:  python3 code/federation/node_agent.py test'
-Write-Host ('  4. Remove the task:    ' + (Join-Path $script:RunnerDir 'Unregister-CgmdHubTask.ps1'))
+Write-Host ('  4. Self-check again:   pwsh/powershell -File ' + (Join-Path $script:RunnerDir 'Test-CgmdHub.ps1') + ' -Push -Notify')
+Write-Host ('  5. Remove the task:    ' + (Join-Path $script:RunnerDir 'Unregister-CgmdHubTask.ps1'))
 Write-Host ''
 Write-Host ('  Log file: ' + $script:BootstrapLog)
 Write-Host ''

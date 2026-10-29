@@ -103,6 +103,39 @@ python3 -m core.task_contract show      --path results/status/cgmd_task.json
 
 ---
 
+## 2.5 打通验证：台式机自检（14 项，结果进 git）
+
+「台式机接上了没有」不再靠猜：一台能接单的机器必须通过 14 项检查，结论写进
+`results/status/desktop_selfcheck.json`（schema `cgmd.selfcheck.v1`），随分支同步。
+
+```bash
+# 远程点名（任何客户端都能发起）：台式机 <=60 s 内自动跑一次自检
+python3 -m core.selfcheck request --note "换网卡后复测" --write
+git add results/status/selfcheck_request.json && git commit -m "queue selfcheck" && git push
+
+# 稍后读回结论（桌面上报后这个命令会给出 PASS/WARN/FAIL 与逐项明细）
+python3 -m core.selfcheck status
+python3 -m core.selfcheck show results/status/desktop_selfcheck.json
+```
+
+```powershell
+# 或在台式机前直接跑（带表格 + 推送 + 自动 push 报告）
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\runner\Test-CgmdHub.ps1 -Push -Notify
+```
+
+| 退出码 | 含义 |
+| --- | --- |
+| `0` | 14 项全绿，可接微秒级任务 |
+| `6` | 有告警（如 WSL 磁盘 < 20 GB、GROMACS 无 CUDA、分支落后），仍可跑 |
+| `7` | 有失败（无 GPU / 缺依赖 / 缺 Martini 3 / 计划任务未注册） |
+| `5` | origin 不是被锁定的仓库，拒绝运行 |
+| `4` | 配置缺失，需要先跑 bootstrap |
+
+检查项：`repo` `origin` `branch` `creds` `wsl` `gpu` `gromacs` `martini3` `python` `tools` `disk` `launcher` `task` `beacon`。
+自检不启动模拟、不占 GPU；WSL 侧只跑一次约 2 s 的探测。bootstrap 的最后一步会自动执行它并以报告收尾。
+
+---
+
 ## 3. 零 Token 手机推送（ntfy：`arena-beacon-95bc796a66`）
 
 ```bash
@@ -212,6 +245,7 @@ Get-ScheduledTask -TaskName CGMD-Hub-Poll | Get-ScheduledTaskInfo   # 上次/下
 Get-Content C:\cgmd\0fuye\skills\cgmd-hub\logs\hub-*.log -Tail 30 -Wait
 Get-Content C:\cgmd\0fuye\skills\cgmd-hub\state\hub-state.json      # 心跳（含上次任务摘要）
 C:\cgmd\0fuye\skills\cgmd-hub\runner\Invoke-CgmdPoll.ps1 -Force      # 手动触发一次（前台版，便于排错）
+C:\cgmd\0fuye\skills\cgmd-hub\runner\Test-CgmdHub.ps1 -Push -Notify    # 14 项自检并回传报告
 C:\cgmd\0fuye\skills\cgmd-hub\runner\Unregister-CgmdHubTask.ps1      # 彻底停止守护
 ```
 
@@ -232,3 +266,4 @@ C:\cgmd\0fuye\skills\cgmd-hub\runner\Unregister-CgmdHubTask.ps1      # 彻底停
 | `GPU support: no` | 装 CUDA 版 GROMACS（`-DGMX_GPU=CUDA`）或 `apt install gromacs` 新版 |
 | 手机收不到推送 | `python3 code/federation/node_agent.py test`，检查 topic 拼写与手机 ntfy 订阅 |
 | 任务卡在 `claimed` | 超过 6 h 会自动重领；急用可 `python3 code/federation/desktop_runner.py reset` |
+| 不确定台式机能不能接单 | `python3 -m core.selfcheck status`；没有报告就 `python3 -m core.selfcheck request --write` 再 push |

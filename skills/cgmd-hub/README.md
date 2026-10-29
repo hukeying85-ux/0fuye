@@ -20,6 +20,7 @@
 | `runner/Register-CgmdHubTask.ps1` | 注册/替换计划任务（默认 60 s，`ExecutionTimeLimit=0` 支持跨天微秒级模拟） |
 | `runner/Unregister-CgmdHubTask.ps1` | 停止并移除计划任务 |
 | `runner/Send-CgmdBeacon.ps1` | Windows 侧 ntfy 推送（与 Python 端同协议、同频道、北京时间戳） |
+| `runner/Test-CgmdHub.ps1` | **14 项自检**：仓库/origin/分支/凭据/WSL/GPU/GROMACS-CUDA/Martini3/python 依赖/martinize2+insane/磁盘/静默包装器/计划任务/推送；产出 `results/status/desktop_selfcheck.json`（`cgmd.selfcheck.v1`），可选 `-Push` `-Notify` |
 | `config/cgmd_hub.json` | 配置模板（真实配置 `cgmd_hub.local.json` 已 gitignore） |
 | `state/`、`logs/` | 运行期状态与日志（已 gitignore） |
 
@@ -77,6 +78,39 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\bootstrap_desktop.ps1
 `results/` 之外的文件永不提交；即使仓库里混进 `.xtc/.trr/.tpr/.cpt/.gro`，runner 的 `prune()` 会先删掉再提交。
 
 ---
+
+## 自检（这个台式机现在到底能不能接单？）
+
+两种触发方式，结果都落在同一个文件里：
+
+```powershell
+# A. 坐在台式机前直接跑（推荐：表格一眼看清）
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\runner\Test-CgmdHub.ps1 -Push -Notify
+```
+
+```bash
+# B. 远程点名：任何客户端往分支里塞一个请求文件，台式机下一次轮询（<=60 s）自动执行
+python3 -m core.selfcheck request --note "换网卡后复测" --write
+git add results/status/selfcheck_request.json && git commit -m "queue selfcheck" && git push
+python3 -m core.selfcheck status      # 读回桌面刚推上来的结论
+```
+
+判定与退出码：
+
+| 退出码 | 含义 | 说明 |
+| --- | --- | --- |
+| `0` | 全绿 | 14 项全 pass，可接微秒级任务 |
+| `6` | 有告警 | 例如 WSL 家目录剩余空间不足 20 GB、GROMACS 无 CUDA、分支落后；仍可跑 |
+| `7` | 有失败 | 缺 GPU / 缺 python 依赖 / 缺 Martini 3 / 计划任务未注册等，必须先修 |
+| `5` | origin 不符 | 克隆指向的不是被锁定的仓库，**拒绝运行** |
+| `4` | 配置缺失 | 还没跑过 bootstrap |
+
+14 项检查一览：`repo` `origin` `branch` `creds` `wsl` `gpu` `gromacs` `martini3` `python` `tools` `disk` `launcher` `task` `beacon`。
+
+* 自检本身**不碰 GPU、不启动模拟**，WSL 侧只做一次 base64 传输的探测脚本（一次往返，约 2 s）；
+* `-Push` 会把报告提交并推到当前分支，因此"打通"这件事有 git 证据，而不是口头结论；
+* bootstrap 最后一步会自动跑一次 `Test-CgmdHub.ps1 -Push`，首次安装即以自检报告收尾；
+* 报告体积约 4 kB，`python3 -m core.selfcheck show` 可将它渲染成表格。
 
 ## 凭据策略（只动本仓库）
 

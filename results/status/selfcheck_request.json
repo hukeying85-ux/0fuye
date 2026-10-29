@@ -1,0 +1,7 @@
+{
+  "how": "the desktop hub runs Test-CgmdHub.ps1 on its next poll, publishes results/status/desktop_selfcheck.json and deletes this file",
+  "note": "sync check: repo doc + self-check chain landed on branch arena/32cd826e-0fuye",
+  "requested_at": "2026-10-29T10:02:30+08:00",
+  "requested_by": "arena-agent",
+  "schema": "cgmd.selfcheck.request.v1"
+}
