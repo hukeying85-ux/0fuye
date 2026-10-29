@@ -189,3 +189,10 @@ except desk_bridge.BridgeError:
 | 100 ps 失败 | `results/status/gmx_smoke.json` → `stage_error` + `stages[].returncode` / `output_tail` |
 | 值守像停了 | `results/status/hub_heartbeat.json` 的 `at`（超过 90 min 没变就是真停了） |
 | 局域网连不上 | 台式机 `state/bridge-*.log`；先试 `core.hub_mailbox ping` 确认值守活着 |
+| 面板/手机页/开机动画 | 看 `results/status/desktop_selfcheck.json` 的 `desk-http` 那行：它会把 `/mobile`、`/assets/boot-mascot.jpg`、`/style.css` 的 HTTP 码直接列出来 |
+| 改了 `code/panel/*` 没生效 | 面板进程要重启：`python3 -m core.hub_mailbox run --kind sync --json-args '{"desk": true}'`（回执里应有 `panel restarted`） |
+
+**已修复、不要再回退的坑**：① PowerShell 里 `[switch]$Json` 和局部 `$json` 是同一个变量，赋值必崩；
+② 这台机器没有 E: 盘，任何 `E:\...` 都必须走 `resolve_win_path()` / `Resolve-AnyDrive`；
+③ `dsh-boot.mp4` / `dsh-bg.mp4` 与 `jobbeacon/pwa/` 素材不在仓库里，靠 poster + `#boot-fallback` + 内建手机页兜底；
+④ 自检必须优先报原生 `gmx.exe`，不要拿 WSL 里那个 CPU 版 2018.1 当主力。

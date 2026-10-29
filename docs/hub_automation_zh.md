@@ -162,6 +162,36 @@ netsh advfirewall firewall add rule name="CGMD bridge" dir=in action=allow proto
 
 ---
 
+## 3.6 桌面（Arena Desk）为什么一直"没修好"——三个根因
+
+这三条全部是**代码里从未提交的素材 + 一个 PowerShell 作用域坑**，与显卡、网络、权限无关。
+
+| # | 现象 | 根因 | 修法 |
+| --- | --- | --- | --- |
+| 1 | 自检永远失败、`results/status/desktop_selfcheck.json` 一直是那个 `False` | `Test-CgmdHub.ps1` 的 `param([switch]$Json)` 与末尾 `$json = $report \| ConvertTo-Json` **是同一个变量**（PowerShell 变量名不区分大小写），给 `[switch]` 赋字符串必抛 `无法转换为 SwitchParameter`，于是**每次自检都在写报告前崩掉**；那个 `False` 又让所有读它的工具继续抛 `无效的 JSON 基元` | 局部变量改名 `$reportJson`；`if ($Json.IsPresent)`；所有 `Read-JsonFile` 加 try/catch；值守每轮自动删除非 JSON 的状态文件并提交删除 |
+| 2 | 开机动画只有黑屏 14.5 s 然后跳过 | `index.html` 引用的 `dsh-boot.mp4` / `dsh-bg.mp4` **从来没有进过仓库**（`git log --all` 查无此文件），`<video>` 404，看门狗到点才退出 | 视频加 `poster`（现成的 `boot-mascot.jpg` / `wallpaper-anime.jpg`）+ 新增 `#boot-fallback` 图层（吉祥物浮动、光晕呼吸、进度条 2.2 s），2.4 s 后自然淡出；`readyState===0` 也能兜住不触发 `onerror` 的情况 |
+| 3 | 手机扫码进去是 404、桌面里一堆"未安装 / E:\0writing" | `code/panel/jobbeacon_src/jobbeacon/pwa/` 也从未提交；`desktop_ops.py`、`deploy.ps1`、`launch_panel.ps1`、`catalog.json` **全都假设有 E: 盘**（参考笔电有，台式机没有） | 内建手机伴侣页（`/mobile` + manifest + sw.js + 图标复用现有 PNG）；新增 `resolve_win_path()` / `app_root()` / `app_drive()`，把 `E:\...` 自动映射到真实存在的盘；`Resolve-AnyDrive` 同样处理 PowerShell 侧；一键安装默认装到 Arena Desk 自己所在的盘 |
+
+**另外两个使"改了却没生效"的坑**：
+
+* 面板 `server.py` 改了但**进程没重启**，旧的还在内存里跑 → `sync` 任务现在会 `taskkill ArenaDesk.exe` + 重启计划任务 `arena-desk-panel`，并轮询 `127.0.0.1:18765` 确认回来（回执里直接写 `panel restarted`）。
+* 自检只看 WSL 里的 `gmx`（2018.1、无 CUDA），把主力引擎说成 CPU 版 → 现在**永远优先探测原生 `gmx.exe`**，报告里同时给出 `gromacs_native` / `gromacs_wsl` / `gromacs_gpu`；Martini 依赖缺失对原生 GPU 路径只降级为 warn。
+
+修完后的真实自检（2026-10-29 14:53，DESKTOP-IEUDGS5）：**18 项 15 pass / 3 warn / 0 fail**
+
+```
+pass gromacs    GROMACS 2025.1 native windows (GPU support: CUDA) | wsl 2018.1 (cpu only) unused
+pass desk-http  127.0.0.1:18765 | version 2.8.0 | 8 tasks | /mobile 200 | /assets/boot-mascot.jpg 200 | /style.css 200
+pass gmxrun     ok | gmx 2025.1 | 100 ps | 2026-10-29T14:37:58+08:00
+warn python     missing: vermouth, insane, MDAnalysis, matplotlib | 只影响 Martini 肽链流水线
+warn tools      同上
+warn martini3   同上
+```
+
+`desk-http` 那一行现在会**直接证明**三个页面/资源都是 200——重启是否生效、开机动画素材在不在，看这一行就够。
+
+---
+
 ## 4. 两条链路怎么选
 
 ```
