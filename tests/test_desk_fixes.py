@@ -282,7 +282,7 @@ def test_deskfix_job_exists_and_launches_the_animation():
     assert "function Invoke-JobDeskfix" in source
     assert "arena-desk-boot-demo re-registered WITH an AtLogOn trigger" in source
     assert "Start-ScheduledTask -TaskName 'arena-desk-boot-demo'" in source
-    assert "'deskfix'   { return Invoke-JobDeskfix }" in source
+    assert "'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }" in source
 
 
 def test_deskdiag_reports_the_browser_boot_ack():
@@ -358,3 +358,37 @@ def test_prompt_v2_forbids_pasting_commands():
     assert "不要再装第二套" in prompt
     assert "连不到台式机的 192.168" in prompt
     assert "-Trigger" in prompt
+
+
+def test_worker_polls_peer_repositories_without_credentials():
+    """Cross-repo: the desk pulls a peer mailbox anonymously and answers here.
+
+    An Arena session token only covers its own repository, so a JevHarness
+    session cannot push into this repo's mailbox.  The desk therefore fetches
+    the peer ref with an empty credential helper and publishes the answer into
+    its own outbox.
+    """
+    worker = (ROOT / "skills" / "cgmd-hub" / "runner" / "Invoke-CgmdMailbox.ps1").read_text(encoding="utf-8")
+    assert "function Invoke-PeerCycle" in worker
+    assert "function Get-PeerRepos" in worker
+    assert "-c', 'credential.helper='" in worker          # anonymous first
+    assert "peer_jobs_per_poll" in worker
+    assert "peer_repos" in worker
+    # answers land in this repo's outbox, so the caller reads them with one id
+    assert "outboxDir = Join-Path $script:Worktree 'outbox'" in worker
+    # a broken peer must never take the main cycle down
+    assert "peer cycle failed" in worker
+
+
+def test_deskfix_records_peer_repositories():
+    worker = (ROOT / "skills" / "cgmd-hub" / "runner" / "Invoke-CgmdMailbox.ps1").read_text(encoding="utf-8")
+    assert "Invoke-JobDeskfix -JobArgs $jobArgs" in worker
+    assert "Set-HubConfigValue -Name 'peer_repos'" in worker
+    assert "function Set-HubConfigValue" in worker
+
+
+def test_docs_say_connect_not_install_for_later_sessions():
+    prompt = (ROOT / "docs" / "new_session_prompt_zh.md").read_text(encoding="utf-8")
+    assert "从别的仓库连接" in prompt
+    assert "--read-repo" in prompt
+    assert "403" in prompt

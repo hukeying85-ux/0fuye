@@ -62,6 +62,8 @@ $script:AttemptsPath = Join-Path $script:StateDir 'mailbox-attempts.json'
 $script:MaxAttempts = 3
 $script:LastPath = Join-Path $script:StateDir 'mailbox-last.json'
 $script:Stopped = $false
+$script:PeerJobs = @()
+$script:PeerInfo = @()
 
 foreach ($dir in @($script:StateDir, $script:LogDir)) {
     if (-not (Test-Path -LiteralPath $dir)) {
@@ -153,6 +155,178 @@ function Get-HubConfig {
         if (Test-Path -LiteralPath $candidate) { return (Read-JsonFile -Path $candidate) }
     }
     return $null
+}
+
+function Get-HubConfigPath {
+    $candidates = @()
+    if ($ConfigPath) { $candidates += $ConfigPath }
+    $candidates += (Join-Path $script:HubRoot 'config\cgmd_hub.local.json')
+    $candidates += (Join-Path $script:HubRoot 'config\cgmd_hub.json')
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+    return (Join-Path $script:HubRoot 'config\cgmd_hub.local.json')
+}
+
+function Set-HubConfigValue {
+    param([string]$Name, $Value)
+    $path = Get-HubConfigPath
+    $data = Read-JsonFile -Path $path
+    $dict = [ordered]@{}
+    if ($null -ne $data) {
+        if ($data -is [System.Collections.IDictionary]) {
+            foreach ($key in $data.Keys) { $dict[$key] = $data[$key] }
+        } else {
+            foreach ($prop in $data.PSObject.Properties) { $dict[$prop.Name] = $prop.Value }
+        }
+    }
+    $dict[$Name] = $Value
+    Write-JsonFile -Path $path -Data $dict
+    return $path
+}
+
+# Other projects cannot push into this repo's mailbox: an Arena session token is
+# scoped to the one repository the session belongs to (403 for every other repo).
+# So the desk pulls *their* mailbox anonymously and answers into its own outbox.
+# A peer is "owner/repo" or "owner/repo#ref" (default ref hub/mailbox).
+function Get-PeerRepos {
+    $value = Get-Property $script:Config 'peer_repos' @()
+    $out = @()
+    foreach ($item in @($value)) {
+        $text = [string]$item
+        if (-not $text) { continue }
+        $ref = $Ref
+        $base = $text
+        if ($text.Contains('#')) {
+            $parts = $text.Split('#')
+            $base = $parts[0]
+            if ($parts.Count -gt 1 -and $parts[1]) { $ref = $parts[1] }
+        }
+        $url = $base
+        if ($base -notmatch '^[a-zA-Z][a-zA-Z0-9+.-]*://' -and $base -match '^[^/]+/[^/]+$') {
+            $url = 'https://github.com/' + $base + '.git'
+        }
+        $out += [pscustomobject]@{ Label = $text; Url = $url; Ref = $ref }
+    }
+    return $out
+}
+
+function Fetch-PeerRef {
+    param([string]$Url, [string]$PeerRef, [string]$Tracking)
+    $previous = $env:GIT_TERMINAL_PROMPT
+    $env:GIT_TERMINAL_PROMPT = '0'
+    try {
+        # Anonymous first: every peer repository is public, and the desk's own
+        # stored credential belongs to one repo only.  A private peer then gets
+        # a second chance with whatever helper the machine already has.
+        $spec = ('+refs/heads/{0}:{1}/{0}' -f $PeerRef, $Tracking)
+        $anon = Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'credential.helper=', 'fetch', '--quiet', '--no-tags', $Url, $spec)
+        if ($anon.Code -eq 0) { return $anon }
+        $retry = Invoke-Git -Directory $RepoPath -GitArgs @('fetch', '--quiet', '--no-tags', $Url, $spec)
+        if ($retry.Code -eq 0) { return $retry }
+        return $retry
+    } finally {
+        $env:GIT_TERMINAL_PROMPT = $previous
+    }
+}
+
+function Invoke-PeerCycle {
+    param([int]$Budget = 1, $Ledger = $null)
+    $answers = @()
+    $peers = @(Get-PeerRepos)
+    if ($peers.Count -eq 0) { return @() }
+    $outboxDir = Join-Path $script:Worktree 'outbox'
+    if (-not (Test-Path -LiteralPath $outboxDir)) {
+        New-Item -ItemType Directory -Path $outboxDir -Force | Out-Null
+    }
+    $index = 0
+    foreach ($peer in $peers) {
+        $index++
+        $label = [string]$peer.Label
+        $entry = [ordered]@{ peer = $label; status = 'skipped'; ran = 0; note = '' }
+        try {
+            $tracking = ('refs/remotes/peer-{0}' -f $index)
+            $fetch = Fetch-PeerRef -Url $peer.Url -PeerRef $peer.Ref -Tracking $tracking
+            if ($fetch.Code -ne 0) {
+                $entry.status = 'unreachable'
+                $entry.note = ([string]$fetch.Output).Trim()
+                if ($entry.note.Length -gt 200) { $entry.note = $entry.note.Substring(0, 200) }
+                $script:PeerInfo += $entry
+                Write-Log ('peer {0} unreachable: {1}' -f $label, $entry.note) 'WARN'
+                continue
+            }
+            $refPath = $tracking + '/' + $peer.Ref
+            $tree = Invoke-Git -Directory $RepoPath -GitArgs @('ls-tree', '-r', '--name-only', $refPath, 'inbox/')
+            $names = @()
+            if ($tree.Code -eq 0 -and $tree.Output) {
+                $names = @(($tree.Output -split "`r?`n") | Where-Object { $_ -match '^inbox/.+\.json$' } | Sort-Object)
+            }
+            if ($names.Count -eq 0) {
+                $entry.status = 'empty'
+                $script:PeerInfo += $entry
+                continue
+            }
+            foreach ($name in $names) {
+                if ($entry.ran -ge $Budget) { break }
+                $jobId = [System.IO.Path]::GetFileNameWithoutExtension($name)
+                $answerPath = Join-Path $outboxDir ($jobId + '.json')
+                if (Test-Path -LiteralPath $answerPath) { continue }
+                if ($null -ne $Ledger -and $Ledger.Contains($jobId)) { continue }
+                $raw = Invoke-Git -Directory $RepoPath -GitArgs @('show', ($refPath + ':' + $name))
+                if ($raw.Code -ne 0) { continue }
+                $request = $null
+                try { $request = $raw.Output | ConvertFrom-Json } catch { $request = $null }
+                $started = Get-Date
+                $outcome = $null
+                try {
+                    if ($null -eq $request) {
+                        $outcome = [ordered]@{ status = 'error'; summary = 'peer request JSON could not be parsed' }
+                    } else {
+                        $outcome = Invoke-Job -Request $request
+                    }
+                } catch {
+                    $outcome = [ordered]@{ status = 'error'; summary = ('peer job crashed: ' + $_.Exception.Message) }
+                }
+                $finished = Get-Date
+                $answer = [ordered]@{
+                    schema       = 'cgmd.mailbox.result.v1'
+                    id           = $jobId
+                    kind         = [string](Get-Property $request 'kind' 'unknown')
+                    status       = [string](Get-Property $outcome 'status' 'error')
+                    summary      = [string](Get-Property $outcome 'summary' '')
+                    detail       = Get-Property $outcome 'detail' $null
+                    logs_tail    = @(Get-Property $outcome 'logs_tail' @())
+                    note         = [string](Get-Property $request 'note' '')
+                    requested_by = [string](Get-Property $request 'from' 'peer')
+                    peer         = $label
+                    worker       = $env:COMPUTERNAME
+                    started_at   = $started.ToUniversalTime().AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
+                    finished_at  = $finished.ToUniversalTime().AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
+                    seconds      = [math]::Round(($finished - $started).TotalSeconds, 2)
+                }
+                Write-JsonFile -Path $answerPath -Data $answer
+                $answers += $answer
+                $entry.ran = $entry.ran + 1
+                Write-Log ('peer {0} job {1} ({2}) -> {3}: {4}' -f $label, $jobId, $answer['kind'], $answer['status'], $answer['summary'])
+                if ($null -ne $Ledger) {
+                    $Ledger[$jobId] = [ordered]@{ kind = $answer['kind']; status = $answer['status'];
+                                                  finished_at = $answer['finished_at']; summary = $answer['summary'] }
+                }
+            }
+            if ($entry.ran -eq 0 -and $entry.status -eq 'skipped') {
+                $entry.status = 'idle'
+                $entry.note = ('{0} request(s) seen, all already answered' -f $names.Count)
+            } elseif ($entry.ran -gt 0) {
+                $entry.status = 'ran'
+            }
+        } catch {
+            $entry.status = 'error'
+            $entry.note = $_.Exception.Message
+            Write-Log ('peer {0} cycle failed: {1}' -f $label, $_.Exception.Message) 'WARN'
+        }
+        $script:PeerInfo += $entry
+    }
+    return $answers
 }
 
 function Invoke-Captured {
@@ -779,6 +953,8 @@ function Invoke-JobDeskdiag {
             appearance   = $appearance
             boot_ack     = $bootAck
             session      = $session
+            peer_repos   = @(Get-Property $script:Config 'peer_repos' @())
+            peers        = @(Get-Property (Read-JsonFile -Path $script:LastPath) 'peers' @())
         }
     }
 }
@@ -816,12 +992,29 @@ function Get-DesktopTasks {
 
 function Invoke-JobDeskfix {
     # Repair the desktop-side plumbing end to end, from here, with no human.
+    # 0) optionally record which other repositories this desk should serve;
     # 1) the boot animation task needs an AtLogOn trigger (it had none);
     # 2) only one task may open a window at logon, or two windows appear;
     # 3) the panel has to be running before any window opens;
     # 4) finally launch the animation so the result is visible immediately.
+    param($JobArgs)
     $deskRoot = Find-DeskRoot
     $notes = @()
+    $peerValue = Get-Property $JobArgs 'peer_repos' $null
+    if ($null -ne $peerValue) {
+        try {
+            $list = @()
+            foreach ($item in @($peerValue)) {
+                $text = ([string]$item).Trim()
+                if ($text) { $list += $text }
+            }
+            $cfgPath = Set-HubConfigValue -Name 'peer_repos' -Value $list
+            $script:Config = Read-JsonFile -Path $cfgPath
+            $notes += ('peer_repos -> ' + ($list -join ', ') + ' in ' + $cfgPath)
+        } catch {
+            $notes += ('peer_repos write failed: ' + $_.Exception.Message)
+        }
+    }
     if (-not $deskRoot) {
         return [ordered]@{ status = 'fail'; summary = 'Arena Desk is not deployed on any drive'; detail = @{} }
     }
@@ -925,6 +1118,7 @@ function Invoke-JobDeskfix {
             desk_root = $deskRoot
             panel_up  = $panelUp
             launched  = $launched
+            peer_repos = @(Get-Property $script:Config 'peer_repos' @())
             tasks     = $tasks
             notes     = $notes
         }
@@ -964,7 +1158,7 @@ function Invoke-Job {
         'smoke'     { return Invoke-JobSmoke -JobArgs $jobArgs }
         'gmx'       { return Invoke-JobGmx -JobArgs $jobArgs }
         'deskdiag'  { return Invoke-JobDeskdiag }
-        'deskfix'   { return Invoke-JobDeskfix }
+        'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
         'pipeline'  { return [ordered]@{ status = 'unsupported'
                                          summary = 'the Martini pipeline job kind is not wired yet; use smoke or gmx' } }
@@ -1161,6 +1355,19 @@ try {
             $jobs += $result
         }
 
+        # Peers: other projects cannot push into this repo (their session token
+        # only covers their own repository), so the desk pulls their mailbox and
+        # answers here.  Anonymous read is enough - every peer repo is public.
+        try {
+            $peerBudget = [int](Get-Property $script:Config 'peer_jobs_per_poll' 1)
+            if ($peerBudget -gt 0) {
+                $peerAnswers = @(Invoke-PeerCycle -Budget $peerBudget -Ledger $ledger)
+                if ($peerAnswers.Count -gt 0) { $jobs += $peerAnswers }
+            }
+        } catch {
+            Write-Log ('peer cycle failed: ' + $_.Exception.Message) 'WARN'
+        }
+
         if ($jobs.Count -gt 0) {
             $null = Publish-MailboxChanges -Message ('mailbox: {0} answer(s) from {1}' -f $jobs.Count, $env:COMPUTERNAME)
         }
@@ -1220,6 +1427,8 @@ try {
         attempts     = $attempts
         log_tail     = @(Get-Tail -Path (Join-Path $script:LogDir ('mailbox-{0}.log' -f (Get-Date -Format 'yyyyMMdd'))) -Count 60)
         call_tail    = @(Get-Tail -Path (Join-Path $script:StateDir 'mailbox-call.log') -Count 40)
+        peer_repos   = @(Get-Property $script:Config 'peer_repos' @())
+        peers        = @($script:PeerInfo)
         processed    = @($jobs | ForEach-Object { [ordered]@{ id = $_['id']; kind = $_['kind']; status = $_['status']; summary = $_['summary'] } })
         recent       = @(Get-Property (Read-JsonFile -Path (Join-Path $script:StateDir 'mailbox-recent.json')) 'items' @())
     })

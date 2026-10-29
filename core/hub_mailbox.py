@@ -294,6 +294,107 @@ def wait(repo: str, job_id: str, ref: str = DEFAULT_REF, timeout: int = 1800,
         time.sleep(max(2, interval))
 
 
+def parse_peer(entry: str, default_ref: str = DEFAULT_REF) -> Tuple[str, str]:
+    """``owner/repo`` or ``owner/repo#ref`` or a full URL -> (url, ref)."""
+    text = (entry or "").strip()
+    ref = default_ref
+    if "#" in text:
+        text, _, tail = text.partition("#")
+        if tail.strip():
+            ref = tail.strip()
+    if "://" in text or text.startswith("git@"):
+        url = text
+    elif text.count("/") == 1:
+        url = "https://github.com/%s.git" % text
+    else:
+        url = text
+    return url, ref
+
+
+def peer_once(desk_repo: str, peers: List[str], handler, ref: str = DEFAULT_REF,
+              remote: str = "origin", max_jobs: int = 1,
+              worker: str = "peer") -> List[Dict[str, Any]]:
+    """Answer jobs that were queued in *other* repositories' mailboxes.
+
+    An Arena session token is scoped to the one repository the session lives in:
+    a JevHarness session that tries to push into 0fuye gets ``403 Resource not
+    accessible by integration``.  So a peer queues work in its own mailbox, the
+    desk pulls that ref **anonymously** (every peer repo is public), runs the job
+    here, and publishes the answer into its own mailbox -- the caller reads it by
+    id from the desk repo.
+
+    This is the Python twin of ``Invoke-PeerCycle`` in
+    ``skills/cgmd-hub/runner/Invoke-CgmdMailbox.ps1``; the tests drive this one.
+    """
+    results: List[Dict[str, Any]] = []
+    if not peers:
+        return results
+    tip = fetch_ref(desk_repo, ref, remote)
+    answered = set()
+    if tip:
+        answered = {os.path.basename(path)[:-5] for path in list_files(desk_repo, tip, "outbox")
+                    if path.endswith(".json")}
+    budget = max(0, int(max_jobs))
+    for index, entry in enumerate(peers, start=1):
+        if budget <= 0:
+            break
+        url, peer_ref = parse_peer(entry, ref)
+        tracking = "refs/remotes/peer-%d/%s" % (index, peer_ref)
+        # anonymous first: the desk's stored credential belongs to one repo only
+        code, _, _ = _run(desk_repo, ["-c", "credential.helper=", "fetch", "--quiet", "--no-tags",
+                                      url, "+refs/heads/%s:%s" % (peer_ref, tracking)])
+        if code != 0:
+            continue
+        peer_tip = _run(desk_repo, ["rev-parse", tracking])[1].decode("utf-8", "replace").strip()
+        if not peer_tip:
+            continue
+        adds: Dict[str, bytes] = {}
+        for path in sorted(list_files(desk_repo, peer_tip, "inbox")):
+            if not path.endswith(".json") or budget <= 0:
+                continue
+            job_id = os.path.basename(path)[:-5]
+            if job_id in answered:
+                continue
+            raw = read_file(desk_repo, peer_tip, path)
+            if raw is None:
+                continue
+            try:
+                request = json.loads(raw.decode("utf-8", "replace"))
+            except ValueError:
+                request = {"id": job_id, "kind": "unknown", "args": {}}
+            started = time.time()
+            try:
+                answer = handler(request) or {}
+                status = answer.pop("status", STATUS_OK)
+                summary = answer.pop("summary", "")
+                detail = answer.get("detail", answer)
+            except Exception as exc:  # noqa: BLE001 - published, never raised
+                status, summary, detail = STATUS_ERROR, str(exc)[:300], {}
+            result = {
+                "schema": SCHEMA_RESULT,
+                "id": job_id,
+                "kind": request.get("kind", "unknown"),
+                "status": status,
+                "summary": summary,
+                "detail": detail,
+                "note": request.get("note", ""),
+                "requested_by": request.get("from", "peer"),
+                "peer": entry,
+                "worker": worker,
+                "seconds": round(time.time() - started, 2),
+                "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00", time.gmtime(time.time() + 8 * 3600)),
+            }
+            adds["outbox/%s.json" % job_id] = json.dumps(result, ensure_ascii=False,
+                                                         indent=2).encode("utf-8")
+            answered.add(job_id)
+            results.append(result)
+            budget -= 1
+        if adds:
+            push_files(desk_repo, ref, adds, [],
+                       "mailbox: %d peer answer(s) from %s" % (len(adds), worker), remote=remote)
+    return results
+
+
 def snapshot(repo: str, ref: str = DEFAULT_REF, remote: str = "origin") -> Dict[str, Any]:
     commit = fetch_ref(repo, ref, remote)
     pending = [os.path.basename(path)[:-5] for path in list_files(repo, commit, "inbox")
@@ -458,8 +559,17 @@ def capabilities(repo: str, ref: str = DEFAULT_REF) -> Dict[str, Any]:
             "python3 -m core.hub_mailbox run --kind sync --json-args '{\"desk\": true}' --timeout 900",
             "python3 -m core.hub_mailbox run --kind selfcheck --timeout 900",
         ],
+        "cross_repo": {
+            "why": "an Arena session token only writes the repository the session lives in (403 everywhere else)",
+            "recipe": [
+                "git clone https://github.com/hukeying85-ux/0fuye.git /tmp/desk",
+                "python3 -m core.hub_mailbox --repo <your checkout> run --kind ping --read-repo /tmp/desk",
+            ],
+            "requires": "your repository is listed in the desk's peer_repos (set it with --kind deskfix)",
+        },
         "rules": [
             "never ask the user to paste a command; every desk action goes through this mailbox",
+            "outside this repo you can only push your own mailbox: queue there, read the answer with --read-repo",
             "never commit or push from the calling session; jobs live on the mailbox ref",
             "this sandbox reaches github.com only - do not try the LAN bridge from here",
             "the desk has no E: drive; the panel is Arena Desk on 127.0.0.1:18765",
@@ -494,6 +604,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     wait_p.add_argument("id")
     wait_p.add_argument("--timeout", type=int, default=1800)
     wait_p.add_argument("--interval", type=int, default=15)
+    wait_p.add_argument("--read-repo", default="",
+                        help="look the answer up here instead (a clone of the desk repo)")
 
     run_p = sub.add_parser("run", help="send and wait")
     run_p.add_argument("--kind", required=True, choices=KINDS)
@@ -502,15 +614,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     run_p.add_argument("--note", default="")
     run_p.add_argument("--timeout", type=int, default=1800)
     run_p.add_argument("--interval", type=int, default=15)
+    run_p.add_argument("--read-repo", default="",
+                       help="queue from this repo but read the answer from the desk repo")
 
     sub.add_parser("ls", help="list queued and answered jobs")
     sub.add_parser("caps", help="what can this desk do? (offline capability card)")
 
     show_p = sub.add_parser("show", help="print one result")
     show_p.add_argument("id")
+    show_p.add_argument("--read-repo", default="", help="read the answer from this clone instead")
 
     args = parser.parse_args(argv)
     repo = repo_root(os.path.abspath(args.repo))
+    read_repo = repo
+    asked = getattr(args, "read_repo", "") or ""
+    if asked:
+        read_repo = repo_root(os.path.abspath(asked))
 
     if args.command == "send":
         payload = json.loads(args.json_args) if args.json_args else {}
@@ -527,7 +646,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0 if result.get("status") == STATUS_OK else 6
 
     if args.command == "wait":
-        result = wait(repo, args.id, ref=args.ref, timeout=args.timeout,
+        result = wait(read_repo, args.id, ref=args.ref, timeout=args.timeout,
                       interval=args.interval, remote=args.remote)
         _print(result)
         return 0 if result.get("status") == STATUS_OK else 6
@@ -539,7 +658,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         job_id = send(repo, args.kind, payload, note=args.note, ref=args.ref,
                       timeout_s=args.timeout, remote=args.remote)
         sys.stderr.write("mailbox: queued %s as %s\n" % (args.kind, job_id))
-        result = wait(repo, job_id, ref=args.ref, timeout=args.timeout,
+        result = wait(read_repo, job_id, ref=args.ref, timeout=args.timeout,
                       interval=args.interval, remote=args.remote)
         _print(result)
         return 0 if result.get("status") == STATUS_OK else 6
@@ -553,7 +672,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if args.command == "show":
-        result = read_result(repo, args.id, ref=args.ref, remote=args.remote)
+        result = read_result(read_repo, args.id, ref=args.ref, remote=args.remote)
         if result is None:
             _print({"id": args.id, "status": STATUS_LOST,
                     "summary": "no result on %s yet" % args.ref})

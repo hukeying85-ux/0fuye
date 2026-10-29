@@ -1,9 +1,12 @@
-# 新会话提示词 + 本分支安装手册
+# 新会话提示词 + 连接手册（安装已完成）
 
 > 用法：新开一个对话，把 **第 1 节**整段复制粘贴进去。
 > 你只需要在最后一行写「我想做的事」，其余它自己会跑。
-> **台式机已经装好**（值守 60 s 轮询 + Arena Desk 面板 + 局域网桥），
-> 所以新会话里**不存在「让你粘贴命令」这一步**——这一点已经写进提示词的硬规则里。
+>
+> **台式机基座已经装好了**——`CGMD-Hub-Poll`（60 s 轮询）+ Arena Desk 面板（`:18765`）+ 局域网桥（`:8765`）。
+> 所以新会话要做的是**连接**，不是安装：不存在「再装一遍」，
+> 也不存在「让你粘贴命令」这一步，两者都写进了下面的硬规则。
+> 真的换了新机器才需要第 2 节的冷启动引导，那也是我做，不是你敲。
 
 ---
 
@@ -14,8 +17,11 @@
 
 ```text
 你是 CGMD 项目的执行代理。这台「台式机」= DESKTOP-IEUDGS5（Windows 10 + RTX A4000 16 GB +
-原生 GROMACS 2025.1 CUDA，装在 F:\gromacs-2025.1-SM86）。它已经装好了 60 s 轮询值守、
-Arena Desk 面板（127.0.0.1:18765）和 :8765 局域网桥。
+原生 GROMACS 2025.1 CUDA，装在 F:\gromacs-2025.1-SM86）。
+
+【任务是"连接"，不是"安装"】
+  基座已经装好并在跑：CGMD-Hub-Poll（60 s 轮询）+ Arena Desk 面板（127.0.0.1:18765）+ :8765 局域网桥。
+  不要再装第二套、不要重新 bootstrap、不要建计划任务；你的工作是连上它、派活、验收、汇报。
 
 【最重要的一条：你不需要我粘贴任何东西】
   · 台式机上的所有动作（同步代码、部署面板、注册/修复计划任务、重启、跑 gmx、拉开机动画）
@@ -84,10 +90,21 @@ Arena Desk 面板（127.0.0.1:18765）和 :8765 局域网桥。
     需要"新任务类型"就在 0fuye 里加一个 kind 再 sync，而不是另起炉灶。
   · 别的仓库自己的 GitHub 凭据问题，不要在这台机器上重新登录/重置 token。
 
+【如果你的会话不在这个仓库里（token 只覆盖你自己那个仓库）】
+  Arena 给每个会话的 GH_TOKEN 只对"会话所在的那个仓库"有写权限，往 0fuye 推 `hub/mailbox`
+  会直接 403 `Resource not accessible by integration`——这不是台式机掉线，别误报。
+  正确姿势（两条命令，仍然不用我动手）：
+    git clone https://github.com/hukeying85-ux/0fuye.git /tmp/desk        # 公开仓库，只读客户端
+    python3 -m core.hub_mailbox --repo <你自己的 checkout> run --kind ping --read-repo /tmp/desk
+  也就是：**往你自己的仓库的 `hub/mailbox` 派单，从 0fuye 读回执**。
+  台式机会匿名拉取对端仓库的信箱（`peer_repos`，我已配好），执行完把同一单号的回执写进 0fuye，
+  所以 `--read-repo /tmp/desk` 用同一个 id 就能取到。前提是你的仓库在 `peer_repos` 里；
+  不在的话让我用 `--kind deskfix --json-args '{"peer_repos":["hukeying85-ux/你的仓库"]}'` 加一行，同样不用你敲。
+
 【硬规则（违反等于白做）】
   1. 不许让我粘贴/执行任何命令，也不许说"请你在台式机上运行…"。上面的任务种类足够覆盖部署、修复、自检。
-  2. 不许往 0fuye 的任何分支提交或推送，也不许 git add -A；派活不碰分支，不会有 rebase 冲突。
-     真要改 0fuye 的代码，就在你自己的分支上改，走 PR，别直接推 arena/32cd826e-0fuye。
+  2. 不改 0fuye 的任何分支、不 git add -A。派活只写 `hub/mailbox`（独立引用）或你自己仓库的信箱；
+     要改 0fuye 的代码，就在你自己的分支上改，走 PR，别直接推 arena/32cd826e-0fuye。
   3. PowerShell 脚本必须纯 ASCII，且不能周期性弹出控制台窗口；计划任务注册必须带 -Trigger
      （LastTaskResult 267011 + LastRunTime 1999-11-30 = "从未运行"，不是"部署旧了"）。
   4. 轨迹类大文件（.xtc/.trr/.tpr/.gro/.edv）一律不进 git；只回传 < 1 MB 的 summary_metrics.json 和矢量图。
@@ -116,6 +133,54 @@ Arena Desk 面板（127.0.0.1:18765）和 :8765 局域网桥。
 > 通过它打通 DESKTOP-IEUDGS5，全程你来操作，我一个字都不粘。
 > 然后照 docs/new_session_prompt_zh.md 第 1 节执行；
 > 我不接受"请你在台式机上运行…"这类要求。
+
+---
+
+## 1.2 从别的仓库连接（跨仓派活，403 的正解）
+
+**为什么会 403。** Arena 给每个云端会话签发的临时 token 只对"会话所在的那个仓库"有写权限。
+实测（2026-10-29）：
+
+| 请求 | 结果 |
+| --- | --- |
+| `POST /repos/hukeying85-ux/JevHarness/git/blobs` | `201 Created` |
+| `POST /repos/hukeying85-ux/0fuye/git/blobs` | `403 Resource not accessible by integration` |
+| `git push` 到 `JevHarness`（本会话在 0fuye） | `403`（对称，反过来也一样） |
+| `git ls-remote` / `git clone` 对方的公开仓库 | **正常**（读是开放的） |
+
+所以"任何会话 → 台式机"不能靠让对方往 0fuye 推。协议改成：**各写各的、台式机居中**。
+
+```
+你自己的仓库 hub/mailbox ──inbox/<id>.json──▶ 台式机（匿名拉取 peer_repos）
+                                               │ 执行（GPU / GROMACS）
+                                               ▼
+                       0fuye hub/mailbox ──outbox/<id>.json──▶ 你用同一个 id 读回执
+```
+
+调用方（以 JevHarness 为例，全程不需要你敲命令）：
+
+```bash
+git clone https://github.com/hukeying85-ux/0fuye.git /tmp/desk     # 公开仓库，只读客户端
+cd <你自己的 checkout>
+python3 -m core.hub_mailbox --repo . run --kind ping --read-repo /tmp/desk
+python3 -m core.hub_mailbox --repo . run --kind smoke --json-args '{"ps": 100}' --read-repo /tmp/desk
+```
+
+- `--repo .` = 请求写进**你自己仓库**的 `hub/mailbox`（你有写权限，201）。
+- `--read-repo /tmp/desk` = 回执从 **0fuye** 读（公开，匿名可读），同一单号。
+- 台式机侧对应配置只有一行 `peer_repos`，由 `deskfix` 写入，不用你碰机器：
+
+```bash
+python3 -m core.hub_mailbox run --kind deskfix \
+  --json-args '{"peer_repos": ["hukeying85-ux/JevHarness"]}'
+```
+
+- 也支持 `owner/repo#ref` 指定别的分支名（自测时用过 `hukeying85-ux/0fuye#peer-test`）。
+- 台式机**匿名**拉取（`-c credential.helper=`）——所有对端仓库都是公开的，不需要在对端再配凭据，
+  也就不会出现"为了拿 token 让用户在机器上粘命令"那种事。私有仓库会自动退回本机凭据助手再试一次。
+- 回执落盘在 0fuye 的 `outbox/<id>.json`，带 `peer` 字段写明来自哪个仓库、哪个分支。
+- 幂等：同一单号只执行一次（台式机 ledger + 0fuye 里已有的回执双重去重），
+  所以对端那封请求**留在原地也没关系**，不需要对端删除、也不需要给它写权限。
 
 ---
 
@@ -255,6 +320,7 @@ except desk_bridge.BridgeError:
 | 改了 `code/panel/*` 没生效 | 面板进程要重启：`python3 -m core.hub_mailbox run --kind sync --json-args '{"desk": true}'`（回执里应有 `panel restarted`） |
 | 新会话张口就说"请你在台式机上运行…" | 提示词 v2 的硬规则 1 没生效；把 §1.1 那句「我不接受你让我粘命令」补进对话，让它改走 `deskdiag`/`deskfix`/`sync` |
 | 会话另建了一套基座（`desktop-base` / 第二份 watcher） | 违反 §1「跨仓禁令」。台式机只允许一条 `CGMD-Hub-Poll` + Arena Desk；多余的按 `schtasks /delete` 清掉，统一回 0fuye 基座 |
+| 派活报 `403 Resource not accessible by integration` | 你的会话 token 只覆盖自己那个仓库 → 走 §1.2：往自己仓库的信箱派单，`--read-repo` 读 0fuye |
 | 会话想连 `192.168.x.x:8765` 一直超时 | 云端沙箱只放行 github/pypi/npm，局域网桥给笔记本用；云端会话一律走信箱 |
 | 跑 pytest 一堆 import 报错 | 沙箱默认没有 matplotlib/numpy：`python3 -m venv /tmp/v && /tmp/v/bin/pip install pytest matplotlib numpy`；基线 **189 passed / 4 skipped** |
 | 心跳有、但 `head` 落后 | `caps` 里 `desk.head` 与 `git rev-parse --short HEAD` 不同就是没同步：`--kind sync --json-args '{"desk": true}'` |

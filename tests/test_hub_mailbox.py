@@ -191,3 +191,84 @@ def test_poller_self_heals_without_a_human():
     assert "smoke schedule: queued an automatic 100 ps verification" in source
     assert "Invoke-MailboxOnce" in source            # other sessions -> this workstation
     assert "Clear-PollPid" in source
+
+
+# ---------------------------------------------------------------------------
+# cross-repository: an Arena session token only covers the repo the session
+# lives in, so a peer queues in *its own* mailbox and the desk answers into the
+# desk repo.  These tests pin that protocol down.
+# ---------------------------------------------------------------------------
+@pytest.fixture()
+def two_remotes(tmp_path):
+    made = {}
+    for name in ("jev", "desk"):
+        remote = tmp_path / (name + ".git")
+        remote.mkdir()
+        _git(str(remote), "init", "--bare", "--quiet")
+        seed = tmp_path / (name + "-seed")
+        seed.mkdir()
+        _git(str(seed), "init", "--quiet")
+        (seed / "README.md").write_text("seed\n", encoding="utf-8")
+        _git(str(seed), "add", "README.md")
+        _git(str(seed), "commit", "--quiet", "-m", "seed")
+        _git(str(seed), "branch", "-M", "main")
+        _git(str(seed), "remote", "add", "origin", str(remote))
+        _git(str(seed), "push", "--quiet", "origin", "main")
+        _git(str(remote), "symbolic-ref", "HEAD", "refs/heads/main")
+        clone = tmp_path / (name + "-clone")
+        _git(str(tmp_path), "clone", "--quiet", str(remote), str(clone))
+        made[name] = str(clone)
+        made[name + "_url"] = str(remote)
+    return made
+
+
+def test_parse_peer_accepts_slug_ref_and_url():
+    assert hub_mailbox.parse_peer("hukeying85-ux/JevHarness") == (
+        "https://github.com/hukeying85-ux/JevHarness.git", "hub/mailbox")
+    assert hub_mailbox.parse_peer("hukeying85-ux/0fuye#peer-test") == (
+        "https://github.com/hukeying85-ux/0fuye.git", "peer-test")
+    url, ref = hub_mailbox.parse_peer("https://example.com/x/y.git")
+    assert (url, ref) == ("https://example.com/x/y.git", "hub/mailbox")
+
+
+def test_peer_job_queued_in_another_repo_is_answered_into_the_desk_repo(two_remotes):
+    jev, desk = two_remotes["jev"], two_remotes["desk"]
+
+    # the peer can only push to its own repository
+    job_id = hub_mailbox.send(jev, "ping", {"note": "from jev"}, note="cross-repo")
+
+    def handler(request):
+        return {"status": "ok", "summary": "peer pong", "detail": {"seen": request["id"]}}
+
+    answered = hub_mailbox.peer_once(desk, [two_remotes["jev_url"]], handler)
+    assert [item["id"] for item in answered] == [job_id]
+    assert answered[0]["status"] == "ok"
+    assert answered[0]["peer"] == two_remotes["jev_url"]
+
+    # the caller reads the answer out of the desk repository
+    result = hub_mailbox.read_result(desk, job_id)
+    assert result["status"] == "ok"
+    assert result["summary"] == "peer pong"
+
+    # idempotent: a request that stays in the peer inbox is never run twice
+    again = hub_mailbox.peer_once(desk, [two_remotes["jev_url"]], handler)
+    assert again == []
+
+
+def test_unreachable_peer_is_skipped_without_raising(two_remotes, tmp_path):
+    desk = two_remotes["desk"]
+    missing = "file://" + str(tmp_path / "nope.git")
+    assert hub_mailbox.peer_once(desk, [missing], lambda request: {"status": "ok"}) == []
+
+
+def test_cli_read_repo_reads_the_answer_from_the_desk_clone(two_remotes):
+    jev, desk = two_remotes["jev"], two_remotes["desk"]
+    job_id = hub_mailbox.send(jev, "ping", {}, note="cli read-repo")
+    hub_mailbox.peer_once(desk, [two_remotes["jev_url"]],
+                          lambda request: {"status": "ok", "summary": "served"})
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    raw = subprocess.check_output(
+        [sys.executable, "-m", "core.hub_mailbox", "--repo", jev, "show", job_id, "--read-repo", desk],
+        env=env, cwd=jev).decode("utf-8")
+    assert json.loads(raw)["summary"] == "served"
