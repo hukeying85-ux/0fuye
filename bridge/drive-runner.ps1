@@ -14,6 +14,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Check the root *before* Join-Path: on Windows an absent drive letter (e.g. G:)
+# makes Join-Path throw a provider error instead of a useful diagnostic.
+if (-not (Test-Path -LiteralPath $DriveRoot -PathType Container -ErrorAction SilentlyContinue)) {
+    throw ('DriveRoot is not available: ' + $DriveRoot + '. This local-mirror runner needs an existing synced Drive folder. Do not create an empty drive/folder; use the Arena Google Drive connector to search cloud files instead. It cannot read the local F: disk.')
+}
 $inbox = Join-Path $DriveRoot 'inbox'
 $outbox = Join-Path $DriveRoot 'outbox'
 if (-not (Test-Path -LiteralPath $inbox -PathType Container) -or
