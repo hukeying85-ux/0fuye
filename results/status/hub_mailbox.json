@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T16:22:14+08:00",
+    "generated_at":  "2026-10-29T16:22:58+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T082117-c8b5.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -37,7 +37,6 @@
                      "20261029T082117-c8b5":  1
                  },
     "log_tail":  [
-                     "2026-10-29 15:31:58 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 15:31:58 [INFO] job kind=smoke",
                      "2026-10-29 15:32:29 [INFO] job 20261029T073120-60bd (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
                      "2026-10-29 15:32:58 [INFO] mailbox: 0 queued, running at most 1",
@@ -96,7 +95,8 @@
                      "2026-10-29 16:21:57 [INFO] job kind=deskfix",
                      "2026-10-29 16:22:08 [INFO] job 20261029T082117-c8b5 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True",
                      "2026-10-29 16:22:10 [INFO] job kind=ping",
-                     "2026-10-29 16:22:10 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082113-2617 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                     "2026-10-29 16:22:10 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082113-2617 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-29 16:22:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -107,24 +107,13 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/0fuye#peer-test",
-                      "status":  "ran",
-                      "ran":  1,
-                      "note":  ""
+                      "status":  "idle",
+                      "ran":  0,
+                      "note":  "1 request(s) seen, all already answered"
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261029T082117-c8b5",
-                          "kind":  "deskfix",
-                          "status":  "ok",
-                          "summary":  "panel up | boot task trigger 1 | launched True"
-                      },
-                      {
-                          "id":  "20261029T082113-2617",
-                          "kind":  "ping",
-                          "status":  "ok",
-                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
-                      }
+
                   ],
     "recent":  [
                    {
