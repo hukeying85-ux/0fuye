@@ -137,6 +137,25 @@ netsh advfirewall firewall add rule name="CGMD bridge" dir=in action=allow proto
 
 ---
 
+## 3.5 已经实测通过的部分（2026-10-29 13:21，DESKTOP-IEUDGS5）
+
+| 验证项 | 结果 |
+| --- | --- |
+| 自动开信箱分支 | 台式机自己 push 出 `hub/mailbox`（`mailbox: open the queue`） |
+| 自测任务 | 台式机**自己**排 ping → 自己接单 → 0.79 s 完成 → 回执 `outbox/selftest-20261029T132102.json` |
+| 回执内容 | `gmx 2025.1`、`NVIDIA RTX A4000 596.71 16376 MiB`、48 线程、`ready: true` |
+| 局域网发现 | 回执里直接给出 `lan: [100.84.137.117, 172.20.32.1, 192.168.110.226, 172.17.240.1]`、`bridge_port: 8765` |
+| 值守对外可见 | `results/status/hub_mailbox.json` 的 `state` 会在 `ran` / `no-branch` / `created` / `repaired` / `error` 之间如实变化 |
+
+路上踩掉的两个坑（代码已修，留档备查）：
+
+1. `git mktree` 经 PowerShell 管道收到的行尾带 CR，生成了名为 `README.md\r` 的文件；Windows 无法检出
+   （`invalid path 'README.md?'`），worktree 建不起来。现在 mktree 从文件喂 LF，且分支不可用但为空时
+   会自动重建（绝不强推有真实任务的分支）。
+2. 回执文件带 `generated_at`，最初每 60 s 就产生一个提交。现在只在「状态/队列长度/最近回执」真正变化时发布。
+
+---
+
 ## 4. 两条链路怎么选
 
 ```
