@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:51:55+08:00",
+    "generated_at":  "2026-10-29T14:54:01+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T065021-c6ea.json"
+                  "20261029T065241-deb3.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -19,12 +19,10 @@
                      "20261029T064433-5331":  1,
                      "20261029T064657-a850":  1,
                      "20261029T064849-5f39":  1,
-                     "20261029T065021-c6ea":  1
+                     "20261029T065021-c6ea":  1,
+                     "20261029T065241-deb3":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:18:56 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-29 14:18:56 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
-                     "2026-10-29 14:19:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:19:56 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:20:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:20:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
@@ -81,20 +79,30 @@
                      "2026-10-29 14:49:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:50:57 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:50:57 [INFO] job kind=sync",
-                     "2026-10-29 14:51:51 [INFO] job 20261029T065021-c6ea (sync) -\u003e fail: sync exit 6"
+                     "2026-10-29 14:51:51 [INFO] job 20261029T065021-c6ea (sync) -\u003e fail: sync exit 6",
+                     "2026-10-29 14:52:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 14:52:56 [INFO] job kind=sync",
+                     "2026-10-29 14:53:57 [INFO] job 20261029T065241-deb3 (sync) -\u003e ok: sync exit 6 | panel restarted"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
                       {
-                          "id":  "20261029T065021-c6ea",
+                          "id":  "20261029T065241-deb3",
                           "kind":  "sync",
-                          "status":  "fail",
-                          "summary":  "sync exit 6"
+                          "status":  "ok",
+                          "summary":  "sync exit 6 | panel restarted"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T065241-deb3",
+                       "kind":  "sync",
+                       "status":  "ok",
+                       "summary":  "sync exit 6 | panel restarted",
+                       "finished_at":  "2026-10-29T14:53:57+08:00"
+                   },
                    {
                        "id":  "20261029T065021-c6ea",
                        "kind":  "sync",
