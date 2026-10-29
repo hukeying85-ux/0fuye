@@ -452,3 +452,13 @@ def test_native_runner_records_the_force_field_probe():
     assert "share\\top" in source
     assert "report['environment']" in source
     assert "output_tail" in source           # full failure text, not just 6 lines
+
+
+def test_native_runner_never_passes_an_empty_working_directory():
+    """PS 5.1 rejects -WorkingDirectory '' and the failure is silent.
+
+    It cost the GROMACS version and GPU inventory on the first successful run,
+    so the guard has to stay.
+    """
+    source = open(os.path.join(HUB, "Run-Gmx-Native.ps1"), encoding="ascii").read()
+    assert "if (-not $WorkDirectory) { $WorkDirectory = (Get-Location).Path }" in source

@@ -74,6 +74,7 @@ $ProgressPreference = 'SilentlyContinue'
 $script:HubRoot = Split-Path -Parent $PSScriptRoot
 $script:StartedAt = Get-Date
 $script:StartedAtUtc = [DateTime]::UtcNow
+$script:ProbeDir = [System.IO.Path]::GetTempPath()
 
 function Say {
     param([string]$Message, [string]$Colour = 'Gray')
@@ -178,6 +179,10 @@ function Invoke-Program {
             ('echo CGMD_EXIT_CODE=%ERRORLEVEL% >> "' + $outFile + '"') + [Environment]::NewLine
     [System.IO.File]::WriteAllText($cmdFile, $line, [System.Text.Encoding]::ASCII)
     $started = Get-Date
+    # Start-Process rejects an empty -WorkingDirectory ("parameter is null or
+    # empty"), which silently broke gmx --version and nvidia-smi.  Only pass the
+    # switch when there is a directory to pass, otherwise inherit the cwd.
+    if (-not $WorkDirectory) { $WorkDirectory = (Get-Location).Path }
     try {
         $proc = Start-Process -FilePath $env:ComSpec -ArgumentList ('/d /c "{0}"' -f $cmdFile) `
             -NoNewWindow -PassThru -WorkingDirectory $WorkDirectory
@@ -342,7 +347,7 @@ foreach ($tool in @('nvidia-smi', 'git')) {
 }
 $smi = $software['tools']['nvidia-smi']
 if ($smi) {
-    $gpuInfo = Invoke-Program -Exe $smi -Arguments @('--query-gpu=name,driver_version,memory.total', '--format=csv,noheader') -Timeout 60
+    $gpuInfo = Invoke-Program -Exe $smi -Arguments @('--query-gpu=name,driver_version,memory.total', '--format=csv,noheader') -WorkDirectory $script:ProbeDir -Timeout 60
     $devices = @()
     foreach ($line in ($gpuInfo.Out -split "`r?`n")) {
         if (-not $line.Trim()) { continue }
@@ -358,7 +363,7 @@ if (-not $gmx) {
     $report['stage_error'] = 'gmx.exe not found: pass -Gmx "C:\Program Files\GROMACS xxxx\bin\gmx.exe" or add the GROMACS bin folder to PATH'
     [void]$notes.Add('typical install: conda install -c conda-forge gromacs, or the official Windows installer')
 } else {
-    $versionRun = Invoke-Program -Exe $gmx -Arguments @('--version') -Timeout 60
+    $versionRun = Invoke-Program -Exe $gmx -Arguments @('--version') -WorkDirectory $script:ProbeDir -Timeout 60
     $versionText = ($versionRun.Out + "`n" + $versionRun.Err)
     $gromacs = [ordered]@{
         version      = $null
@@ -397,6 +402,12 @@ if (-not $gmx) {
         $gromacs['cuda'] = ($gromacs['gpu_support'] -match 'CUDA|SYCL|OpenCL')
     }
     $gromacs['available'] = [bool]$gromacs['version']
+    $gromacs['version_returncode'] = $versionRun.Code
+    $banner = @(($versionRun.Out -split "`r?`n") | Where-Object { $_.Trim() } | Select-Object -First 1)
+    $gromacs['banner'] = $banner -join ' '
+    if (-not $gromacs['version']) {
+        [void]$notes.Add('gmx --version printed nothing usable; see software.gromacs.banner and .raw')
+    }
     $software['gromacs'] = $gromacs
 }
 
@@ -421,8 +432,16 @@ if (-not $dataPrefix) {
 }
 $shareTop = ''
 $candidates = @()
-if ($dataPrefix) { $candidates += (Join-Path $dataPrefix 'share\top') }
-if ($dataPrefix) { $candidates += (Join-Path $dataPrefix 'top') }
+if ($dataPrefix) {
+    $candidates += (Join-Path $dataPrefix 'share\top')
+    $candidates += (Join-Path $dataPrefix 'share\gromacs\top')
+    $candidates += (Join-Path $dataPrefix 'top')
+    $parentOfPrefix = Split-Path -Parent $dataPrefix
+    if ($parentOfPrefix -and $parentOfPrefix -ne $dataPrefix) {
+        $candidates += (Join-Path $parentOfPrefix 'share\top')
+        $candidates += (Join-Path $parentOfPrefix 'share\gromacs\top')
+    }
+}
 foreach ($candidate in $candidates) {
     if ($shareTop) { continue }
     if (Test-Path -LiteralPath $candidate) { $shareTop = $candidate }
