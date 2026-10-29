@@ -388,12 +388,14 @@ try {
             $smokeParts = @()
             $smokeParts += ('cd ' + (Quote-Bash $wslRepoSmoke))
             $smokeParts += ('export PYTHONPATH=' + (Quote-Bash ($wslRepoSmoke + ':' + $wslRepoSmoke + '/code/cgmd')) + ' PYTHONIOENCODING=utf-8')
-            $smokeParts += ('python3 -m cgmd.smoke --ps 100 --gpu-id ' + $gpuId +
+            # `timeout` and stdin from /dev/null: a wedged child must never keep
+            # the poll lock for an hour again.
+            $smokeParts += ('timeout 1200 python3 -m cgmd.smoke --ps 100 --gpu-id ' + $gpuId +
                             ' --workdir ' + (Quote-Bash $smokeWork) +
-                            ' --out results/status/gmx_smoke.json --timeout 3600')
+                            ' --out results/status/gmx_smoke.json --timeout 900 < /dev/null')
             $smokeCommand = 'wsl.exe -d ' + $script:Distro + ' -- bash -c "' + ($smokeParts -join ' && ') + '"'
             $smokeLog = Join-Path $script:StateDir 'smoke-call.log'
-            $smokeCode = Invoke-Captured -CommandLine $smokeCommand -OutFile $smokeLog -TimeoutSeconds 3700
+            $smokeCode = Invoke-Captured -CommandLine $smokeCommand -OutFile $smokeLog -TimeoutSeconds 1260
             Write-HubLog ("smoke finished with exit code {0}" -f $smokeCode)
             if (Test-Path -LiteralPath $smokeLog) {
                 $smokeTail = ([System.IO.File]::ReadAllLines($smokeLog, [System.Text.Encoding]::UTF8) | Select-Object -Last 30) -join [Environment]::NewLine
