@@ -159,6 +159,12 @@ python3 -m cgmd.cli run --task results/status/cgmd_task.json \
     --workdir ~/cgmd-runs/<task_id> --output results/cgmd/<task_id>
 ```
 
+> 📄 **逐步详解**（12 个阶段 · 参数逐条解释 · 报错排查表 · QC 清单 · 参考文献）：
+> 仓库内 [`docs/cgmd_pipeline_steps_zh.md`](docs/cgmd_pipeline_steps_zh.md)；同一份已导出为 Google 文档
+> <https://docs.google.com/document/d/130wwAf1ZM4B8ifwf9dujOUJqskNHCn4vC7SM1Hl4aWE/edit>
+> （归档位置：Google Drive `02_科研与学术论文 / 20261029_CGMD_Martini3粗粒化MD_详细步骤`）。
+> 需要重新导出 docx/PDF：`python3 docs/md2docx.py docs/cgmd_pipeline_steps_zh.md out.docx "标题"`。
+
 流水线要点：
 
 1. **结构**：`--structure-pdb`（AlphaFold/实验结构）> `--predictor "colabfold_batch {fasta} {outdir}"` > 内置 NeRF 建模器（理想伸展链/理想螺旋，重原子 173 个，两两无碰撞）；
