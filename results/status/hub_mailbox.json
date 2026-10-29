@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T16:22:58+08:00",
+    "generated_at":  "2026-10-29T16:25:09+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261029T082308-4946.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -34,12 +34,10 @@
                      "20261029T073120-60bd":  1,
                      "20261029T075318-79cd":  1,
                      "20261029T081935-f37c":  1,
-                     "20261029T082117-c8b5":  1
+                     "20261029T082117-c8b5":  1,
+                     "20261029T082308-4946":  1
                  },
     "log_tail":  [
-                     "2026-10-29 15:31:58 [INFO] job kind=smoke",
-                     "2026-10-29 15:32:29 [INFO] job 20261029T073120-60bd (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
-                     "2026-10-29 15:32:58 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:33:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:34:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:35:56 [INFO] mailbox: 0 queued, running at most 1",
@@ -96,7 +94,10 @@
                      "2026-10-29 16:22:08 [INFO] job 20261029T082117-c8b5 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True",
                      "2026-10-29 16:22:10 [INFO] job kind=ping",
                      "2026-10-29 16:22:10 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082113-2617 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
-                     "2026-10-29 16:22:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-29 16:22:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-29 16:23:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 16:23:56 [INFO] job kind=sync",
+                     "2026-10-29 16:25:01 [INFO] job 20261029T082308-4946 (sync) -\u003e ok: sync exit 6 | panel restarted"
                  ],
     "call_tail":  [
 
@@ -113,9 +114,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261029T082308-4946",
+                          "kind":  "sync",
+                          "status":  "ok",
+                          "summary":  "sync exit 6 | panel restarted"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T082308-4946",
+                       "kind":  "sync",
+                       "status":  "ok",
+                       "summary":  "sync exit 6 | panel restarted",
+                       "finished_at":  "2026-10-29T16:25:01+08:00"
+                   },
                    {
                        "id":  "20261029T082117-c8b5",
                        "kind":  "deskfix",
@@ -248,13 +261,6 @@
                        "status":  "fail",
                        "summary":  "sync exit 7",
                        "finished_at":  "2026-10-29T14:47:53+08:00"
-                   },
-                   {
-                       "id":  "20261029T064433-5331",
-                       "kind":  "sync",
-                       "status":  "fail",
-                       "summary":  "sync exit 7",
-                       "finished_at":  "2026-10-29T14:45:53+08:00"
                    }
                ]
 }
