@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T15:02:03+08:00",
+    "generated_at":  "2026-10-29T15:03:13+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T070048-e9db.json"
+                  "20261029T070210-d9c0.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -24,12 +24,10 @@
                      "20261029T065614-93ef":  1,
                      "20261029T065816-bd45":  1,
                      "20261029T065938-0f13":  1,
-                     "20261029T070048-e9db":  1
+                     "20261029T070048-e9db":  1,
+                     "20261029T070210-d9c0":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:27:54 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-29 14:27:54 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
-                     "2026-10-29 14:28:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:28:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:29:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:29:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
@@ -86,20 +84,30 @@
                      "2026-10-29 15:00:01 [INFO] job 20261029T065938-0f13 (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
                      "2026-10-29 15:00:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 15:00:56 [INFO] job kind=sync",
-                     "2026-10-29 15:01:58 [INFO] job 20261029T070048-e9db (sync) -\u003e ok: sync exit 6 | panel restarted"
+                     "2026-10-29 15:01:58 [INFO] job 20261029T070048-e9db (sync) -\u003e ok: sync exit 6 | panel restarted",
+                     "2026-10-29 15:02:58 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 15:02:59 [INFO] job kind=deskfix",
+                     "2026-10-29 15:03:09 [INFO] job 20261029T070210-d9c0 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
                       {
-                          "id":  "20261029T070048-e9db",
-                          "kind":  "sync",
+                          "id":  "20261029T070210-d9c0",
+                          "kind":  "deskfix",
                           "status":  "ok",
-                          "summary":  "sync exit 6 | panel restarted"
+                          "summary":  "panel up | boot task trigger 1 | launched True"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T070210-d9c0",
+                       "kind":  "deskfix",
+                       "status":  "ok",
+                       "summary":  "panel up | boot task trigger 1 | launched True",
+                       "finished_at":  "2026-10-29T15:03:09+08:00"
+                   },
                    {
                        "id":  "20261029T070048-e9db",
                        "kind":  "sync",
