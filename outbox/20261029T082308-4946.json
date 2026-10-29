@@ -1,0 +1,20 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261029T082308-4946",
+    "kind":  "sync",
+    "status":  "ok",
+    "summary":  "sync exit 6 | panel restarted",
+    "detail":  {
+                   "exit_code":  6,
+                   "panel_restarted":  true
+               },
+    "logs_tail":  [
+                      "CGMD_EXIT_CODE=6 "
+                  ],
+    "note":  "deploy the peer gate",
+    "requested_by":  "user",
+    "started_at":  "2026-10-29T16:23:56+08:00",
+    "finished_at":  "2026-10-29T16:25:01+08:00",
+    "seconds":  64.47,
+    "worker":  "DESKTOP-IEUDGS5"
+}
