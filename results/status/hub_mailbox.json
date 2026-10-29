@@ -1,9 +1,12 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T13:15:56+08:00",
+    "generated_at":  "2026-10-29T13:16:56+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "no-branch",
+    "branch_created":  false,
+    "init_note":  "worktree add failed: git.exe : Preparing worktree (resetting branch \u0027hub-mailbox\u0027; was at bdd77f2)\r\n所在位置 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Invoke-CgmdMailbox.ps1:130 字符: 19\r\n+         $output = \u0026 git -C $Directory @GitArgs 2\u003e\u00261 | Out-String\r\n+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (Preparing workt...was at bdd77f2):String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\nbranch \u0027hub-mailbox\u0027 set up to track \u0027origin/hub/mailbox\u0027.\r\nerror: invalid path \u0027README.md?\u0027\r\nfatal: Could not reset index file to revision \u0027HEAD\u0027.",
+    "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
     "queued":  0,
     "processed":  [
 
