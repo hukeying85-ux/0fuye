@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T16:26:34+08:00",
+    "generated_at":  "2026-10-29T16:27:14+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261029T082641-df13.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -35,12 +35,10 @@
                      "20261029T075318-79cd":  1,
                      "20261029T081935-f37c":  1,
                      "20261029T082117-c8b5":  1,
-                     "20261029T082308-4946":  1
+                     "20261029T082308-4946":  1,
+                     "20261029T082641-df13":  1
                  },
     "log_tail":  [
-                     "2026-10-29 15:36:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 15:37:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 15:38:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:39:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:40:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:41:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -97,31 +95,41 @@
                      "2026-10-29 16:25:01 [INFO] job 20261029T082308-4946 (sync) -\u003e ok: sync exit 6 | panel restarted",
                      "2026-10-29 16:25:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 16:25:58 [INFO] job kind=smoke",
-                     "2026-10-29 16:26:29 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082516-de56 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
+                     "2026-10-29 16:26:29 [INFO] peer hukeying85-ux/0fuye#peer-test job 20261029T082516-de56 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
+                     "2026-10-29 16:26:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 16:26:56 [INFO] job kind=deskfix",
+                     "2026-10-29 16:27:08 [INFO] job 20261029T082641-df13 (deskfix) -\u003e ok: panel up | boot task trigger 1 | launched True"
                  ],
     "call_tail":  [
 
                   ],
     "peer_repos":  [
-                       "hukeying85-ux/0fuye#peer-test"
+                       "hukeying85-ux/JevHarness"
                    ],
     "peers":  [
                   {
-                      "peer":  "hukeying85-ux/0fuye#peer-test",
-                      "status":  "ran",
-                      "ran":  1,
-                      "note":  ""
+                      "peer":  "hukeying85-ux/JevHarness",
+                      "status":  "waiting",
+                      "ran":  0,
+                      "note":  "no mailbox branch yet (appears on the first send)"
                   }
               ],
     "processed":  [
                       {
-                          "id":  "20261029T082516-de56",
-                          "kind":  "smoke",
+                          "id":  "20261029T082641-df13",
+                          "kind":  "deskfix",
                           "status":  "ok",
-                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
+                          "summary":  "panel up | boot task trigger 1 | launched True"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T082641-df13",
+                       "kind":  "deskfix",
+                       "status":  "ok",
+                       "summary":  "panel up | boot task trigger 1 | launched True",
+                       "finished_at":  "2026-10-29T16:27:08+08:00"
+                   },
                    {
                        "id":  "20261029T082516-de56",
                        "kind":  "smoke",
@@ -254,13 +262,6 @@
                        "status":  "fail",
                        "summary":  "sync exit 6",
                        "finished_at":  "2026-10-29T14:51:51+08:00"
-                   },
-                   {
-                       "id":  "20261029T064849-5f39",
-                       "kind":  "selfcheck",
-                       "status":  "fail",
-                       "summary":  "selfcheck: 0 pass / 0 warn / 0 fail",
-                       "finished_at":  "2026-10-29T14:49:24+08:00"
                    }
                ]
 }
