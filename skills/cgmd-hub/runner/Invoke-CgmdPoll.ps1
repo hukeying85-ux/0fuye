@@ -12,7 +12,9 @@
        code/federation/desktop_runner.py inside WSL2, which claims the task,
        runs the Martini 3 pipeline on the GPU and writes the reduced result;
     5. commits only results/status + results/cgmd and pushes back to the same
-       branch, then records a heartbeat in state/hub-state.json.
+       branch, then records a heartbeat in state/hub-state.json (and, at most
+       once per -HeartbeatMinutes, a tiny results/status/hub_heartbeat.json in
+       git so that other clients can see the watcher is alive).
 
     Absolutely nothing is written to the screen: this script is started by
     wscript.exe (see CgmdPoll.vbs), which has no console at all.
@@ -29,6 +31,10 @@
 .PARAMETER MaxRunMinutes
     Hard wall clock limit for the simulation; 0 means no limit.
 
+.PARAMETER HeartbeatMinutes
+    Minimum minutes between two git heart-beats; 0 writes one every cycle,
+    -1 disables the git heart-beat (the local state/hub-state.json is kept).
+
 .EXAMPLE
     powershell -NoProfile -File Invoke-CgmdPoll.ps1 -Force
 #>
@@ -38,6 +44,7 @@ param(
     [switch]$Force,
     [switch]$NoPublish,
     [int]$MaxRunMinutes = 0,
+    [int]$HeartbeatMinutes = 60,
     [switch]$LogVerbose
 )
 
@@ -208,6 +215,48 @@ function Publish-Results {
     return $false
 }
 
+function Publish-Heartbeat {
+    param([string]$Repo, [string]$Branch, [string]$State = 'idle', [string]$TaskId = '', [int]$Minutes = 60)
+    # A tiny file in git so that "the workstation watcher is alive" can be
+    # checked from any other client (phone, laptop, Arena agent) without SSH.
+    if ($NoPublish -or $Minutes -lt 0) { return }
+    $rel = 'results/status/hub_heartbeat.json'
+    $path = Join-Path (Join-Path (Join-Path $Repo 'results') 'status') 'hub_heartbeat.json'
+    $previous = Read-JsonFile -Path $path
+    if ($Minutes -gt 0 -and $null -ne $previous) {
+        $last = [string](Get-Property $previous 'at' '')
+        if ($last) {
+            try {
+                $parsed = [datetimeoffset]::Parse($last)
+                $age = ([datetimeoffset]::Now - $parsed).TotalMinutes
+                if ($age -lt $Minutes) { return }
+            } catch {
+                $null = $_
+            }
+        }
+    }
+    $head = (Invoke-Git -Repo $Repo -GitArgs @('rev-parse', '--short', 'HEAD')).Output
+    $document = [ordered]@{
+        schema     = 'cgmd.heartbeat.v1'
+        at         = Get-BeijingStamp
+        host       = $env:COMPUTERNAME
+        branch     = $Branch
+        head       = $head
+        state      = $State
+        task_id    = $TaskId
+        interval_s = Get-Property $script:Config 'poll_seconds' 60
+        poll_count = 1 + [int](Get-Property $previous 'poll_count' 0)
+        launcher   = 'wscript -> CGMDHub.exe (winexe) -> powershell hidden'
+    }
+    try {
+        Write-JsonFile -Path $path -Data $document
+    } catch {
+        Write-HubLog ('heart-beat write failed: ' + $_.Exception.Message) 'WARN'
+        return
+    }
+    $null = Publish-Results -Repo $Repo -Branch $Branch -Message ('heartbeat: {0} alive, state {1} [desktop hub]' -f $env:COMPUTERNAME, $State)
+}
+
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
@@ -221,6 +270,7 @@ try {
     }
 
     $cfg = Get-HubConfig -Path $ConfigPath
+    $script:Config = $cfg
     $repo = Get-Property $cfg 'repo_path'
     $branch = Get-Property $cfg 'branch' 'main'
     $script:Distro = Get-Property $cfg 'wsl_distro' 'Ubuntu'
@@ -324,6 +374,7 @@ try {
                 $null = Publish-Results -Repo $repo -Branch $branch -Message 'selfcheck: desktop report [desktop hub]'
             }
             Write-HubLog 'self-check cycle complete'
+            Publish-Heartbeat -Repo $repo -Branch $branch -State 'request-done' -TaskId 'selfcheck' -Minutes $HeartbeatMinutes
             exit 0
         }
     }
@@ -341,6 +392,7 @@ try {
 
     if ($taskStatus -ne 'pending' -and -not $Force) {
         Write-HubLog 'task is not pending, idling'
+        Publish-Heartbeat -Repo $repo -Branch $branch -State 'idle' -TaskId $taskId -Minutes $HeartbeatMinutes
         exit 0
     }
 
@@ -420,6 +472,7 @@ try {
         poll_count         = 1 + [int](Get-Property $previous 'poll_count' 0)
     }
     Write-JsonFile -Path $script:StatePath -Data $heartbeat
+    Publish-Heartbeat -Repo $repo -Branch $branch -State 'task-done' -TaskId $taskId -Minutes $HeartbeatMinutes
     Write-HubLog 'poll finished'
     if ($null -ne $runnerJson) {
         $status = Get-Property $runnerJson 'status' 'unknown'

@@ -228,3 +228,72 @@ def test_desk_flag_must_be_boolean():
     request = selfcheck.new_request()
     request["desk"] = "yes"
     assert any("desk must be a boolean" in problem for problem in selfcheck.validate_request(request))
+
+
+# ---------------------------------------------------------------------------
+# heart-beat: proof that the watcher on the workstation is alive
+# ---------------------------------------------------------------------------
+def _beat(minutes_ago=3):
+    from datetime import datetime, timedelta, timezone
+    stamp = (datetime.now(timezone.utc) - timedelta(minutes=minutes_ago)).astimezone(
+        timezone(timedelta(hours=8))
+    ).replace(microsecond=0).isoformat()
+    return {
+        "schema": "cgmd.heartbeat.v1",
+        "at": stamp,
+        "host": "DESKTOP-CGMD",
+        "branch": "arena/32cd826e-0fuye",
+        "head": "8b49c36",
+        "state": "idle",
+        "task_id": "",
+        "interval_s": 60,
+        "poll_count": 42,
+    }
+
+
+def test_heartbeat_document_is_valid():
+    document = _beat()
+    assert selfcheck.validate_heartbeat(document) == []
+    assert 2.5 < selfcheck.heartbeat_age_minutes(document) < 4.5
+
+
+def test_heartbeat_rejects_wrong_schema():
+    document = _beat()
+    document["schema"] = "nope"
+    assert any("schema" in problem for problem in selfcheck.validate_heartbeat(document))
+
+
+def test_heartbeat_requires_host_and_branch():
+    document = _beat()
+    del document["host"]
+    document["branch"] = ""
+    problems = selfcheck.validate_heartbeat(document)
+    assert any("host" in problem for problem in problems)
+    assert any("branch" in problem for problem in problems)
+
+
+def test_cli_heartbeat_reports_missing_beats(capsys):
+    assert selfcheck.main(["heartbeat", "--path", "/nonexistent/beat.json"]) == 1
+    assert "NO HEART-BEAT" in capsys.readouterr().out
+
+
+def test_cli_heartbeat_reports_fresh_beat(tmp_path, capsys):
+    path = tmp_path / "hub_heartbeat.json"
+    path.write_text(json.dumps(_beat(minutes_ago=1)), encoding="utf-8")
+    assert selfcheck.main(["heartbeat", "--path", str(path)]) == 0
+    assert "ALIVE" in capsys.readouterr().out
+
+
+def test_cli_heartbeat_reports_a_stale_beat(tmp_path, capsys):
+    path = tmp_path / "hub_heartbeat.json"
+    path.write_text(json.dumps(_beat(minutes_ago=600)), encoding="utf-8")
+    assert selfcheck.main(["heartbeat", "--path", str(path)]) == 1
+    assert "STALE" in capsys.readouterr().out
+
+
+def test_poller_publishes_the_heartbeat():
+    source = open(os.path.join(HUB, "runner", "Invoke-CgmdPoll.ps1"), encoding="ascii").read()
+    assert "hub_heartbeat.json" in source
+    assert "cgmd.heartbeat.v1" in source
+    assert "Publish-Heartbeat" in source
+    assert "HeartbeatMinutes" in source

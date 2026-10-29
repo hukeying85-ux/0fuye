@@ -24,6 +24,7 @@
 | `runner/Sync-Desktop.ps1` | **一键同步**：origin 校验 → `fetch` → `reset --hard origin/<branch>`（脏工作区默认拒绝）→ 可选 `-Desk` 重新部署 `code/panel` → 跑 17 项自检 → 提交并推送 `desktop_sync.json` + `desktop_selfcheck.json` |
 | `config/cgmd_hub.json` | 配置模板（真实配置 `cgmd_hub.local.json` 已 gitignore） |
 | `state/`、`logs/` | 运行期状态与日志（已 gitignore） |
+| `results/status/hub_heartbeat.json` | **值守心跳**（`cgmd.heartbeat.v1`）：轮询器最多每小时推送一次，任何客户端用 `python3 -m core.selfcheck heartbeat` 就能判断「台式机值守是否活着」 |
 
 ---
 
@@ -92,6 +93,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hu
 
 退出码：`0` 全绿 / `6` 有告警 / `7` 自检失败 / `9` desk 部署失败 / `8` git 冲突（先提交或加 `-Force`）/ `5` origin 不符 / `4` 配置缺失。
 记录落在 `results/status/desktop_sync.json`（schema `cgmd.desksync.v1`：`from_sha`→`to_sha`、desk 版本、自检结论）。
+
+## 值守是否活着？（心跳）
+
+轮询器每次跑到末段都会更新本地 `state/hub-state.json`；**最多每 60 分钟**还会推一个 300 字节的
+`results/status/hub_heartbeat.json` 到分支，于是“台式机值守有没有在跑”可以从任何地方验证，不需要 SSH：
+
+```bash
+python3 -m core.selfcheck heartbeat
+# ALIVE: 2026-10-29T10:31:00+08:00 | host DESKTOP-CGMD | branch arena/32cd826e-0fuye | head 8b49c36 | state idle | 3 min ago (limit 120)
+```
+
+* 判据：`age <= max(2 × poll_seconds, 5 分钟)` 算 ALIVE，否则 STALE（退出码 1）；文件不存在 = 台式机从未跑过轮询；
+* 频率调节：`Invoke-CgmdPoll.ps1 -HeartbeatMinutes 0` 每轮都写，`-1` 关闭 git 心跳（本地心跳保留）。
 
 ## 自检（这个台式机现在到底能不能接单？）
 

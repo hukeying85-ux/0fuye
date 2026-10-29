@@ -11,6 +11,7 @@ CLI
     python3 -m core.selfcheck check  results/status/desktop_selfcheck.json
     python3 -m core.selfcheck request --note "why" [--desk] --write
     python3 -m core.selfcheck status --write
+    python3 -m core.selfcheck heartbeat
 """
 
 from __future__ import annotations
@@ -27,6 +28,10 @@ __all__ = [
     "CHECK_IDS",
     "STATUSES",
     "REPORT_PATH",
+    "HEARTBEAT_SCHEMA",
+    "HEARTBEAT_PATH",
+    "heartbeat_age_minutes",
+    "validate_heartbeat",
     "REQUEST_PATH",
     "CheckError",
     "beijing_iso",
@@ -44,6 +49,8 @@ REPORT_SCHEMA = "cgmd.selfcheck.v1"
 REQUEST_SCHEMA = "cgmd.selfcheck.request.v1"
 
 REPORT_PATH = "results/status/desktop_selfcheck.json"
+HEARTBEAT_SCHEMA = "cgmd.heartbeat.v1"
+HEARTBEAT_PATH = "results/status/hub_heartbeat.json"
 REQUEST_PATH = "results/status/selfcheck_request.json"
 
 CHECK_IDS = (
@@ -123,6 +130,35 @@ def validate_request(request: dict) -> list:
         problems.append("requested_by is required")
     if "desk" in request and not isinstance(request["desk"], bool):
         problems.append("desk must be a boolean when present")
+    return problems
+
+
+# ---------------------------------------------------------------------------
+# heart-beat document (written by the poller, at most once per hour)
+# ---------------------------------------------------------------------------
+def heartbeat_age_minutes(document: dict) -> float:
+    """Minutes since the workstation last polled; negative-ish on clock skew."""
+    stamp = document.get("at")
+    if not isinstance(stamp, str):
+        raise CheckError("heart-beat has no 'at' timestamp")
+    moment = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=BEIJING)
+    return (datetime.now(timezone.utc) - moment.astimezone(timezone.utc)).total_seconds() / 60.0
+
+
+def validate_heartbeat(document: dict) -> list:
+    problems = []
+    if not isinstance(document, dict):
+        return ["heart-beat must be a JSON object"]
+    if document.get("schema") != HEARTBEAT_SCHEMA:
+        problems.append("schema must be {}".format(HEARTBEAT_SCHEMA))
+    for key in ("at", "host", "branch"):
+        if not isinstance(document.get(key), str) or not document.get(key):
+            problems.append(key + " is required")
+    interval = document.get("interval_s")
+    if interval is not None and not isinstance(interval, int):
+        problems.append("interval_s must be an integer")
     return problems
 
 
@@ -305,6 +341,31 @@ def _cmd_request(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_heartbeat(args: argparse.Namespace) -> int:
+    """Prove the workstation watcher is alive, or say how stale it is."""
+    path = args.path or HEARTBEAT_PATH
+    if not os.path.exists(path):
+        print("NO HEART-BEAT yet - the workstation poller has never published one")
+        print("  on the desktop: powershell -NoProfile -ExecutionPolicy Bypass -File "
+              "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Invoke-CgmdPoll.ps1 -Force")
+        return 1
+    document = load(path)
+    problems = validate_heartbeat(document)
+    if problems:
+        print("INVALID " + "; ".join(problems))
+        return 2
+    age = heartbeat_age_minutes(document)
+    interval = int(document.get("interval_s") or 60)
+    limit = args.max_age if args.max_age else max(interval * 2, 5)
+    state = "ALIVE" if age <= limit else "STALE"
+    print("{}: {} | host {} | branch {} | head {} | state {} | {:.0f} min ago (limit {:.0f})".format(
+        state, document.get("at"), document.get("host"), document.get("branch"),
+        document.get("head", "?"), document.get("state", "?"), age, limit))
+    if document.get("task_id"):
+        print("  last task: {}".format(document.get("task_id")))
+    return 0 if state == "ALIVE" else 1
+
+
 def _cmd_status(args: argparse.Namespace) -> int:
     """One-line answer to the question: can the desktop take a task right now?"""
     report_path = args.path or REPORT_PATH
@@ -351,6 +412,12 @@ def main(argv=None) -> int:
     p_request.add_argument("--write", action="store_true")
     p_request.add_argument("--desk", action="store_true", help="also redeploy Arena Desk")
     p_request.set_defaults(func=_cmd_request)
+
+    p_beat = sub.add_parser("heartbeat", help="is the workstation watcher alive?")
+    p_beat.add_argument("--path", default="")
+    p_beat.add_argument("--max-age", dest="max_age", type=float, default=0.0,
+                        help="minutes before the beat counts as stale")
+    p_beat.set_defaults(func=_cmd_heartbeat)
 
     p_status = sub.add_parser("status", help="is the desktop ready for a task?")
     p_status.add_argument("--path", default="")

@@ -119,6 +119,9 @@ python3 -m core.selfcheck request --note "换网卡后复测" --write
 python3 -m core.selfcheck request --desk --note "顺带部署 desk" --write   # 连 desk 一起
 git add results/status/selfcheck_request.json && git commit -m "queue selfcheck" && git push
 
+# 值守活着没？轮询器最多每小时推一次 300 B 心跳到 results/status/hub_heartbeat.json
+python3 -m core.selfcheck heartbeat
+
 # 稍后读回结论（桌面上报后这个命令会给出 PASS/WARN/FAIL 与逐项明细）
 python3 -m core.selfcheck status
 python3 -m core.selfcheck show results/status/desktop_selfcheck.json
