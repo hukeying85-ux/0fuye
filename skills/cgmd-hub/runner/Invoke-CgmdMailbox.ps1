@@ -738,6 +738,16 @@ function Invoke-JobDeskdiag {
     # boot animation plumbing: the scheduled tasks and the preference file
     $tasks = @(Get-DesktopTasks)
 
+    # A locked or disconnected console explains a hidden browser window, and a
+    # hidden window is why an animation can look like "nothing happened".
+    $session = [ordered]@{ user = $env:USERNAME; session_id = 0; locked = $false; logonui = $false }
+    try { $session['session_id'] = (Get-Process -Id $PID).SessionId } catch { }
+    try {
+        $logon = @(Get-Process -Name 'LogonUI' -ErrorAction SilentlyContinue)
+        $session['logonui'] = ($logon.Count -gt 0)
+        $session['locked'] = ($logon.Count -gt 0)
+    } catch { }
+
     $appearance = $null
     $bootAck = $null
     if ($deskRoot) {
@@ -768,6 +778,7 @@ function Invoke-JobDeskdiag {
             tasks        = $tasks
             appearance   = $appearance
             boot_ack     = $bootAck
+            session      = $session
         }
     }
 }

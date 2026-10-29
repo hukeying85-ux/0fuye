@@ -433,17 +433,29 @@
       }
     };
 
+    const appearanceNow = (STATE && STATE.appearance) || {};
+    if (appearanceNow.boot_video_available === false) {
+      // Nothing to preload: paint the mascot layer now so the first visible
+      // frame is the animation, not a black rectangle.
+      showBootFallback("boot_asset_absent_hidden");
+    }
+
     if (document.visibilityState === "visible") {
       startPlaybackWhenVisible();
     } else {
       if (stageEl) stageEl.textContent = "画面已就绪 · 窗口激活即自动播放 dsh-video-skin 开机动画…";
       document.addEventListener("visibilitychange", onVisChange);
-      // If window stays occluded during automated background health check, still never leave overlay stuck
+      // The window can be hidden at the moment the overlay arms (logon race, a
+      // background launch, a locked console).  Waiting used to give up after
+      // 9.2 s, which is why a remote/manual launch looked like "no animation":
+      // the overlay was dropped before anybody could see it.  Wait for the
+      // window to become visible instead, with a long hard safety as the only
+      // way out.
       BOOT_BG_SAFETY_TIMER = setTimeout(() => {
         if (!startedVisiblePlayback) {
           enterWorkspace(250, "dsh_video_bg_autoforward");
         }
-      }, 9200);
+      }, 90000);
     }
 
     const skipBtn = $("#boot-skip");

@@ -288,3 +288,16 @@ def test_deskfix_job_exists_and_launches_the_animation():
 def test_deskdiag_reports_the_browser_boot_ack():
     source = (RUNNER / "Invoke-CgmdMailbox.ps1").read_text(encoding="ascii")
     assert "boot_ack" in source and "boot-ack.json" in source
+
+
+def test_boot_overlay_waits_for_a_visible_window():
+    app = (PANEL / "app.js").read_text(encoding="utf-8")
+    assert "}, 90000);" in app, "the 9.2 s give-up dropped the animation before it was seen"
+    assert 'enterWorkspace(250, "dsh_video_bg_autoforward")' in app          # hard safety stays
+    assert 'showBootFallback("boot_asset_absent_hidden")' in app             # paint before visible
+
+
+def test_deskdiag_reports_whether_the_console_is_locked():
+    source = (RUNNER / "Invoke-CgmdMailbox.ps1").read_text(encoding="ascii")
+    assert "LogonUI" in source
+    assert "session      = $session" in source
