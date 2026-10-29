@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-29T11:14:16+08:00",
+    "checked_at":  "2026-10-29T11:21:14+08:00",
     "overall":  "fail",
     "exit_code":  7,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
@@ -34,7 +34,7 @@
                     "passed":  10,
                     "warnings":  0,
                     "failed":  7,
-                    "seconds":  17.1
+                    "seconds":  14.8
                 },
     "checks":  [
                    {
@@ -55,8 +55,8 @@
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ 6379b79 (ahead 0, behind 0)",
-                       "seconds":  1.82
+                       "detail":  "arena/32cd826e-0fuye @ 06869b5 (ahead 0, behind 0)",
+                       "seconds":  2.82
                    },
                    {
                        "id":  "creds",
@@ -69,7 +69,7 @@
                        "id":  "wsl",
                        "title":  "WSL2 distro",
                        "status":  "fail",
-                       "detail":  "distro Ubuntu-22.04 did not answer: bash: line 1: set: +\r: invalid option\nset: usage: set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]\nbash: line 32: syntax error near unexpected token `$\u0027do\\r\u0027\u0027\nbash: line 32: `for cand in \"$CGMD_MARTINI3_DIR\" \"$HOME/martini3\" \"$HOME/martini3/martini_v3.0.0\" \"$HOME/gmx_files/martini3\" /usr/share/gromacs/top/martini3 /usr/local/share/gromacs/top/martini3; do\r\u0027",
+                       "detail":  "distro Ubuntu-22.04 did not answer: no output",
                        "seconds":  0
                    },
                    {
@@ -146,7 +146,7 @@
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 11:13:13 | result 0",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/29/2026 11:20:20 | result 0",
                        "seconds":  0
                    },
                    {
@@ -154,7 +154,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  2.25
+                       "seconds":  2.38
                    }
                ]
 }
