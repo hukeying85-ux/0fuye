@@ -739,7 +739,13 @@ function Invoke-JobDeskdiag {
     $tasks = @(Get-DesktopTasks)
 
     $appearance = $null
-    if ($deskRoot) { $appearance = Read-JsonFile -Path (Join-Path $deskRoot 'data\appearance.json') }
+    $bootAck = $null
+    if ($deskRoot) {
+        $appearance = Read-JsonFile -Path (Join-Path $deskRoot 'data\appearance.json')
+        # the page posts here when the overlay closes; "mode" is the reason tag,
+        # which tells us whether the video, the fallback or nothing played.
+        $bootAck = Read-JsonFile -Path (Join-Path $deskRoot 'data\boot-ack.json')
+    }
 
     $status = 'ok'
     if ($drift.Count -gt 0) { $status = 'drift' }
@@ -761,6 +767,7 @@ function Invoke-JobDeskdiag {
             clips        = $clips
             tasks        = $tasks
             appearance   = $appearance
+            boot_ack     = $bootAck
         }
     }
 }
