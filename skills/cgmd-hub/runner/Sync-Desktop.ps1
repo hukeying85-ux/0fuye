@@ -34,6 +34,12 @@
 .PARAMETER Desk
     Redeploy Arena Desk from code/panel/deploy.ps1 after the sync.
 
+.PARAMETER SkipAutoHeal
+    Pass -SkipAutoHeal to deploy.ps1 (skips the SSH/self-heal pass, faster).
+
+.PARAMETER DeskBootDemo
+    Pass -LaunchBootDemo to deploy.ps1 (show the boot animation once).
+
 .PARAMETER NoSelfCheck
     Skip runner/Test-CgmdHub.ps1 (the sync record is still published).
 
@@ -61,6 +67,8 @@ param(
     [string]$RepoPath = '',
     [string]$Branch = '',
     [switch]$Desk,
+    [switch]$SkipAutoHeal,
+    [switch]$DeskBootDemo,
     [switch]$NoSelfCheck,
     [switch]$Notify,
     [switch]$Force,
@@ -259,7 +267,10 @@ if ($Desk) {
         $errFile = Join-Path $script:HubRoot 'state\desk-deploy.err'
         $stateDir = Split-Path -Parent $outFile
         if (-not (Test-Path -LiteralPath $stateDir)) { New-Item -ItemType Directory -Path $stateDir -Force | Out-Null }
-        $argLine = '-NoProfile -ExecutionPolicy Bypass -File "' + $deployScript + '" -NoOpenWindow'
+        $deployArgs = '-NoOpenWindow'
+        if ($SkipAutoHeal) { $deployArgs += ' -SkipAutoHeal' }
+        if ($DeskBootDemo) { $deployArgs += ' -LaunchBootDemo' }
+        $argLine = '-NoProfile -ExecutionPolicy Bypass -File "' + $deployScript + '" ' + $deployArgs
         try {
             $proc = Start-Process -FilePath 'powershell.exe' -ArgumentList $argLine -NoNewWindow -PassThru `
                 -RedirectStandardOutput $outFile -RedirectStandardError $errFile
