@@ -196,3 +196,9 @@ except desk_bridge.BridgeError:
 ② 这台机器没有 E: 盘，任何 `E:\...` 都必须走 `resolve_win_path()` / `Resolve-AnyDrive`；
 ③ `dsh-boot.mp4` / `dsh-bg.mp4` 与 `jobbeacon/pwa/` 素材不在仓库里，靠 poster + `#boot-fallback` + 内建手机页兜底；
 ④ 自检必须优先报原生 `gmx.exe`，不要拿 WSL 里那个 CPU 版 2018.1 当主力。
+⑤ 计划任务注册时**必须带 `-Trigger`**：`LastTaskResult 267011` + `LastRunTime 1999-11-30` 表示"从未运行"，
+   不是"部署旧了"——先用 `deskdiag` 看哈希（`drift 0` 就说明文件没错），再用 `deskfix` 补触发器；
+⑥ 缺 `dsh-boot.mp4` 时 `play()` 是**同步被拒**的，要在碰 `<video>` 之前读 `boot_video_available`，
+   绝不能靠 `onerror`/300 ms 兜底（那就是黑闪的来源）；
+⑦ 远程/服务上下文拉起的窗口是隐藏的，开机安全阀必须是 **90 s + 等窗口可见**，9.2 s 会报
+   `dsh_video_bg_autoforward`；回执 `mode` 只有 `boot_asset_absent*` 才算动画这一环真的过了。

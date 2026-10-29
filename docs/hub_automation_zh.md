@@ -190,6 +190,35 @@ warn martini3   同上
 
 `desk-http` 那一行现在会**直接证明**三个页面/资源都是 200——重启是否生效、开机动画素材在不在，看这一行就够。
 
+### 3.6.1 开机动画为什么"还是没成功"——又是三个根因（已全部修好并实测）
+
+上面第 2 条只解决了"素材缺失时黑屏 14.5 s"，但**动画本身仍然一次都没播过**。三个新根因：
+
+| # | 现象 | 根因 | 修法（都已提交，用户不用敲任何命令） |
+| --- | --- | --- | --- |
+| 4 | 登录后什么都不发生，`deskdiag` 看到 `arena-desk-boot-demo` 的 `LastTaskResult 267011`、`LastRunTime 1999-11-30` | 计划任务注册时**没带 `-Trigger`**——`267011` 不是"失败"，而是"从未运行过"。部署脚本只在版本升级时 `Start-ScheduledTask` 一次，所以等于永远不自动跑 | `deploy.ps1` 给开机任务挂 `AtLogOn`；`arena-desk-open` 在登录时**禁用**（避免两个窗口抢）；另注册无触发器的 `arena-desk-open-manual` 供手动开窗。现场用新任务 `deskfix` 一次性兜底 |
+| 5 | 动画"闪一下就黑"，回执 `mode: dsh_video_autoplay_fallback` | `dsh-boot.mp4` / `dsh-bg.mp4` **仓库和台式机都没有**，`<video>.play()` 同步被拒；旧代码在拒绝时直接 `enterWorkspace(300, ...)`——300 ms 就撤图层，看起来就是黑闪 | 服务端 `/api/state` 新增 `boot_video_available` / `wallpaper_available` / `boot_fallback_art` / `wallpaper_fallback_art`；`app.js` **先看标志位再碰 `<video>`**，缺素材直接走 `showBootFallback()`（吉祥物 + 光晕 + 进度条 → 淡出），壁纸退到 `wallpaper-anime.jpg` |
+| 6 | 回执变成 `mode: dsh_video_bg_autoforward`（9.2 s 后放弃） | 从服务上下文远程拉起时窗口是**隐藏**的，浏览器不给隐藏窗口上屏；旧安全阀 9.2 s 一到就撤 | 安全阀放到 **90 s**，并新增"先等到窗口可见再播"；隐藏期间也把首帧画出来。`deskdiag` 同时报 `session`（`user` / `session_id` / `locked` / `logonui`），锁屏导致的不会骗人 |
+
+**实测（2026-10-29 15:07，DESKTOP-IEUDGS5，全部由我远程执行）：**
+
+| 检查 | 结果 |
+| --- | --- |
+| `deskdiag` 文件漂移 | `drift 0`，`index.html` / `app.js` / `style.css` / `server.py` / `desktop_ops.py` 五个文件仓库↔`C:\0apps\ArenaDesk` **哈希逐个相同** |
+| 计划任务 | `arena-desk-boot-demo` **Running**、触发器 `MSFT_TaskLogonTrigger`、`last_run 15:07:07`；`arena-desk-open` Disabled；`arena-desk-open-manual` Ready 无触发器 |
+| 素材 | `dsh-boot.mp4` / `dsh-bg.mp4` 仓库与台式机均**不存在**（`repo:false, desk:false`）；`boot-mascot.jpg` / `wallpaper-anime.jpg` 都在 |
+| 会话 | `user BNI`、`session_id 1`、`locked False`、`logonui False` ——不是锁屏造成的 |
+| **开机回执** | `boot_ack: ok True`、`overlay_hidden True`、**`mode: boot_asset_absent`**、`dismissed_at 15:07:48` ——既不是 300 ms 跳过，也不是 9.2 s 隐藏窗口放弃 |
+
+也就是说：现在缺视频时走的是**优雅降级动画**（吉祥物图层，2.4 s 自然淡出），而不是黑闪；一旦把 `dsh-boot.mp4` 放进 `code/panel/assets/`，同一个 `sync` 就会自动切回真视频，代码不用改。
+
+两个新信箱任务（同样是我远程调用，用户不接触命令行）：
+
+```
+python3 -m core.hub_mailbox run --kind deskfix  --json-args '{}'          # 重挂开机触发器 + 保面板存活 + 立刻拉一次动画
+python3 -m core.hub_mailbox run --kind deskdiag --json-args '{}'          # 文件哈希 / 任务状态 / 服务响应 / 素材 / boot_ack / 锁屏
+```
+
 ---
 
 ## 4. 两条链路怎么选
