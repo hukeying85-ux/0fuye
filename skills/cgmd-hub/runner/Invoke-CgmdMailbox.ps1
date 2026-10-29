@@ -228,6 +228,7 @@ function Initialize-Mailbox {
 }
 
 function New-MailboxBranch {
+    param([switch]$Force)
     # Nobody has queued anything yet, so open the queue ourselves.  Without
     # this the branch only appears after the first client, and a client that
     # cannot push (read-only token, CI, a phone) could never start.
@@ -268,8 +269,12 @@ function New-MailboxBranch {
         '-c', 'user.email=hukeying85-ux@users.noreply.github.com',
         'commit-tree', $tree, '-m', 'mailbox: open the queue')).Output
     if (-not $commit) { return $false }
-    $push = Invoke-Git -Directory $RepoPath -GitArgs @('push', '--quiet', 'origin', ($commit + ':refs/heads/' + $Ref))
+    $pushArgs = @('push', '--quiet')
+    if ($Force) { $pushArgs += '--force' }
+    $pushArgs += @('origin', ($commit + ':refs/heads/' + $Ref))
+    $push = Invoke-Git -Directory $RepoPath -GitArgs $pushArgs
     if ($push.Code -ne 0) {
+        $script:InitNote = 'branch push failed: ' + $push.Output
         Write-Log ('mailbox branch creation failed: ' + $push.Output) 'WARN'
         return $false
     }
@@ -647,19 +652,32 @@ try {
             Write-Log 'mailbox branch does not exist on origin yet, creating it'
             $created = New-MailboxBranch
             $branchCreated = [bool]$created
-            if ($created -and (Initialize-Mailbox)) {
-                $mailboxState = 'created'
-            } else {
+            if ($created -and (Initialize-Mailbox)) { $mailboxState = 'created' } else { $mailboxState = 'no-branch' }
+        } else {
+            # The branch exists but cannot be checked out here: the first
+            # attempt wrote a file called "README.md" plus a CR, which Windows
+            # cannot create ("invalid path 'README.md?'").  When nothing has
+            # been queued yet, rebuild the branch cleanly; a queue with real
+            # work in it is never force-pushed.
+            $tree = Invoke-Git -Directory $RepoPath -GitArgs @('ls-tree', '-r', '--name-only', ('origin/' + $Ref))
+            $work = @(($tree.Output -split "`r?`n") | Where-Object { $_ -match '^(inbox|outbox)/' })
+            if ($work.Count -eq 0) {
+                Write-Log 'mailbox branch exists but cannot be checked out and is empty, rebuilding it'
+                if (New-MailboxBranch -Force) {
+                    $branchCreated = $true
+                    # Initialize-Mailbox re-fetches, so the tracking ref follows
+                    # the rebuilt branch on its own.
+                    if (Initialize-Mailbox) { $mailboxState = 'repaired' }
+                }
+            }
+            if ($mailboxState -ne 'repaired') {
+                $script:InitNote = $script:InitNote + ' | existing branch unusable (' + $work.Count + ' queued items)'
                 $mailboxState = 'no-branch'
             }
-        } else {
-            $mailboxState = 'no-branch'
         }
-        if ($mailboxState -ne 'created' -and $mailboxState -ne 'ran') {
-            Write-Log 'mailbox unavailable this cycle'
-        }
+        if ($mailboxState -eq 'no-branch') { Write-Log 'mailbox unavailable this cycle' }
     }
-    if ($mailboxState -eq 'created') {
+    if ($mailboxState -eq 'created' -or $mailboxState -eq 'repaired') {
         $createdInbox = Join-Path $script:Worktree 'inbox'
         if (-not (Test-Path -LiteralPath $createdInbox)) {
             New-Item -ItemType Directory -Path $createdInbox -Force | Out-Null
