@@ -301,3 +301,60 @@ def test_deskdiag_reports_whether_the_console_is_locked():
     source = (RUNNER / "Invoke-CgmdMailbox.ps1").read_text(encoding="ascii")
     assert "LogonUI" in source
     assert "session      = $session" in source
+
+
+def test_caps_card_reads_committed_status(tmp_path):
+    """`caps` must orient a brand-new session from the committed status files."""
+    from core import hub_mailbox
+
+    status = tmp_path / "results" / "status"
+    status.mkdir(parents=True)
+    (status / "hub_heartbeat.json").write_text(json.dumps({
+        "host": "DESKTOP-IEUDGS5", "state": "idle", "interval_s": 60,
+        "at": "2026-10-29T14:28:55+08:00", "branch": "arena/32cd826e-0fuye",
+    }), encoding="utf-8")
+    (status / "desktop_selfcheck.json").write_text(json.dumps({
+        "overall": "warn",
+        "summary": {"checks": 18, "passed": 15, "warnings": 3, "failed": 0},
+        "versions": {"gromacs": "2025.1"},
+        "host": {"computer": "DESKTOP-IEUDGS5"},
+    }), encoding="utf-8")
+    (status / "gmx_smoke.json").write_text(json.dumps({
+        "status": "ok", "ps_completed": 100, "accelerator": "gpu",
+        "mdrun": {"performance_ns_per_day": 576.0},
+        "software": {"gpus": ["NVIDIA RTX A4000"]},
+    }), encoding="utf-8")
+
+    caps = hub_mailbox.capabilities(str(tmp_path))
+
+    assert caps["schema"] == "cgmd.hub.capabilities.v1"
+    assert caps["desk"]["host"] == "DESKTOP-IEUDGS5"
+    assert caps["desk"]["gromacs"] == "2025.1"
+    assert caps["desk"]["gpu"] == "NVIDIA RTX A4000"
+    assert caps["selfcheck"]["counts"]["passed"] == 15
+    assert caps["smoke"]["ns_per_day"] == 576.0
+    assert caps["smoke"]["accelerator"] == "gpu"
+    assert caps["user_action_required"] is False
+    assert caps["jobs"]["deskfix"]
+    # the card must repeat the no-paste rule the prompt relies on
+    assert any("never ask the user" in rule for rule in caps["rules"])
+    assert any("LAN bridge" in rule for rule in caps["rules"])
+
+
+def test_caps_card_survives_missing_status(tmp_path):
+    from core import hub_mailbox
+
+    caps = hub_mailbox.capabilities(str(tmp_path))
+    assert caps["desk"]["alive"] is False
+    assert caps["desk"]["heartbeat_age_min"] is None
+    assert caps["selfcheck"]["overall"] is None
+
+
+def test_prompt_v2_forbids_pasting_commands():
+    """docs/new_session_prompt_zh.md must keep the zero-paste contract."""
+    prompt = (ROOT / "docs" / "new_session_prompt_zh.md").read_text(encoding="utf-8")
+    assert "不许让我粘贴/执行任何命令" in prompt
+    assert "python3 -m core.hub_mailbox caps" in prompt
+    assert "不要再装第二套" in prompt
+    assert "连不到台式机的 192.168" in prompt
+    assert "-Trigger" in prompt

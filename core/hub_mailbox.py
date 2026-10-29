@@ -36,6 +36,7 @@ CLI
 """
 
 import argparse
+import datetime
 import json
 import os
 import random
@@ -52,6 +53,28 @@ DEFAULT_REF = "hub/mailbox"
 
 # Kinds the desktop worker knows.  shell is opt-in on the desk side.
 KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline")
+
+# One line per kind, printed by ``caps`` so a brand-new session never has to
+# guess what the desk can do.
+JOB_HELP = {
+    "ping": "is the desk alive? host, gmx version, gpus, LAN addresses, bridge port (~1 s)",
+    "selfcheck": "18-item health check, writes results/status/desktop_selfcheck.json",
+    "smoke": '{"ps": 100} real GROMACS run on the GPU, writes results/status/gmx_smoke.json',
+    "sync": '{"desk": true} pull the branch on the desk, redeploy Arena Desk, restart the panel',
+    "gmx": '--arg --version whitelisted gmx sub-command, argv lives in args.argv',
+    "deskdiag": "file hashes repo-vs-desk, scheduled tasks, served HTML, boot ack, lock state",
+    "deskfix": "re-arm the logon trigger, keep the panel alive, launch the boot animation now",
+    "shell": "opt-in on the desk side (allow_shell=false by default)",
+    "pipeline": "Martini pipeline, not wired yet - use smoke or gmx",
+}
+
+# Status files the desk publishes; ``caps`` reads them straight from the tree.
+STATUS_FILES = {
+    "heartbeat": "results/status/hub_heartbeat.json",
+    "selfcheck": "results/status/desktop_selfcheck.json",
+    "smoke": "results/status/gmx_smoke.json",
+    "mailbox": "results/status/hub_mailbox.json",
+}
 
 STATUS_OK = "ok"
 STATUS_FAIL = "fail"
@@ -342,6 +365,110 @@ def _print(payload: Any) -> None:
     sys.stdout.write(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
 
 
+def _load_status(repo: str) -> Dict[str, Any]:
+    """Best-effort read of the desk-published status files (never raises)."""
+    out: Dict[str, Any] = {}
+    for name, rel in STATUS_FILES.items():
+        path = os.path.join(repo, rel.replace("/", os.sep))
+        try:
+            with open(path, "r", encoding="utf-8-sig") as fh:
+                out[name] = json.load(fh)
+        except Exception as exc:  # noqa: BLE001 - a missing file is normal
+            out[name] = {"_error": "%s: %s" % (type(exc).__name__, exc)}
+    return out
+
+
+def _age_minutes(stamp: Any) -> Optional[float]:
+    text = str(stamp or "").strip()
+    if not text:
+        return None
+    normalised = text.replace("Z", "+00:00")
+    try:
+        parsed = datetime.datetime.fromisoformat(normalised)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=datetime.timezone.utc)
+    return round((datetime.datetime.now(datetime.timezone.utc) - parsed).total_seconds() / 60.0, 1)
+
+
+def capabilities(repo: str, ref: str = DEFAULT_REF) -> Dict[str, Any]:
+    """A self-orienting card for a session that has just cloned the repo.
+
+    Reads only what is committed, so it works offline and costs no git push.
+    """
+    status = _load_status(repo)
+    heartbeat = status.get("heartbeat") or {}
+    selfcheck = status.get("selfcheck") or {}
+    smoke = status.get("smoke") or {}
+    mailbox = status.get("mailbox") or {}
+
+    versions = selfcheck.get("versions") or {}
+    host = selfcheck.get("host") or {}
+    gpus = versions.get("gpus") or (smoke.get("software") or {}).get("gpus") or []
+    gmx_version = versions.get("gromacs") or (smoke.get("software") or {}).get("gromacs", {}).get("version")
+    age = _age_minutes(heartbeat.get("at"))
+    desk_alive = isinstance(age, (int, float)) and age <= 120
+
+    return {
+        "schema": "cgmd.hub.capabilities.v1",
+        "repo": "hukeying85-ux/0fuye",
+        "branch": "arena/32cd826e-0fuye",
+        "mailbox_ref": ref,
+        "entry_command": "python3 -m core.hub_mailbox",
+        "desk": {
+            "host": heartbeat.get("host") or host.get("computer"),
+            "state": heartbeat.get("state"),
+            "heartbeat_at": heartbeat.get("at"),
+            "heartbeat_age_min": age,
+            "alive": desk_alive,
+            "interval_s": heartbeat.get("interval_s"),
+            "branch": heartbeat.get("branch"),
+            "head": heartbeat.get("head"),
+            "gromacs": gmx_version,
+            "gpu": (gpus[0] if gpus and isinstance(gpus[0], str) else
+                    ((gpus[0] or {}).get("name") if gpus and isinstance(gpus[0], dict) else None)),
+            "gpus": len(gpus) if isinstance(gpus, list) else 0,
+        },
+        "selfcheck": {
+            "overall": selfcheck.get("overall"),
+            "checked_at": selfcheck.get("checked_at"),
+            "counts": selfcheck.get("summary"),
+        },
+        "smoke": {
+            "status": smoke.get("status"),
+            "generated_at": smoke.get("generated_at"),
+            "ps_completed": smoke.get("ps_completed"),
+            "ns_per_day": (smoke.get("mdrun") or {}).get("performance_ns_per_day"),
+            "accelerator": smoke.get("accelerator"),
+        },
+        "mailbox": {
+            "state": mailbox.get("state"),
+            "queued": mailbox.get("queued"),
+            "last_jobs": mailbox.get("last_jobs"),
+        },
+        "jobs": dict(JOB_HELP),
+        "first_steps": [
+            "python3 -m core.hub_mailbox run --kind ping --timeout 300",
+            "python3 -m core.hub_mailbox run --kind smoke --json-args '{\"ps\": 100}' --timeout 1800",
+        ],
+        "if_broken": [
+            "python3 -m core.hub_mailbox run --kind deskdiag --timeout 600",
+            "python3 -m core.hub_mailbox run --kind deskfix --timeout 600",
+            "python3 -m core.hub_mailbox run --kind sync --json-args '{\"desk\": true}' --timeout 900",
+            "python3 -m core.hub_mailbox run --kind selfcheck --timeout 900",
+        ],
+        "rules": [
+            "never ask the user to paste a command; every desk action goes through this mailbox",
+            "never commit or push from the calling session; jobs live on the mailbox ref",
+            "this sandbox reaches github.com only - do not try the LAN bridge from here",
+            "the desk has no E: drive; the panel is Arena Desk on 127.0.0.1:18765",
+            "a job that returns timeout usually means the desk worker stopped - say so plainly",
+        ],
+        "user_action_required": False,
+    }
+
+
 def _summarise(result: Dict[str, Any]) -> str:
     return "%s %s: %s" % (result.get("kind", "?"), result.get("status", "?"),
                           result.get("summary", ""))
@@ -377,6 +504,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     run_p.add_argument("--interval", type=int, default=15)
 
     sub.add_parser("ls", help="list queued and answered jobs")
+    sub.add_parser("caps", help="what can this desk do? (offline capability card)")
 
     show_p = sub.add_parser("show", help="print one result")
     show_p.add_argument("id")
@@ -415,6 +543,10 @@ def main(argv: Optional[List[str]] = None) -> int:
                       interval=args.interval, remote=args.remote)
         _print(result)
         return 0 if result.get("status") == STATUS_OK else 6
+
+    if args.command == "caps":
+        _print(capabilities(repo, ref=args.ref))
+        return 0
 
     if args.command == "ls":
         _print(snapshot(repo, ref=args.ref, remote=args.remote))

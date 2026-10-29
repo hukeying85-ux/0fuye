@@ -221,6 +221,41 @@ python3 -m core.hub_mailbox run --kind deskdiag --json-args '{}'          # 文�
 
 ---
 
+## 3.7 新会话怎么自己"上手"：`caps` 能力卡 + 零粘贴契约
+
+新会话的第一条命令不该是猜，而是一张卡：
+
+```
+python3 -m core.hub_mailbox caps
+```
+
+它只读仓库里已提交的状态文件（不联网、不发单、1 秒返回），直接给出：
+
+| 字段 | 内容 |
+| --- | --- |
+| `desk.alive` / `heartbeat_age_min` | 台式机是否活着、心跳多久前（> 120 min 判死） |
+| `desk.gromacs` / `desk.gpu` / `desk.gpus` | 真正干活的引擎与显卡 |
+| `selfcheck.overall` / `selfcheck.counts` | 18 项自检的 pass/warn/fail |
+| `smoke.ns_per_day` / `smoke.accelerator` | 最近一次 100 ps 的速度与加速器 |
+| `jobs` | 9 种任务各自干什么 |
+| `first_steps` / `if_broken` | 先跑什么、坏了按什么顺序修 |
+| `rules` | 五条硬规则（其中第一条就是"永远不要让用户粘贴命令"） |
+| `user_action_required` | 固定 `false` |
+
+**零粘贴契约**（写进 `docs/new_session_prompt_zh.md` v2 的硬规则，也会被测试守着）：
+台式机上的一切动作——同步、部署、修计划任务、重启面板、跑 gmx、拉开机动画——
+都必须通过 `hub/mailbox` 由会话自己发起；调用方**不提交、不推送、不碰分支**。
+唯一允许例外：从没装过基座的全新机器（`caps` 里连心跳历史都没有），
+此时给一条命令并说明原因，而不是把"你贴一下"当成默认手段。
+
+**跨仓禁令**：台式机上只允许**一套**基座（`CGMD-Hub-Poll` + Arena Desk + `:8765`）。
+另一个项目的会话曾自己克隆仓库、另建 `desktop-base`、写第二份 watcher，
+结果第一轮就把自己的 watcher 删了、还要用户在机器上粘命令装凭据。
+别的项目要用台式机，正确做法是**把 0fuye 当客户端**（`python3 -m core.hub_mailbox`）；
+需要新任务类型就在本仓库加一个 kind 再 `sync`。
+
+---
+
 ## 4. 两条链路怎么选
 
 ```

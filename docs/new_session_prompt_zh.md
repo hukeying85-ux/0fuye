@@ -1,86 +1,148 @@
 # 新会话提示词 + 本分支安装手册
 
-> 用法：新开一个对话，把 **第 1 节**整段复制粘贴进去，它就会自己去装、去连、去跑。
-> 需要改的只有两处：台式机 IP（可留空，让它自己从信箱里读）和你想做的事。
+> 用法：新开一个对话，把 **第 1 节**整段复制粘贴进去。
+> 你只需要在最后一行写「我想做的事」，其余它自己会跑。
+> **台式机已经装好**（值守 60 s 轮询 + Arena Desk 面板 + 局域网桥），
+> 所以新会话里**不存在「让你粘贴命令」这一步**——这一点已经写进提示词的硬规则里。
 
 ---
 
-## 1. 直接粘进新对话的提示词（整段复制）
+## 1. 直接粘进新对话的提示词（整段复制，v2）
+
+> v2 相对 v1 的改动：环境事实前置、加「零粘贴」硬规则、加跨仓禁令（不要再造第二套基座）、
+> 加速度验收的 JSON 路径、加实测基线数字。三项都是为了不再出现「跑完还要你贴一行 PowerShell」。
 
 ```text
-你是 CGMD 项目的执行代理。台式机（Windows 11 + RTX A4000 + 原生 GROMACS 2025.1 CUDA）
-已经装好值守程序，你不用碰它的键盘，也不要让我手动敲命令。
+你是 CGMD 项目的执行代理。这台「台式机」= DESKTOP-IEUDGS5（Windows 10 + RTX A4000 16 GB +
+原生 GROMACS 2025.1 CUDA，装在 F:\gromacs-2025.1-SM86）。它已经装好了 60 s 轮询值守、
+Arena Desk 面板（127.0.0.1:18765）和 :8765 局域网桥。
 
-【仓库】
-  github.com/hukeying85-ux/0fuye   分支 arena/32cd826e-0fuye
-  沙箱内先：git clone -b arena/32cd826e-0fuye https://github.com/hukeying85-ux/0fuye && cd 0fuye
+【最重要的一条：你不需要我粘贴任何东西】
+  · 台式机上的所有动作（同步代码、部署面板、注册/修复计划任务、重启、跑 gmx、拉开机动画）
+    都通过下面的信箱总线由你自己发起。我不是你的手，别给我命令行。
+  · 唯一例外：这是一台**从没装过基座**的全新机器。此时也只能由我一次性装；
+    若真遇到这种冷启动，先跑一次 ping，再用 detail 证明「这台机器确实没有值守」，
+    然后**只给一条**命令并说明为什么这次必须我动手。不要为了省事就退回到"你贴一下"。
 
-【第一步：30 秒确认链路（必做，不要跳过）】
-  cd 0fuye
+【你的运行环境（别浪费时间探测）】
+  · 沙箱 = Linux(Debian)，没有 Windows / PowerShell / GPU，不要试图本地跑 gmx 或 .ps1。
+  · 沙箱出网只放行 github.com / codeload / api.github.com / pypi / npm ——
+    **连不到台式机的 192.168.x.x / 100.84.x.x**。所以这里只走信箱总线，
+    不要拿 core.desk_bridge 试 :8765（那是笔记本在同一个 Wi-Fi 下才用的）。试了必超时，浪费 10 分钟。
+  · 台式机没有 E: 盘；面板叫 Arena Desk，服务在 127.0.0.1:18765。
+
+【仓库 / 拿代码】
+  git clone -b arena/32cd826e-0fuye https://github.com/hukeying85-ux/0fuye && cd 0fuye
+  只读这个仓库。你派的活走独立的 hub/mailbox 引用，**不需要也不许**往任何分支提交/推送。
+
+【第 0 步：先读能力卡（1 秒，别跳过）】
+  python3 -m core.hub_mailbox caps
+  它会直接告诉你：台式机是否存活、心跳多久前、GROMACS/GPU、最近一次 18 项自检和 100 ps 的速度、
+  9 种任务各自干什么、坏了按什么顺序修。**先看它，再决定跑什么。**
+
+【第 1 步：30 秒确认链路（必做）】
   python3 -m core.hub_mailbox run --kind ping --timeout 300
-  期望：status=ok，summary 里出现 "DESKTOP-IEUDGS5 alive, gmx 2025.1"，
+  期望：status=ok，summary 形如 "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"，
         detail 里有 gpus / lan / bridge_port。
-  如果返回 timeout 或 lost：说明台式机值守没跑，直接告诉我，
-  并把 results/status/hub_mailbox.json 的 state / log_tail 原文贴给我，不要自己猜。
+  返回 timeout / lost：先 deskdiag 再 deskfix 再 sync（见下面「坏了怎么修」），
+  仍不行才如实告诉我「值守停了」，并附 results/status/hub_mailbox.json 的 state/log_tail 原文。
+  不要自己猜、不要写新脚本去替代值守。
 
-【第二步：要用 GPU 就跑这个，不要自己写脚本】
+【第 2 步：GPU 烟测 100 ps（要动算力就跑这个）】
   python3 -m core.hub_mailbox run --kind smoke --json-args '{"ps": 100}' --timeout 1800
-  验收标准（全部满足才算成功，逐条核对 detail.report）：
-    status            = ok
-    ps_completed      = 100
-    mdrun.finished    = true
-    stages 里 mdrun-md-gpu 的 returncode = 0
-    software.gromacs.version = 2025.1 且 accelerator = gpu
-  结果同时落在 results/status/gmx_smoke.json（git 里可查）。
+  验收逐条核对（字段层级已经踩过坑，照抄路径）：
+    result.status == "ok"
+    result.detail.report.ps_completed == 100
+    result.detail.report.mdrun.finished == true
+    result.detail.report.mdrun.performance_ns_per_day > 0        (实测 576 ns/day 量级)
+    result.detail.report.accelerator == "gpu"                     (不在 report.progress 里)
+    stages 里 mdrun-md-gpu 的 returncode == 0
+  结果同时落在 results/status/gmx_smoke.json（git 可查）。
 
-【其余可用任务（都用同一入口）】
-  --kind selfcheck    18 项自检
-  --kind sync         让台式机同步代码/重部署 Arena Desk
-  --kind gmx --arg --version        白名单内的 gmx 子命令
-  --kind smoke --json-args '{"ps": 500}'   跑 500 ps
-  python3 -m core.hub_mailbox ls            看队列
-  python3 -m core.hub_mailbox show <id>     取某单结果
+【全部可用任务（同一入口，caps 里也有说明）】
+  --kind caps      上面那张能力卡（其实是本地命令，不发单）
+  --kind ping              活着吗
+  --kind selfcheck         18 项自检（原生 gmx / CUDA / 面板 / 素材）
+  --kind smoke --json-args '{"ps": 500}'    真实 GROMACS，默认 100 ps
+  --kind sync --json-args '{"desk": true}'  台式机拉最新代码 + 重部署面板 + 重启（回执含 panel restarted）
+  --kind gmx --arg --version                白名单 gmx 子命令
+  --kind deskdiag          文件哈希 repo↔desk、计划任务、页面 200、开机回执、锁屏状态
+  --kind deskfix           重挂登录触发器 + 保面板 + 立刻拉一次开机动画
+  python3 -m core.hub_mailbox ls / show <id>     看队列 / 取某单结果
 
-【同一局域网时（快，秒级，可选）】
-  python3 -m core.desk_bridge ping --host <台式机IP>
-  python3 -m core.desk_bridge smoke --host <台式机IP>
-  IP 从 ping 结果的 detail.lan 里取（形如 192.168.x.x）。
-  连不上就退回信箱总线，不要卡在这里。
+【坏了怎么修（顺序固定，不用问我要命令）】
+  deskdiag  → 看 drift / tasks / boot_ack / session，先定性
+  deskfix   → 触发器、面板、动画
+  sync desk → 代码版本不对时（drift 不为 0）
+  selfcheck → 最后确认 18 项是 15 pass / 3 warn / 0 fail（warn 是 Martini python 依赖，不影响接单）
+
+【跨仓 / 别的项目怎么办（这条是硬禁令）】
+  · 台式机上**只有这一套基座**（CGMD-Hub-Poll + Arena Desk + :8765）。不要再装第二套、
+    不要克隆别的仓库去建 desktop-base、不要写第二份轮询脚本——上一轮有会话这么干，
+    结果自删了自己的 watcher、还为了拿凭据让用户在机器上粘命令。
+  · 别的项目要用台式机：把本仓库当客户端，`python3 -m core.hub_mailbox` 派活即可；
+    需要"新任务类型"就在 0fuye 里加一个 kind 再 sync，而不是另起炉灶。
+  · 别的仓库自己的 GitHub 凭据问题，不要在这台机器上重新登录/重置 token。
 
 【硬规则（违反等于白做）】
-  1. 绝不 switch 到别的分支；只推 arena/32cd826e-0fuye。
-  2. 不要 git add -A（会把台式机侧的 results/status 卷进冲突）；
-     只 add 你自己改过的文件，推之前先 git pull --rebase。
-  3. PowerShell 脚本必须纯 ASCII，且不能周期性弹控制台窗口。
-  4. 轨迹类大文件（.xtc/.trr/.tpr/.gro/.edv 等）一律不进 git；
-     只回传 < 1 MB 的 summary_metrics.json 和矢量图。
-  5. 这个工作站用的是 **Windows 原生 gmx.exe**，不是 WSL；
-     任何方案都不要依赖 WSL / Python / Martini 文件去跑烟测。
-  6. 不要让我手动执行命令。卡住了就自己查 results/status/*.json 和日志再来一次。
-  7. 测试基线：PYTHONPATH=$PWD:$PWD/code/cgmd:$PWD/code/federation \
-     MPLBACKEND=Agg python3 -m pytest tests -q  → 必须 159 passed 以上。
+  1. 不许让我粘贴/执行任何命令，也不许说"请你在台式机上运行…"。上面的任务种类足够覆盖部署、修复、自检。
+  2. 不许往 0fuye 的任何分支提交或推送，也不许 git add -A；派活不碰分支，不会有 rebase 冲突。
+     真要改 0fuye 的代码，就在你自己的分支上改，走 PR，别直接推 arena/32cd826e-0fuye。
+  3. PowerShell 脚本必须纯 ASCII，且不能周期性弹出控制台窗口；计划任务注册必须带 -Trigger
+     （LastTaskResult 267011 + LastRunTime 1999-11-30 = "从未运行"，不是"部署旧了"）。
+  4. 轨迹类大文件（.xtc/.trr/.tpr/.gro/.edv）一律不进 git；只回传 < 1 MB 的 summary_metrics.json 和矢量图。
+  5. 这台机器用的是 Windows 原生 gmx.exe，不是 WSL；任何方案都不要依赖 WSL / Python / Martini 文件跑烟测。
+  6. 实测基线（2026-10-29，拿它对比）：ping 0.9 s；100 ps 端到端 21–31 s、mdrun 14–16 s、
+     576 ns/day；自检 18 项 15 pass / 3 warn / 0 fail；面板 v2.8.0。
+     数字差太多先 deskdiag，不要直接说"机器变慢了"。
+
+【汇报格式】
+  先一张表：主机 / 值守心跳 / GPU / GROMACS / 烟测 ps、ns·day⁻¹ / 自检 pass-warn-fail / 工单号，
+  再写「我要做的事」的进展。凡是没实测的数字，标"未验证"，不要编。
 
 【我想做的事】
   <在这里写你的需求，例如：把 Martini 3 POPE:POPG=3:1 的膜孔体系跑到 1 µs；
-   或者：帮我看看现在 576 ns/day 还能不能再快>
-
-先按上面跑完第一步和第二步，把关键数字用表格汇报给我，再开始我要的正事。
+   或者：帮我看看现在 576 ns/day 还能不能再快；或者：台式机开机动画再看一眼>
 ```
+
+---
+
+## 1.1 更短的一句话版（可以，但只当封面语）
+
+你原本那句可以留作开场，但它自己不构成提示词——两个实测会话里，正因为只给了这一句，
+一个去猜「安装指什么」，另一个干脆自己造了一套基座并最终把命令交回给你。建议这样发：
+
+> 安装 github.com/hukeying85-ux/0fuye 分支 arena/32cd826e-0fuye 的台式机基座，
+> 通过它打通 DESKTOP-IEUDGS5，全程你来操作，我一个字都不粘。
+> 然后照 docs/new_session_prompt_zh.md 第 1 节执行；
+> 我不接受"请你在台式机上运行…"这类要求。
 
 ---
 
 ## 2. 台式机侧的一次性安装（本分支）
 
-> 已经装过可以跳过；换机器/重装系统时照这个来。全程**普通权限** PowerShell，不弹窗。
+> **这一段不是给你的操作说明**，是"我（代理）在台式机上做过什么"的留档。
+> 正常情况你不会用到它：机器上已经有值守在跑，`caps` 一看就知道。
+> 只有换新机器 / 重装系统这种「冷启动」才需要一次性的引导，
+> 而那次也可以由代理通过远程/已有通道完成；你要做的只是别自己动手。
 
-### 2.1 拿到代码
+### 2.0 先判断是哪种情况
+
+| 现象 | 结论 | 谁来做 |
+| --- | --- | --- |
+| `caps` 里 `desk.alive = true`、`heartbeat_age_min < 5` | 基座活着，直接派活 | 全自动，无人介入 |
+| `ping` 超时，但 `results/status/hub_heartbeat.json` 有历史 | 值守可能停了 | 代理跑 `deskfix` / `sync`，仍不行才报「机器需要看一眼」 |
+| 从没有过 `hub_heartbeat.json`、`C:\cgmd\0fuye` 不存在 | 真·冷启动 | 一次性引导，见 2.2–2.5 |
+
+
+### 2.2 拿到代码（冷启动时由代理执行一次）
 
 ```powershell
 git clone -b arena/32cd826e-0fuye https://github.com/hukeying85-ux/0fuye C:\cgmd\0fuye
 cd C:\cgmd\0fuye
 ```
 
-### 2.2 引导（写配置 + 建计划任务 + 自检）
+### 2.3 引导（写配置 + 建计划任务 + 自检）
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\skills\cgmd-hub\bootstrap_desktop.ps1 `
@@ -91,7 +153,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\skills\cgmd-hub\bootstrap_
 编译静默启动器 `CGMDHub.exe`（`/target:winexe`）+ VBS 包装、注册每 60 s 的计划任务
 `CGMD-Hub-Poll`、最后跑一遍 18 项自检。**最后一行必须是「成功」**，否则先别往下走。
 
-### 2.3 本分支新增的三块能力（配置项）
+### 2.4 本分支新增的三块能力（配置项）
 
 `skills/cgmd-hub/config/cgmd_hub.local.json` 里加上（缺省值就够用，写出来只是让你好改）：
 
@@ -123,7 +185,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\skills\cgmd-hub\bootstrap_
 Start-ScheduledTask -TaskName CGMD-Hub-Poll
 ```
 
-### 2.4 局域网直连（可选，让笔记本秒级调用）
+### 2.5 局域网直连（可选，让笔记本秒级调用）
 
 ```powershell
 # 台式机：普通权限启动桥
@@ -170,7 +232,7 @@ except desk_bridge.BridgeError:
 | --- | --- |
 | GROMACS | 2025.1，mixed，AVX2_256，CUDA 12.8 / 驱动 13.2，FFTW3 |
 | GPU | NVIDIA RTX A4000 16 GB（驱动 596.71），48 线程 |
-| 100 ps（50000 步 × 0.002 ps） | **21–22 s 端到端**，`mdrun` 15–16 s，**576 ns/day** |
+| 100 ps（50000 步 × 0.002 ps） | **21–31 s 端到端**，`mdrun` 14–16 s，**576–617 ns/day**（跨会话实测区间，波动来自 GPU 占用） |
 | 加速 | `-nb gpu -gpu_id 0`，失败自动回退 CPU |
 | 从派活到拿到回执 | 30.9 s（信箱总线，含 60 s 轮询内的等待） |
 | 自愈 | 值守自己开信箱分支、自己排 ping 自测、自己按期复验 100 ps |
@@ -181,7 +243,7 @@ except desk_bridge.BridgeError:
 
 ---
 
-## 5. 出问题先看这三处
+## 5. 出问题先看这几处
 
 | 现象 | 先看 |
 | --- | --- |
@@ -191,6 +253,11 @@ except desk_bridge.BridgeError:
 | 局域网连不上 | 台式机 `state/bridge-*.log`；先试 `core.hub_mailbox ping` 确认值守活着 |
 | 面板/手机页/开机动画 | 看 `results/status/desktop_selfcheck.json` 的 `desk-http` 那行：它会把 `/mobile`、`/assets/boot-mascot.jpg`、`/style.css` 的 HTTP 码直接列出来 |
 | 改了 `code/panel/*` 没生效 | 面板进程要重启：`python3 -m core.hub_mailbox run --kind sync --json-args '{"desk": true}'`（回执里应有 `panel restarted`） |
+| 新会话张口就说"请你在台式机上运行…" | 提示词 v2 的硬规则 1 没生效；把 §1.1 那句「我不接受你让我粘命令」补进对话，让它改走 `deskdiag`/`deskfix`/`sync` |
+| 会话另建了一套基座（`desktop-base` / 第二份 watcher） | 违反 §1「跨仓禁令」。台式机只允许一条 `CGMD-Hub-Poll` + Arena Desk；多余的按 `schtasks /delete` 清掉，统一回 0fuye 基座 |
+| 会话想连 `192.168.x.x:8765` 一直超时 | 云端沙箱只放行 github/pypi/npm，局域网桥给笔记本用；云端会话一律走信箱 |
+| 跑 pytest 一堆 import 报错 | 沙箱默认没有 matplotlib/numpy：`python3 -m venv /tmp/v && /tmp/v/bin/pip install pytest matplotlib numpy`；基线 **189 passed / 4 skipped** |
+| 心跳有、但 `head` 落后 | `caps` 里 `desk.head` 与 `git rev-parse --short HEAD` 不同就是没同步：`--kind sync --json-args '{"desk": true}'` |
 
 **已修复、不要再回退的坑**：① PowerShell 里 `[switch]$Json` 和局部 `$json` 是同一个变量，赋值必崩；
 ② 这台机器没有 E: 盘，任何 `E:\...` 都必须走 `resolve_win_path()` / `Resolve-AnyDrive`；
