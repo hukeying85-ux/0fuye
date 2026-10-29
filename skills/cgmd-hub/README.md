@@ -22,6 +22,8 @@
 | `runner/Send-CgmdBeacon.ps1` | Windows 侧 ntfy 推送（与 Python 端同协议、同频道、北京时间戳） |
 | `runner/Test-CgmdHub.ps1` | **18 项自检**：仓库/origin/分支/凭据/WSL/GPU/GROMACS-CUDA/Martini3/python 依赖/martinize2+insane/磁盘/静默包装器/计划任务/推送；产出 `results/status/desktop_selfcheck.json`（`cgmd.selfcheck.v1`），可选 `-Push` `-Notify` |
 | `runner/Run-Gmx-Native.ps1` | **Windows 原生 100 ps 实测**：只用 GROMACS 自带 `oplsaa.ff` + SPC 水，`solvate` → EM → `50000×0.002 ps`，GPU 失败自动回退 CPU；若 `grompp` 在自带力场上崩溃（2025.1 Windows 版实测 `0xC0000005`）则自动换「参数全内联的 SPC 拓扑」重跑并记录原因；产出 `results/status/gmx_smoke.json`（`cgmd.gmxsmoke.v1`）并推送；不依赖 WSL / Python / Martini 文件 |
+| `runner/Invoke-CgmdMailbox.ps1` | **万能信箱工作端**：在独立分支 `hub/mailbox` 上取任务（`ping`/`selfcheck`/`sync`/`smoke`/`gmx`/`shell`），在本机执行并把结果写回 `outbox/`，调用方永不提交到自己的分支 → 无 rebase 冲突 |
+| `runner/Invoke-CgmdBridge.ps1` | **局域网直连端点**（`TcpListener` 0.0.0.0:8765，无需管理员/URL ACL）：`GET /health`、`GET /status`、`POST /job`；回环与私网直接放行，公网需 token；`shell` 默认关闭 |
 | `runner/Run-Smoke.ps1` | 手动 100 ps（WSL 版）；`-Native` 转调上一条；`-ClearLock` 先清卡死的 `poll.lock` 与残留轮询进程 |
 | `runner/Sync-Desktop.ps1` | **一键同步**：origin 校验 → `fetch` → `reset --hard origin/<branch>`（脏工作区默认拒绝）→ 可选 `-Desk` 重新部署 `code/panel` → 跑 18 项自检 → 提交并推送 `desktop_sync.json` + `desktop_selfcheck.json` |
 | `config/cgmd_hub.json` | 配置模板（真实配置 `cgmd_hub.local.json` 已 gitignore） |

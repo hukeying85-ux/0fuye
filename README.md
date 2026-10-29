@@ -174,6 +174,19 @@ python3 -m cgmd.smoke --show results/status/gmx_smoke.json   # 读回版本/软�
 
 ---
 
+### 完全不用人管（自愈 + 信箱 + 局域网直连）
+
+值守现在会自己修自己、自己安排验证，别的会话也能直接给它派活：
+
+| 能力 | 一句话 | 入口 |
+| --- | --- | --- |
+| 自愈值守 | 死锁自动破、100 ps 每 24 h 自动复验（失败 3 h 退避重试） | 无需操作，`Invoke-CgmdPoll.ps1` 每轮自检 |
+| 信箱总线 | 任何会话/分支/机器 → 台式机，走独立分支 `hub/mailbox`，**不碰调用方分支** | `python3 -m core.hub_mailbox run --kind smoke` |
+| 局域网直连 | 同一 WiFi 下笔记本毫秒级调用台式机（`/health` `/status` `/job`） | `python3 -m core.desk_bridge ping --host <台式机IP>` |
+| 分工 | 跨网络/要留档用信箱，同网要秒回用直连，两者返回值同 schema | 见 `docs/hub_automation_zh.md` |
+
+---
+
 ## 3. 零 Token 手机推送（ntfy：`arena-beacon-95bc796a66`）
 
 ```bash

@@ -45,6 +45,7 @@ param(
     [switch]$NoPublish,
     [int]$MaxRunMinutes = 0,
     [int]$HeartbeatMinutes = 60,
+    [int]$StaleLockMinutes = 90,
     [switch]$LogVerbose
 )
 
@@ -58,6 +59,7 @@ $script:StatePath = Join-Path $script:StateDir 'hub-state.json'
 $script:RunOut = Join-Path $script:StateDir 'last-run.log'
 $script:CmdFile = Join-Path $script:StateDir 'last-run.cmd'
 $script:Lock = $null
+$script:LockPidPath = Join-Path $script:StateDir 'poll.pid'
 
 foreach ($dir in @($script:StateDir, $script:LogDir)) {
     if (-not (Test-Path -LiteralPath $dir)) {
@@ -85,6 +87,109 @@ function Write-HubLog {
         [System.IO.File]::AppendAllText($file, $line + [Environment]::NewLine, (New-Object System.Text.UTF8Encoding($false)))
     } catch { }
     if ($LogVerbose) { Write-Host $line }
+}
+
+function Open-PollLock {
+    # A single instance at a time, but never at the price of a permanent wedge:
+    # a crashed or killed poll used to leave the lock behind and the watcher
+    # stayed silent for hours until somebody logged in and removed it by hand.
+    param([int]$StaleMinutes = 90)
+    try {
+        return [System.IO.File]::Open($script:LockPath, 'OpenOrCreate', 'ReadWrite', 'None')
+    } catch { }
+
+    $holder = Read-JsonFile -Path $script:LockPidPath
+    $holderPid = 0
+    if ($null -ne $holder) { $holderPid = [int](Get-Property $holder 'pid' 0) }
+    $alive = $false
+    if ($holderPid -gt 0) {
+        $alive = $null -ne (Get-Process -Id $holderPid -ErrorAction SilentlyContinue)
+    }
+    $age = 0.0
+    try { $age = ((Get-Date) - (Get-Item -LiteralPath $script:LockPath).LastWriteTime).TotalMinutes } catch { }
+
+    if ($alive -and $age -lt $StaleMinutes) {
+        return $null
+    }
+    Write-HubLog ('breaking a stale poll lock: holder pid {0}, alive {1}, age {2:N1} min' -f $holderPid, $alive, $age) 'WARN'
+    if ($alive -and $holderPid -gt 0) {
+        try { & taskkill.exe /F /T /PID $holderPid 2>&1 | Out-Null } catch { }
+        Start-Sleep -Seconds 2
+    }
+    Remove-Item -LiteralPath $script:LockPath -Force -ErrorAction SilentlyContinue
+    try {
+        return [System.IO.File]::Open($script:LockPath, 'OpenOrCreate', 'ReadWrite', 'None')
+    } catch {
+        return $null
+    }
+}
+
+function Write-PollPid {
+    try {
+        Write-JsonFile -Path $script:LockPidPath -Data ([ordered]@{
+            pid        = $PID
+            started_at = Get-BeijingStamp
+            script     = 'Invoke-CgmdPoll.ps1'
+            host       = $env:COMPUTERNAME
+        })
+    } catch { }
+}
+
+function Clear-PollPid {
+    try { Remove-Item -LiteralPath $script:LockPidPath -Force -ErrorAction SilentlyContinue } catch { }
+}
+
+function Test-SmokeDue {
+    # Self-healing schedule: verify 100 ps whenever the last proof is missing,
+    # failed, or simply old.  No request file from a human is involved.
+    param([string]$Repo, [double]$IntervalHours = 24, [double]$RetryMinutes = 180)
+    $schedule = Read-JsonFile -Path (Join-Path $script:StateDir 'smoke-schedule.json')
+    if ($null -ne $schedule) {
+        $stamp = [string](Get-Property $schedule 'last_queued_at' '')
+        if ($stamp) {
+            try {
+                $last = [datetimeoffset]::Parse($stamp)
+                if (([datetimeoffset]::Now - $last).TotalMinutes -lt $RetryMinutes) { return $false }
+            } catch { }
+        }
+    }
+    $report = Read-JsonFile -Path (Join-Path $Repo 'results\status\gmx_smoke.json')
+    if ($null -eq $report) { return $true }
+    if ([string](Get-Property $report 'status' 'unknown') -ne 'ok') { return $true }
+    $generated = [string](Get-Property $report 'generated_at' '')
+    if (-not $generated) { return $true }
+    try {
+        return (([datetimeoffset]::Now - [datetimeoffset]::Parse($generated)).TotalHours -ge $IntervalHours)
+    } catch {
+        return $true
+    }
+}
+
+function Invoke-MailboxOnce {
+    # Runs the worker in its own process so a broken job cannot take the poll
+    # down, then copies its ledger into results/status for remote inspection.
+    param([string]$Repo, [string]$Branch, [string]$Ref = '', [int]$MaxJobs = 1)
+    $worker = Join-Path $PSScriptRoot 'Invoke-CgmdMailbox.ps1'
+    if (-not (Test-Path -LiteralPath $worker)) { return }
+    $log = Join-Path $script:StateDir 'mailbox-call.log'
+    $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $worker + '" -RepoPath "' + $Repo + '" -MaxJobs ' + $MaxJobs + ' -Quiet'
+    if ($Branch) { $line += ' -Branch "' + $Branch + '"' }
+    if ($Ref) { $line += ' -Ref "' + $Ref + '"' }
+    $code = Invoke-Captured -CommandLine $line -OutFile $log -TimeoutSeconds 2700
+    Write-HubLog ('mailbox worker exit ' + $code)
+    $last = Read-JsonFile -Path (Join-Path $script:StateDir 'mailbox-last.json')
+    if ($null -eq $last) { return }
+    $statusDir = Join-Path (Join-Path $Repo 'results') 'status'
+    if (-not (Test-Path -LiteralPath $statusDir)) {
+        New-Item -ItemType Directory -Path $statusDir -Force | Out-Null
+    }
+    Write-JsonFile -Path (Join-Path $statusDir 'hub_mailbox.json') -Data $last
+    # Publish on every cycle (Publish-Results is a no-op when nothing changed):
+    # a remote reader must be able to tell "worker ran, queue empty" from
+    # "worker never ran".
+    if (-not $NoPublish) {
+        $null = Publish-Results -Repo $Repo -Branch $Branch -Message 'mailbox: worker report [desktop hub]'
+    }
 }
 
 function Read-JsonFile {
@@ -163,6 +268,17 @@ function Invoke-Captured {
         }
     } else {
         $proc.WaitForExit()
+    }
+    # Start-Process -PassThru does not reliably expose ExitCode for console
+    # programs on PS 5.1 (it came back empty on the workstation), so the wrapper
+    # echoes %ERRORLEVEL% into the log and that is what gets read back.
+    if (Test-Path -LiteralPath $OutFile) {
+        try {
+            $text = [System.IO.File]::ReadAllText($OutFile, [System.Text.Encoding]::UTF8)
+            $match = [regex]::Match($text, 'CGMD_EXIT_CODE=(-?\d+)')
+            if ($match.Success) { return [int]$match.Groups[1].Value }
+            if ($text -match 'Fatal error') { return 1 }
+        } catch { }
     }
     return $proc.ExitCode
 }
@@ -301,12 +417,12 @@ function Publish-Heartbeat {
 # ---------------------------------------------------------------------------
 $startedAt = Get-Date
 try {
-    try {
-        $script:Lock = [System.IO.File]::Open($script:LockPath, 'OpenOrCreate', 'ReadWrite', 'None')
-    } catch {
+    $script:Lock = Open-PollLock -StaleMinutes $StaleLockMinutes
+    if ($null -eq $script:Lock) {
         Write-HubLog 'another poll is running, exiting' 'WARN'
         exit 0
     }
+    Write-PollPid
 
     $cfg = Get-HubConfig -Path $ConfigPath
     $script:Config = $cfg
@@ -363,7 +479,49 @@ try {
         }
     }
 
-    # --- 1b. on-demand self-check / desk deployment -----------------------
+    $requestFile = Join-Path $repo 'results\status\selfcheck_request.json'
+
+    # --- 1b. mailbox bus: any session, any branch -> this workstation -----
+    # Work is queued on a dedicated ref (default hub/mailbox), so a caller
+    # never commits to its own branch: the rebase conflicts that used to cost
+    # a whole round trip cannot happen.  A mailbox failure must never stop the
+    # poll, so everything is wrapped.
+    if ([bool](Get-Property $cfg 'mailbox_enabled' $true)) {
+        try {
+            Invoke-MailboxOnce -Repo $repo -Branch $branch `
+                -Ref ([string](Get-Property $cfg 'mailbox_ref' '')) `
+                -MaxJobs ([int](Get-Property $cfg 'mailbox_jobs_per_poll' 1))
+        } catch {
+            Write-HubLog ('mailbox step failed: ' + $_.Exception.Message) 'WARN'
+        }
+    }
+
+    # --- 1b-2. self-healing 100 ps schedule -------------------------------
+    # The operator should never have to ask for the smoke test again: if the
+    # last proof is missing, failed or older than smoke_interval_hours, queue
+    # it here.  Retries are rate limited so a broken workstation does not spend
+    # every cycle on a doomed run.
+    if ([bool](Get-Property $cfg 'smoke_auto' $true) -and -not (Test-Path -LiteralPath $requestFile)) {
+        if (Test-SmokeDue -Repo $repo `
+                -IntervalHours ([double](Get-Property $cfg 'smoke_interval_hours' 24)) `
+                -RetryMinutes ([double](Get-Property $cfg 'smoke_retry_minutes' 180))) {
+            Write-JsonFile -Path $requestFile -Data ([ordered]@{
+                schema       = 'cgmd.selfcheck.request.v1'
+                desk         = $false
+                smoke        = $true
+                how          = 'automatic schedule (self-healing), no human involved'
+                requested_at = Get-BeijingStamp
+                requested_by = 'hub-scheduler'
+                note         = 'periodic 100 ps verification of the workstation'
+            })
+            Write-JsonFile -Path (Join-Path $script:StateDir 'smoke-schedule.json') -Data ([ordered]@{
+                last_queued_at = Get-BeijingStamp
+            })
+            Write-HubLog 'smoke schedule: queued an automatic 100 ps verification'
+        }
+    }
+
+    # --- 1c. on-demand self-check / desk deployment -----------------------
     # Any client (Arena agent, laptop, phone) may drop
     # results/status/selfcheck_request.json into the branch.  With desk=false
     # the desktop runs Test-CgmdHub.ps1 (17 checks); with desk=true it runs
@@ -371,7 +529,6 @@ try {
     # and then checks; with smoke=true it first integrates 100 ps with GROMACS
     # and publishes results/status/gmx_smoke.json.  Either way the report is
     # published and the request file is deleted so the next poll is quiet.
-    $requestFile = Join-Path $repo 'results\status\selfcheck_request.json'
     if (Test-Path -LiteralPath $requestFile) {
         $selfCheckScript = Join-Path $PSScriptRoot 'Test-CgmdHub.ps1'
         $syncScript = Join-Path $PSScriptRoot 'Sync-Desktop.ps1'
@@ -643,6 +800,7 @@ catch {
     exit 9
 }
 finally {
+    Clear-PollPid
     if ($null -ne $script:Lock) {
         try { $script:Lock.Dispose() } catch { }
         try {
