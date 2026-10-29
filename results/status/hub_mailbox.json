@@ -1,29 +1,27 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:49:55+08:00",
+    "generated_at":  "2026-10-29T14:51:55+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261029T065021-c6ea.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
                      "20261029T063955-a9b5":  1,
                      "20261029T064433-5331":  1,
                      "20261029T064657-a850":  1,
-                     "20261029T064849-5f39":  1
+                     "20261029T064849-5f39":  1,
+                     "20261029T065021-c6ea":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:16:57 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
-                     "2026-10-29 14:17:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-29 14:17:55 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:18:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:18:56 [WARN] job 20261029T061550-2d7d already answered, dropping the duplicate request",
                      "2026-10-29 14:19:56 [INFO] mailbox: 1 queued, running at most 1",
@@ -80,15 +78,30 @@
                      "2026-10-29 14:48:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:48:56 [INFO] job kind=selfcheck",
                      "2026-10-29 14:49:24 [INFO] job 20261029T064849-5f39 (selfcheck) -\u003e fail: selfcheck: 0 pass / 0 warn / 0 fail",
-                     "2026-10-29 14:49:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-29 14:49:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-29 14:50:57 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 14:50:57 [INFO] job kind=sync",
+                     "2026-10-29 14:51:51 [INFO] job 20261029T065021-c6ea (sync) -\u003e fail: sync exit 6"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
-
+                      {
+                          "id":  "20261029T065021-c6ea",
+                          "kind":  "sync",
+                          "status":  "fail",
+                          "summary":  "sync exit 6"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T065021-c6ea",
+                       "kind":  "sync",
+                       "status":  "fail",
+                       "summary":  "sync exit 6",
+                       "finished_at":  "2026-10-29T14:51:51+08:00"
+                   },
                    {
                        "id":  "20261029T064849-5f39",
                        "kind":  "selfcheck",
