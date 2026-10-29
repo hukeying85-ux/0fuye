@@ -103,13 +103,13 @@ python3 -m core.task_contract show      --path results/status/cgmd_task.json
 
 ---
 
-## 2.5 打通验证：台式机同步 + 自检（17 项，结果进 git）
+## 2.5 打通验证：台式机同步 + 自检（18 项，结果进 git）
 
-「台式机接上了没有」不再靠猜：一条命令同步代码（含 Arena Desk）+ 17 项检查，结论写进
+「台式机接上了没有」不再靠猜：一条命令同步代码（含 Arena Desk）+ 18 项检查，结论写进
 `results/status/desktop_selfcheck.json`（schema `cgmd.selfcheck.v1`），随分支同步。
 
 ```powershell
-# 台式机上一条命令：拉最新 -> 重新部署 Arena Desk -> 17 项自检 -> 报告自动 push
+# 台式机上一条命令：拉最新 -> 重新部署 Arena Desk -> 18 项自检 -> 报告自动 push
 powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\runner\Sync-Desktop.ps1 -Desk -Notify
 ```
 
@@ -134,7 +134,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hu
 
 | 退出码 | 含义 |
 | --- | --- |
-| `0` | 17 项全绿，可接微秒级任务 |
+| `0` | 18 项全绿，可接微秒级任务 |
 | `6` | 有告警（如 WSL 磁盘 < 20 GB、GROMACS 无 CUDA、分支落后），仍可跑 |
 | `7` | 有失败（无 GPU / 缺依赖 / 缺 Martini 3 / 计划任务未注册 / desk 源码不全） |
 | `9` | Arena Desk 部署失败（`Sync-Desktop.ps1 -Desk`） |
@@ -257,7 +257,7 @@ Get-ScheduledTask -TaskName CGMD-Hub-Poll | Get-ScheduledTaskInfo   # 上次/下
 Get-Content C:\cgmd\0fuye\skills\cgmd-hub\logs\hub-*.log -Tail 30 -Wait
 Get-Content C:\cgmd\0fuye\skills\cgmd-hub\state\hub-state.json      # 心跳（含上次任务摘要）
 C:\cgmd\0fuye\skills\cgmd-hub\runner\Invoke-CgmdPoll.ps1 -Force      # 手动触发一次（前台版，便于排错）
-C:\cgmd\0fuye\skills\cgmd-hub\runner\Sync-Desktop.ps1 -Desk -Notify      # 同步+部署 desk+17 项自检
+C:\cgmd\0fuye\skills\cgmd-hub\runner\Sync-Desktop.ps1 -Desk -Notify      # 同步+部署 desk+18 项自检
 C:\cgmd\0fuye\skills\cgmd-hub\runner\Test-CgmdHub.ps1 -Push -Notify    # 只自检并回传报告
 C:\cgmd\0fuye\skills\cgmd-hub\runner\Unregister-CgmdHubTask.ps1      # 彻底停止守护
 ```

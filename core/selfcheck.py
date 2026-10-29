@@ -71,6 +71,7 @@ CHECK_IDS = (
     "desk-src",
     "desk-app",
     "desk-http",
+    "gmxrun",
 )
 
 STATUSES = ("pass", "warn", "fail")
@@ -89,7 +90,12 @@ def beijing_iso() -> str:
 # ---------------------------------------------------------------------------
 # request document
 # ---------------------------------------------------------------------------
-def new_request(note: str = "", requested_by: str = "arena-agent", desk: bool = False) -> dict:
+def new_request(
+    note: str = "",
+    requested_by: str = "arena-agent",
+    desk: bool = False,
+    smoke: bool = False,
+) -> dict:
     """A request asks the desktop to refresh itself on its next poll.
 
     ``desk=True`` also redeploys Arena Desk (``code/panel/deploy.ps1``) through
@@ -101,8 +107,15 @@ def new_request(note: str = "", requested_by: str = "arena-agent", desk: bool = 
         "requested_by": requested_by,
         "note": note,
         "desk": bool(desk),
+        "smoke": bool(smoke),
     }
-    if desk:
+    if smoke:
+        request["how"] = (
+            "the desktop hub runs `python3 -m cgmd.smoke --ps 100` inside WSL2 on "
+            "its next poll, publishes results/status/gmx_smoke.json (GROMACS "
+            "version + software inventory + 100 ps integration) and deletes this file"
+        )
+    elif desk:
         request["how"] = (
             "the desktop hub runs Sync-Desktop.ps1 -Desk on its next poll: git "
             "reset to the branch tip, redeploy Arena Desk, run the 17-point "
@@ -128,8 +141,9 @@ def validate_request(request: dict) -> list:
         problems.append("requested_at must be an ISO-8601 timestamp with a T separator")
     if "requested_by" not in request:
         problems.append("requested_by is required")
-    if "desk" in request and not isinstance(request["desk"], bool):
-        problems.append("desk must be a boolean when present")
+    for flag in ("desk", "smoke"):
+        if flag in request and not isinstance(request[flag], bool):
+            problems.append(flag + " must be a boolean when present")
     return problems
 
 
@@ -331,7 +345,9 @@ def _cmd_show(args: argparse.Namespace) -> int:
 
 
 def _cmd_request(args: argparse.Namespace) -> int:
-    request = new_request(note=args.note or "", requested_by=args.by, desk=bool(args.desk))
+    request = new_request(
+        note=args.note or "", requested_by=args.by, desk=bool(args.desk), smoke=bool(args.smoke)
+    )
     path = args.path or REQUEST_PATH
     if args.write:
         dump(request, path)
@@ -411,6 +427,7 @@ def main(argv=None) -> int:
     p_request.add_argument("--path", default="")
     p_request.add_argument("--write", action="store_true")
     p_request.add_argument("--desk", action="store_true", help="also redeploy Arena Desk")
+    p_request.add_argument("--smoke", action="store_true", help="run the 100 ps GROMACS smoke test")
     p_request.set_defaults(func=_cmd_request)
 
     p_beat = sub.add_parser("heartbeat", help="is the workstation watcher alive?")

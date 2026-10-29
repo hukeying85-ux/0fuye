@@ -329,14 +329,64 @@ try {
     # results/status/selfcheck_request.json into the branch.  With desk=false
     # the desktop runs Test-CgmdHub.ps1 (17 checks); with desk=true it runs
     # Sync-Desktop.ps1 -Desk, which pulls the branch tip, redeploys Arena Desk
-    # and then checks.  Either way the report is published and the request
-    # file is deleted so the next poll does not repeat the work.
+    # and then checks; with smoke=true it first integrates 100 ps with GROMACS
+    # and publishes results/status/gmx_smoke.json.  Either way the report is
+    # published and the request file is deleted so the next poll is quiet.
     $requestFile = Join-Path $repo 'results\status\selfcheck_request.json'
     if (Test-Path -LiteralPath $requestFile) {
         $selfCheckScript = Join-Path $PSScriptRoot 'Test-CgmdHub.ps1'
         $syncScript = Join-Path $PSScriptRoot 'Sync-Desktop.ps1'
         $request = Read-JsonFile -Path $requestFile
         $wantDesk = [bool](Get-Property $request 'desk' $false)
+        $wantSmoke = [bool](Get-Property $request 'smoke' $false)
+
+        # --- 1b-1. real GROMACS smoke test (100 ps) -----------------------
+        if ($wantSmoke) {
+            Write-HubLog 'smoke requested: running cgmd.smoke (100 ps) inside WSL2'
+            Send-Beacon -Title '[CGMD] gmx smoke test' -Message ('desktop ' + $env:COMPUTERNAME + ' is integrating 100 ps with GROMACS now') -Tags @('microscope')
+            $wslRepoSmoke = Convert-ToWslPath -WindowsPath $repo
+            $smokeWork = ($wslWork.TrimEnd('/') + '/smoke-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+            $smokeParts = @()
+            $smokeParts += ('cd ' + (Quote-Bash $wslRepoSmoke))
+            $smokeParts += ('export PYTHONPATH=' + (Quote-Bash ($wslRepoSmoke + ':' + $wslRepoSmoke + '/code/cgmd')) + ' PYTHONIOENCODING=utf-8')
+            $smokeParts += ('python3 -m cgmd.smoke --ps 100 --gpu-id ' + $gpuId +
+                            ' --workdir ' + (Quote-Bash $smokeWork) +
+                            ' --out results/status/gmx_smoke.json --timeout 3600')
+            $smokeCommand = 'wsl.exe -d ' + $script:Distro + ' -- bash -c "' + ($smokeParts -join ' && ') + '"'
+            $smokeLog = Join-Path $script:StateDir 'smoke-call.log'
+            $smokeCode = Invoke-Captured -CommandLine $smokeCommand -OutFile $smokeLog -TimeoutSeconds 3700
+            Write-HubLog ("smoke finished with exit code {0}" -f $smokeCode)
+            if (Test-Path -LiteralPath $smokeLog) {
+                $smokeTail = ([System.IO.File]::ReadAllLines($smokeLog, [System.Text.Encoding]::UTF8) | Select-Object -Last 30) -join [Environment]::NewLine
+                Write-HubLog ("smoke output (tail):" + [Environment]::NewLine + $smokeTail)
+            }
+            $smokeReport = Read-JsonFile -Path (Join-Path $repo 'results\status\gmx_smoke.json')
+            $smokeMessage = 'gmx smoke: no report produced'
+            $smokeTags = @('rotating_light')
+            if ($null -ne $smokeReport) {
+                $smokeStatus = [string](Get-Property $smokeReport 'status' 'unknown')
+                $gmxInfo = Get-Property $smokeReport 'software' $null
+                $gmxVersion = ''
+                if ($null -ne $gmxInfo) {
+                    $gmxBlock = Get-Property $gmxInfo 'gromacs' $null
+                    if ($null -ne $gmxBlock) { $gmxVersion = [string](Get-Property $gmxBlock 'version' '') }
+                }
+                $smokePs = Get-Property $smokeReport 'ps_completed' 0
+                $smokeMessage = ('gmx {0}: {1}, {2} ps integrated' -f $gmxVersion, $smokeStatus, $smokePs)
+                $smokeError = [string](Get-Property $smokeReport 'stage_error' '')
+                if ($smokeError) { $smokeMessage += (' | ' + $smokeError) }
+                if ($smokeStatus -eq 'ok') { $smokeTags = @('white_check_mark') }
+            }
+            Send-Beacon -Title '[CGMD] gmx smoke result' -Message $smokeMessage -Tags $smokeTags
+            Remove-Item -LiteralPath $requestFile -Force -ErrorAction SilentlyContinue
+            if (-not $NoPublish) {
+                $null = Publish-Results -Repo $repo -Branch $branch -Message 'smoke: gmx 100 ps report [desktop hub]'
+            }
+            Write-HubLog 'smoke cycle complete'
+            Publish-Heartbeat -Repo $repo -Branch $branch -State 'smoke-done' -TaskId 'gmx-smoke' -Minutes $HeartbeatMinutes
+            exit 0
+        }
+
         $runnerScript = $selfCheckScript
         $runnerArgs = '-Quiet'
         if ($wantDesk -and (Test-Path -LiteralPath $syncScript)) {

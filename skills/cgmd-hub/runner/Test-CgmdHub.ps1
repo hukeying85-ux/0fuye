@@ -33,6 +33,7 @@
         desk-src  code/panel (Arena Desk) is complete inside the clone
         desk-app  ArenaDesk.exe is deployed with a version marker
         desk-http the panel answers on http://127.0.0.1:18765/api/state
+        gmxrun    the last 100 ps GROMACS smoke test in git succeeded
 
     Exit codes:  0 all pass | 6 warnings only | 7 at least one failure |
                  5 origin lock violation | 4 configuration missing.
@@ -199,40 +200,87 @@ function Get-WslExe {
     return ''
 }
 
-function Invoke-WslProbe {
-    param([string]$Distro, [string]$ScriptText, [int]$TimeoutSeconds = 120)
-    $exe = Get-WslExe
-    if (-not $exe) { return $null }
-    $bytes = [System.Text.Encoding]::ASCII.GetBytes(($ScriptText -replace "`r", ''))
-    $payload = [Convert]::ToBase64String($bytes)
-    $inner = 'echo ' + $payload + ' | base64 -d | bash'
-    # cmd.exe/wsl.exe re-parse the command line, so the bash payload is wrapped
-    # in double quotes; the payload itself is base64 and holds no quote at all.
-    $argumentLine = '-d ' + $Distro + ' -- bash -lc "' + $inner + '"'
-    $outFile = Join-Path $script:StateDir 'wsl-probe.out'
-    $errFile = Join-Path $script:StateDir 'wsl-probe.err'
+function Read-TextSafely {
+    param([string]$Path)
+    # wsl.exe writes UTF-16LE when its output is redirected on some Windows
+    # builds; decode whatever we get instead of trusting one code page.
+    if (-not (Test-Path -LiteralPath $Path)) { return '' }
     try {
-        $proc = Start-Process -FilePath $exe -ArgumentList $argumentLine -NoNewWindow -PassThru `
+        $bytes = [System.IO.File]::ReadAllBytes($Path)
+    } catch {
+        return ''
+    }
+    if ($bytes.Length -eq 0) { return '' }
+    $nul = 0
+    $probe = [math]::Min($bytes.Length, 400)
+    for ($i = 0; $i -lt $probe; $i++) { if ($bytes[$i] -eq 0) { $nul++ } }
+    if ($nul -gt ($probe / 4)) {
+        return ([System.Text.Encoding]::Unicode.GetString($bytes)).Trim()
+    }
+    if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
+        return ([System.Text.Encoding]::UTF8.GetString($bytes, 3, $bytes.Length - 3)).Trim()
+    }
+    return ([System.Text.Encoding]::UTF8.GetString($bytes)).Trim()
+}
+
+function Invoke-WslRaw {
+    param([string]$Arguments, [int]$TimeoutSeconds = 60)
+    $exe = Get-WslExe
+    if (-not $exe) { return [pscustomobject]@{ Code = -1; Out = ''; Err = 'wsl.exe not found' } }
+    $stamp = [guid]::NewGuid().ToString('N').Substring(0, 8)
+    $outFile = Join-Path $script:StateDir ('wsl-' + $stamp + '.out')
+    $errFile = Join-Path $script:StateDir ('wsl-' + $stamp + '.err')
+    try {
+        $proc = Start-Process -FilePath $exe -ArgumentList $Arguments -NoNewWindow -PassThru `
             -RedirectStandardOutput $outFile -RedirectStandardError $errFile
         if (-not $proc.WaitForExit($TimeoutSeconds * 1000)) {
             & taskkill.exe /F /T /PID $proc.Id 2>&1 | Out-Null
-            return [pscustomobject]@{ Code = -1; Lines = @(); Error = 'probe timed out' }
+            return [pscustomobject]@{ Code = -1; Out = ''; Err = 'timed out after ' + $TimeoutSeconds + ' s' }
         }
-        $lines = @()
-        if (Test-Path -LiteralPath $outFile) {
-            $lines = [System.IO.File]::ReadAllLines($outFile, [System.Text.Encoding]::UTF8)
+        return [pscustomobject]@{
+            Code = $proc.ExitCode
+            Out  = (Read-TextSafely -Path $outFile)
+            Err  = (Read-TextSafely -Path $errFile)
         }
-        $errorText = ''
-        if (Test-Path -LiteralPath $errFile) {
-            $errorText = ([System.IO.File]::ReadAllText($errFile, [System.Text.Encoding]::UTF8)).Trim()
-        }
-        return [pscustomobject]@{ Code = $proc.ExitCode; Lines = $lines; Error = $errorText }
     } catch {
-        return [pscustomobject]@{ Code = -1; Lines = @(); Error = $_.Exception.Message }
+        return [pscustomobject]@{ Code = -1; Out = ''; Err = $_.Exception.Message }
     } finally {
         foreach ($path in @($outFile, $errFile)) {
             if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue }
         }
+    }
+}
+
+function Get-WslDistros {
+    $result = Invoke-WslRaw -Arguments '-l -q' -TimeoutSeconds 30
+    $names = @()
+    foreach ($line in ($result.Out -split "`r?`n")) {
+        $name = ($line -replace "`0", '').Trim()
+        if ($name) { $names += $name }
+    }
+    return $names
+}
+
+function Invoke-WslProbe {
+    param([string]$Distro, [string]$ScriptText, [int]$TimeoutSeconds = 120)
+    # The bash payload travels as base64 so no quoting/escaping can break it,
+    # and the sentinel lines are parsed from stdout only: a login shell may
+    # print "mesg: ttyname failed" on stderr without the probe having failed.
+    $bytes = [System.Text.Encoding]::ASCII.GetBytes($ScriptText)
+    $payload = [Convert]::ToBase64String($bytes)
+    $inner = 'echo ' + $payload + ' | base64 -d | bash'
+    $argumentLine = '-d ' + $Distro + ' -- bash -lc "' + $inner + '"'
+    $result = Invoke-WslRaw -Arguments $argumentLine -TimeoutSeconds $TimeoutSeconds
+    $lines = @()
+    foreach ($line in ($result.Out -split "`r?`n")) {
+        $clean = ($line -replace "`0", '').TrimEnd()
+        if ($clean) { $lines += $clean }
+    }
+    return [pscustomobject]@{
+        Code   = $result.Code
+        Lines  = $lines
+        Error  = (($result.Err -split "`r?`n") | Where-Object { $_ -and $_ -notmatch 'mesg: ttyname failed' } | Select-Object -Last 4) -join ' | '
+        Distro = $Distro
     }
 }
 
@@ -450,23 +498,39 @@ echo "PROBE_DONE=1"
 '@
 
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
-$probeResult = Invoke-WslProbe -Distro $distro -ScriptText $probeScript -TimeoutSeconds $TimeoutSeconds
+$probeResult = $null
+$probe = @{}
+$candidates = @($distro)
+if (-not $NoRemote) {
+    foreach ($name in (Get-WslDistros)) {
+        if ($name -and ($candidates -notcontains $name)) { $candidates += $name }
+    }
+}
+$probeDistro = $distro
+foreach ($candidate in $candidates) {
+    $attempt = Invoke-WslProbe -Distro $candidate -ScriptText $probeScript -TimeoutSeconds $TimeoutSeconds
+    $parsed = ConvertFrom-ProbeLines -Lines $attempt.Lines
+    if ($parsed.ContainsKey('PROBE_DONE')) {
+        $probeResult = $attempt
+        $probe = $parsed
+        $probeDistro = $candidate
+        break
+    }
+    if ($null -eq $probeResult) { $probeResult = $attempt }
+}
 $sw.Stop()
 $probeSeconds = [math]::Round($sw.Elapsed.TotalSeconds, 2)
-$probe = @{}
 if ($null -eq $probeResult) {
     Add-Check 'wsl' 'WSL2 distro' 'fail' 'wsl.exe not found; install WSL2 (wsl --install -d Ubuntu)'
-} elseif ($probeResult.Code -ne 0 -or $probeResult.Lines.Count -eq 0) {
+} elseif ($probe.Count -eq 0 -or -not $probe.ContainsKey('PROBE_DONE')) {
     $why = $probeResult.Error
-    if (-not $why) { $why = 'no output' }
-    Add-Check 'wsl' 'WSL2 distro' 'fail' ('distro ' + $distro + ' did not answer: ' + $why)
+    if (-not $why) { $why = 'exit code ' + $probeResult.Code + ', no sentinel output' }
+    $tried = ($candidates -join ', ')
+    Add-Check 'wsl' 'WSL2 distro' 'fail' ('no distro answered (tried: ' + $tried + '): ' + $why) $probeSeconds
+} elseif ($probeDistro -ne $distro) {
+    Add-Check 'wsl' 'WSL2 distro' 'warn' ($probeDistro + ' answered, but the config says ' + $distro + ' | fix wsl_distro in config\cgmd_hub.local.json')
 } else {
-    $probe = ConvertFrom-ProbeLines -Lines $probeResult.Lines
-    if ($probe.ContainsKey('WSL_OK') -and $probe.ContainsKey('PROBE_DONE')) {
-        Add-Check 'wsl' 'WSL2 distro' 'pass' ($distro + ' | ' + $probe['OS'] + ' | ' + $probe['NPROC'] + ' cores | ' + $probe['MEM_GB'] + ' GB RAM') $probeSeconds
-    } else {
-        Add-Check 'wsl' 'WSL2 distro' 'fail' ('probe exited early: ' + $probeResult.Error) $probeSeconds
-    }
+    Add-Check 'wsl' 'WSL2 distro' 'pass' ($probeDistro + ' | ' + $probe['OS'] + ' | ' + $probe['NPROC'] + ' cores | ' + $probe['MEM_GB'] + ' GB RAM') $probeSeconds
 }
 
 # ---------------------------------------------------------------------------
@@ -617,6 +681,37 @@ if ($NoRemote) {
 }
 
 # ---------------------------------------------------------------------------
+# 7c. the last real GROMACS run (100 ps smoke test), straight from git
+# ---------------------------------------------------------------------------
+$smokePath = Join-Path (Join-Path (Join-Path $repo 'results') 'status') 'gmx_smoke.json'
+if (-not (Test-Path -LiteralPath $smokePath)) {
+    Add-Check 'gmxrun' 'last 100 ps mdrun' 'warn' 'no results/status/gmx_smoke.json yet | queue one with: python3 -m core.selfcheck request --smoke --write'
+} else {
+    $smokeDoc = Read-JsonFile -Path $smokePath
+    if ($null -eq $smokeDoc) {
+        Add-Check 'gmxrun' 'last 100 ps mdrun' 'fail' 'gmx_smoke.json is not valid JSON'
+    } else {
+        $smokeStatus = [string](Get-Property $smokeDoc 'status' 'unknown')
+        $smokePs = Get-Property $smokeDoc 'ps_completed' 0
+        $smokeAt = [string](Get-Property $smokeDoc 'generated_at' '')
+        $smokeGmx = ''
+        $smokeSoftware = Get-Property $smokeDoc 'software' $null
+        if ($null -ne $smokeSoftware) {
+            $gmxBlock = Get-Property $smokeSoftware 'gromacs' $null
+            if ($null -ne $gmxBlock) { $smokeGmx = [string](Get-Property $gmxBlock 'version' '') }
+        }
+        $smokeDetail = ('{0} | gmx {1} | {2} ps | {3}' -f $smokeStatus, $smokeGmx, $smokePs, $smokeAt)
+        $smokeError = [string](Get-Property $smokeDoc 'stage_error' '')
+        if ($smokeError) { $smokeDetail += (' | ' + $smokeError) }
+        if ($smokeStatus -eq 'ok') {
+            Add-Check 'gmxrun' 'last 100 ps mdrun' 'pass' $smokeDetail
+        } else {
+            Add-Check 'gmxrun' 'last 100 ps mdrun' 'fail' $smokeDetail
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
 # 8. scheduled task
 # ---------------------------------------------------------------------------
 $taskCheck = $null
@@ -690,7 +785,7 @@ $report = [pscustomobject]@{
         os         = [string](Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue).Caption
         repo       = $repo
         branch     = $branch
-        wsl_distro = $distro
+        wsl_distro = $probeDistro
         gpu_id     = $gpuId
     }
     versions   = [pscustomobject]@{
@@ -725,13 +820,13 @@ $reportDir = Split-Path -Parent $reportPath
 if (-not (Test-Path -LiteralPath $reportDir)) {
     New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
 }
-$reportJson = $report | ConvertTo-Json -Depth 8
-[System.IO.File]::WriteAllText($reportPath, $reportJson, (New-Object System.Text.UTF8Encoding($false)))
+$json = $report | ConvertTo-Json -Depth 8
+[System.IO.File]::WriteAllText($reportPath, $json, (New-Object System.Text.UTF8Encoding($false)))
 $stateCopy = Join-Path $script:StateDir 'last-selfcheck.json'
-[System.IO.File]::WriteAllText($stateCopy, $reportJson, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText($stateCopy, $json, (New-Object System.Text.UTF8Encoding($false)))
 
 if ($Json) {
-    Write-Output $reportJson
+    Write-Output $json
 } elseif (-not $Quiet) {
     Write-Host ''
     Write-Host ('=' * 74) -ForegroundColor DarkGray
