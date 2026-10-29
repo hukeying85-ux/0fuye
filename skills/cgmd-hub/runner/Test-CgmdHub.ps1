@@ -725,13 +725,13 @@ $reportDir = Split-Path -Parent $reportPath
 if (-not (Test-Path -LiteralPath $reportDir)) {
     New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
 }
-$json = $report | ConvertTo-Json -Depth 8
-[System.IO.File]::WriteAllText($reportPath, $json, (New-Object System.Text.UTF8Encoding($false)))
+$reportJson = $report | ConvertTo-Json -Depth 8
+[System.IO.File]::WriteAllText($reportPath, $reportJson, (New-Object System.Text.UTF8Encoding($false)))
 $stateCopy = Join-Path $script:StateDir 'last-selfcheck.json'
-[System.IO.File]::WriteAllText($stateCopy, $json, (New-Object System.Text.UTF8Encoding($false)))
+[System.IO.File]::WriteAllText($stateCopy, $reportJson, (New-Object System.Text.UTF8Encoding($false)))
 
 if ($Json) {
-    Write-Output $json
+    Write-Output $reportJson
 } elseif (-not $Quiet) {
     Write-Host ''
     Write-Host ('=' * 74) -ForegroundColor DarkGray

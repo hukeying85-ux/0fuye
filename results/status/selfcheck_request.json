@@ -1,8 +1,0 @@
-{
-  "desk": true,
-  "how": "the desktop hub runs Sync-Desktop.ps1 -Desk on its next poll: git reset to the branch tip, redeploy Arena Desk, run the 17-point self-check, push results/status/desktop_sync.json + desktop_selfcheck.json, then delete this file",
-  "note": "sync desk + 17-point self-check (branch arena/32cd826e-0fuye)",
-  "requested_at": "2026-10-29T10:12:11+08:00",
-  "requested_by": "arena-agent",
-  "schema": "cgmd.selfcheck.request.v1"
-}
