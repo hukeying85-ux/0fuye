@@ -406,12 +406,12 @@ def probe_and_sync_desktop_hub(data_dir: pathlib.Path, results_dir: pathlib.Path
                 "}\n"
                 "$cgBootstrap = Join-Path (Split-Path $PSScriptRoot -Parent) 'cgmd-hub\\bootstrap_desktop.ps1'\n"
                 "if (Test-Path -LiteralPath $cgBootstrap) {\n"
-                "    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $cgBootstrap\n"
+                "    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $cgBootstrap -SkipCredentials -SkipWslSetup -SkipFirstPoll\n"
                 "}\n"
                 "$repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent\n"
                 "$panelDeploy = Join-Path $repoRoot 'code\\panel\\deploy.ps1'\n"
                 "if (Test-Path -LiteralPath $panelDeploy) {\n"
-                "    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $panelDeploy -OpenMainWindow\n"
+                "    & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $panelDeploy -OpenMainWindow -SkipAutoHeal\n"
                 "}\n"
                 "Write-Output '[OK] Desktop default zero-window git-sync-hub + cgmd-hub + Arena Desk v2.8 installed!'\n",
                 encoding="ascii",
@@ -506,8 +506,8 @@ def probe_and_sync_desktop_hub(data_dir: pathlib.Path, results_dir: pathlib.Path
                 f"/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -NoProfile -ExecutionPolicy Bypass -Command '{ps_payload}'",
             ):
                 rc, out, err = _run_silent(
-                    ["ssh.exe", "-o", "BatchMode=yes", "-o", "User=" + ssh_user, "-o", "ConnectTimeout=4", "-o", "StrictHostKeyChecking=accept-new", reachable_ip, remote_shell],
-                    timeout=90,
+                    ["ssh.exe", "-n", "-o", "BatchMode=yes", "-o", "User=" + ssh_user, "-o", "ConnectTimeout=5", "-o", "ServerAliveInterval=5", "-o", "ServerAliveCountMax=2", "-o", "StrictHostKeyChecking=accept-new", reachable_ip, remote_shell],
+                    timeout=75,
                 )
                 ssh_attempts.append(f"{ssh_user}@{reachable_ip}:rc={rc}:{(out or err)[:80]}")
                 if rc == 0:

@@ -8,10 +8,72 @@ $syncRoot = 'E:\0github\.git-sync'
 $written = @()
 
 $workerCode = @'
-# hub-worker.ps1 - Hot-reloaded every 15s cycle by git-sync-hub v4.0 (v4.3 Zero-Window Silent Edition)
-# 1. Auto-switches gh active account back to mqgg5630-cyber if hosts.yml drifted (CRLF-safe regex)
-# 2. Pins GUI-subsystem git-credential-arenasilent.exe so git ls-remote NEVER spawns sh.exe / conhost
-# 3. Auto-locks 0fuye back to private:true if ever temporarily opened
+# hub-worker.ps1 - Hot-reloaded every 15s cycle by git-sync-hub v4.0 (v4.4 Zero-Window Tree-Safe Edition)
+# 1. Hardens Invoke-ProcessSilent with closed stdin + taskkill /F /T + bounded stream wait so child ssh never hangs
+# 2. Auto-switches gh active account back to mqgg5630-cyber if hosts.yml drifted (CRLF-safe regex)
+# 3. Pins GUI-subsystem git-credential-arenasilent.exe so git ls-remote NEVER spawns sh.exe / conhost
+# 4. Auto-locks 0fuye back to private:true if ever temporarily opened
+
+function Invoke-ProcessSilent {
+    param(
+        [string]$FileName,
+        [string]$Arguments,
+        [string]$WorkingDirectory = $PSScriptRoot,
+        [int]$TimeoutSeconds = 120,
+        [string]$StdinText = ''
+    )
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    try {
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName               = $FileName
+        $psi.Arguments              = $Arguments
+        if ($WorkingDirectory -and (Test-Path -LiteralPath $WorkingDirectory)) {
+            $psi.WorkingDirectory   = $WorkingDirectory
+        }
+        $psi.UseShellExecute        = $false
+        $psi.CreateNoWindow         = $true
+        $psi.WindowStyle            = [System.Diagnostics.ProcessWindowStyle]::Hidden
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError  = $true
+        $psi.RedirectStandardInput  = $true
+        $psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+        $psi.StandardErrorEncoding  = [System.Text.Encoding]::UTF8
+
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        if ($StdinText) {
+            $proc.StandardInput.Write($StdinText)
+        }
+        try { $proc.StandardInput.Close() } catch {}
+        $outTask = $proc.StandardOutput.ReadToEndAsync()
+        $errTask = $proc.StandardError.ReadToEndAsync()
+
+        $finished = $proc.WaitForExit($TimeoutSeconds * 1000)
+        if (-not $finished) {
+            try { & taskkill.exe /F /T /PID $proc.Id >$null 2>&1 } catch {}
+            try { $proc.Kill() } catch {}
+            try { [void]$proc.WaitForExit(2000) } catch {}
+        }
+        $sw.Stop()
+        $outStr = ''
+        $errStr = ''
+        try { if ($outTask.Wait(2000)) { $outStr = [string]$outTask.Result } } catch {}
+        try { if ($errTask.Wait(2000)) { $errStr = [string]$errTask.Result } } catch {}
+        return @{
+            exit_code  = if ($finished) { [int]$proc.ExitCode } else { 124 }
+            stdout     = $outStr
+            stderr     = $errStr
+            elapsed_ms = [int]$sw.ElapsedMilliseconds
+        }
+    } catch {
+        $sw.Stop()
+        return @{
+            exit_code  = -1
+            stdout     = ''
+            stderr     = $_.Exception.Message
+            elapsed_ms = [int]$sw.ElapsedMilliseconds
+        }
+    }
+}
 
 function Ensure-PrimaryGhAccount {
     $ghPath = 'C:\Program Files\GitHub CLI\gh.exe'

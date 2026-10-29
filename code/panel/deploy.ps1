@@ -7,7 +7,8 @@
 param(
     [switch]$NoOpenWindow,
     [switch]$LaunchBootDemo,
-    [switch]$OpenMainWindow
+    [switch]$OpenMainWindow,
+    [switch]$SkipAutoHeal
 )
 
 $ErrorActionPreference = 'Stop'
@@ -167,14 +168,77 @@ if ((-not (Test-Path -LiteralPath $cfLocal)) -and (-not (Get-Command 'cloudflare
     }
 }
 
-# Ensure Python exe and build icons if missing
-$pyExe = 'E:\spider\python.exe'
-if (-not (Test-Path -LiteralPath $pyExe)) {
-    $pyCmd = Get-Command python.exe -ErrorAction SilentlyContinue
-    if ($pyCmd) { $pyExe = $pyCmd.Source }
+# Ensure real working Python exe (skip WindowsApps Store stub; auto-provision portable Python 3.11 if missing!)
+function Test-WorkingPython([string]$cand) {
+    if ([string]::IsNullOrWhiteSpace($cand) -or ($cand -match 'WindowsApps')) { return $false }
+    if (-not (Test-Path -LiteralPath $cand)) { return $false }
+    try {
+        $probe = (& $cand -c "import http.server; print('ARENA_PY_OK')" 2>$null) -join ''
+        return ($LASTEXITCODE -eq 0 -and ($probe -match 'ARENA_PY_OK'))
+    } catch {
+        return $false
+    }
 }
+
+$pyCands = @(
+    (Join-Path $root 'python\python.exe'),
+    'E:\spider\python.exe',
+    'C:\ProgramData\Miniforge3\python.exe',
+    'C:\ProgramData\anaconda3\python.exe',
+    'C:\ProgramData\miniconda3\python.exe',
+    "$env:USERPROFILE\Miniforge3\python.exe",
+    "$env:USERPROFILE\miniconda3\python.exe",
+    "$env:USERPROFILE\anaconda3\python.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python312\python.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python311\python.exe",
+    "$env:LOCALAPPDATA\Programs\Python\Python310\python.exe",
+    'D:\Miniforge3\python.exe',
+    'D:\miniconda3\python.exe',
+    'D:\anaconda3\python.exe',
+    'C:\Python312\python.exe',
+    'C:\Python311\python.exe'
+)
+foreach ($cmdItem in @(Get-Command python.exe -All -ErrorAction SilentlyContinue)) {
+    if ($cmdItem.Source -and ($cmdItem.Source -notmatch 'WindowsApps') -and ($pyCands -notcontains $cmdItem.Source)) {
+        $pyCands += $cmdItem.Source
+    }
+}
+
+$pyExe = ''
+foreach ($c in $pyCands) {
+    if (Test-WorkingPython $c) { $pyExe = $c; break }
+}
+
+if (-not $pyExe) {
+    $embedDir = Join-Path $root 'python'
+    New-Item -ItemType Directory -Force -Path $embedDir | Out-Null
+    $zipTmp = Join-Path $embedDir 'py311-embed.zip'
+    $mirrors = @(
+        'https://repo.huaweicloud.com/python/3.11.9/python-3.11.9-embed-amd64.zip',
+        'https://registry.npmmirror.com/-/binary/python/3.11.9/python-3.11.9-embed-amd64.zip',
+        'https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip'
+    )
+    foreach ($u in $mirrors) {
+        try {
+            & curl.exe -sSL --connect-timeout 8 --max-time 35 -o $zipTmp $u 2>$null
+            if ((Test-Path -LiteralPath $zipTmp) -and ((Get-Item -LiteralPath $zipTmp).Length -gt 5000000)) {
+                Expand-Archive -LiteralPath $zipTmp -DestinationPath $embedDir -Force
+                Remove-Item -LiteralPath $zipTmp -Force -ErrorAction SilentlyContinue
+                $pthFile = Join-Path $embedDir 'python311._pth'
+                $pthLines = @('python311.zip', '.', '..', '..\jobbeacon_src', 'import site')
+                [System.IO.File]::WriteAllLines($pthFile, $pthLines, [System.Text.Encoding]::ASCII)
+                $candEmbed = Join-Path $embedDir 'python.exe'
+                if (Test-WorkingPython $candEmbed) { $pyExe = $candEmbed; break }
+            }
+        } catch {}
+    }
+    Remove-Item -LiteralPath $zipTmp -Force -ErrorAction SilentlyContinue
+}
+
+if (-not $pyExe) { $pyExe = 'python.exe' }
 $pywExe = $pyExe -replace 'python\.exe$', 'pythonw.exe'
 if (-not (Test-Path -LiteralPath $pywExe)) { $pywExe = $pyExe }
+[System.IO.File]::WriteAllText((Join-Path "$root\data" 'pythonw-path.txt'), $pywExe, [System.Text.Encoding]::ASCII)
 
 $icoFile = Join-Path $root 'assets\ArenaDesk.ico'
 if (-not (Test-Path -LiteralPath $icoFile)) {
@@ -233,10 +297,10 @@ if ($csc) {
     }
 }
 
-# Provision non-destructive multi-account SSH 443 + zero-window git credential helper (keeps mqgg5630-cyber active)
+# Provision non-destructive multi-account SSH 443 + zero-window git credential helper on primary laptop only
 $multiGhPy = Join-Path "$root\auth" 'setup_multi_gh.py'
 $multiGhStatus = $null
-if (Test-Path -LiteralPath $multiGhPy) {
+if (($env:COMPUTERNAME -eq 'LAPTOP-R77M5D6M') -and (Test-Path -LiteralPath $multiGhPy)) {
     try {
         $rawGh = & $pyExe $multiGhPy --provision 2>$null
         if ($rawGh) { $multiGhStatus = ($rawGh | Out-String | ConvertFrom-Json) }
@@ -287,22 +351,42 @@ if ($compiledExe) {
     Install-Task 'arena-desk-open' $ps $launchArgs
 }
 
-# Create Desktop & Start Menu shortcuts with custom ArenaDesk.ico
+# Mirror universal launcher stub to C:\0apps\ArenaDesk so OneDrive-synced Desktop shortcuts work across all PCs
+$universalExe = $exePath
+if ($compiledExe -and ($root -ne 'C:\0apps\ArenaDesk')) {
+    try {
+        New-Item -ItemType Directory -Force -Path 'C:\0apps\ArenaDesk\assets' | Out-Null
+        Copy-Item -LiteralPath $exePath -Destination 'C:\0apps\ArenaDesk\ArenaDesk.exe' -Force
+        if (Test-Path -LiteralPath $icoFile) {
+            Copy-Item -LiteralPath $icoFile -Destination 'C:\0apps\ArenaDesk\assets\ArenaDesk.ico' -Force
+        }
+        $universalExe = 'C:\0apps\ArenaDesk\ArenaDesk.exe'
+    } catch {
+        $universalExe = $exePath
+    }
+}
+
+# Create Desktop & Start Menu shortcuts with custom ArenaDesk.ico across local + OneDrive Desktop folders
 $w = New-Object -ComObject WScript.Shell
-foreach ($folder in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Programs'))) {
-    if (-not $folder -or -not (Test-Path -LiteralPath $folder)) { continue }
+$shortcutFolders = @(
+    [Environment]::GetFolderPath('Desktop'),
+    (Join-Path $HOME 'Desktop'),
+    (Join-Path $HOME 'OneDrive\Desktop'),
+    [Environment]::GetFolderPath('Programs')
+) | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -Unique
+foreach ($folder in $shortcutFolders) {
     $link = $w.CreateShortcut((Join-Path $folder 'Arena Desk.lnk'))
     if ($compiledExe) {
-        $link.TargetPath = $exePath
+        $link.TargetPath = $universalExe
         $link.Arguments = ''
     } else {
         $link.TargetPath = $ps
         $link.Arguments = $launchArgs
         $link.WindowStyle = 7
     }
-    $link.WorkingDirectory = $root
+    $link.WorkingDirectory = (Split-Path -Parent $universalExe)
     $link.IconLocation = ($icoFile + ',0')
-    $link.Description = 'Arena Desk v2.6 Desktop Control Plane'
+    $link.Description = 'Arena Desk v2.8 Desktop Control Plane'
     $link.Save()
 }
 
@@ -337,10 +421,12 @@ $ghLink.IconLocation = ($icoFile + ',0')
 $ghLink.Description = 'One-Click GitHub CLI OAuth for hukeying85@gmail.com (Chrome Profile 1)'
 $ghLink.Save()
 
-# Hot-enable private repository polling + zero-window silent credential helper on git-sync-hub
-try {
-    & (Join-Path $root 'enable_private_hub.ps1') | Out-Null
-} catch {}
+# Hot-enable private repository polling + zero-window silent credential helper on primary laptop only
+if ($env:COMPUTERNAME -eq 'LAPTOP-R77M5D6M') {
+    try {
+        & (Join-Path $root 'enable_private_hub.ps1') | Out-Null
+    } catch {}
+}
 
 # Keep verified standalone desktop pet task active via GUI-subsystem ArenaSilentRun.exe (ZERO powershell console flash)
 $petExe = Get-ChildItem 'E:\0apps\DSHPet' -Filter 'dsh-pet-standalone-webm.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -389,18 +475,46 @@ try {
         }
     }
 } catch {}
-try {
-    $epHub = Join-Path $root 'enable_private_hub.ps1'
-    if (Test-Path -LiteralPath $epHub) {
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $epHub | Out-Null
-    }
-} catch {}
-try {
-    $bootInfo = Invoke-RestMethod 'http://127.0.0.1:18765/api/bootstrap' -TimeoutSec 10
-    if ($bootInfo.csrf) {
-        Invoke-RestMethod -Uri 'http://127.0.0.1:18765/api/system/auto-heal-4step' -Method Post -Headers @{ 'X-CSRF-Token' = $bootInfo.csrf; 'Origin' = 'http://127.0.0.1:18765' } -Body '{}' -ContentType 'application/json' -TimeoutSec 65 | Out-Null
-    }
-} catch {}
+if ($env:COMPUTERNAME -eq 'LAPTOP-R77M5D6M') {
+    try {
+        $epHub = Join-Path $root 'enable_private_hub.ps1'
+        if (Test-Path -LiteralPath $epHub) {
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $epHub | Out-Null
+        }
+    } catch {}
+}
+
+# Detached Win32_Process fallback when Start-ScheduledTask runs inside non-interactive OpenSSH sshd
+$httpReady = $false
+for ($w = 0; $w -lt 4; $w++) {
+    try {
+        $b = Invoke-RestMethod 'http://127.0.0.1:18765/api/bootstrap' -TimeoutSec 2
+        if ($b.version) { $httpReady = $true; break }
+    } catch {}
+    Start-Sleep -Milliseconds 600
+}
+if (-not $httpReady) {
+    try {
+        $cmdLine = '"' + $pywExe + '" "' + (Join-Path $root 'server.py') + '"'
+        Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $cmdLine; CurrentDirectory = $root } -ErrorAction SilentlyContinue | Out-Null
+        for ($w2 = 0; $w2 -lt 10; $w2++) {
+            Start-Sleep -Milliseconds 700
+            try {
+                $b2 = Invoke-RestMethod 'http://127.0.0.1:18765/api/bootstrap' -TimeoutSec 2
+                if ($b2.version) { $httpReady = $true; break }
+            } catch {}
+        }
+    } catch {}
+}
+
+if ((-not $SkipAutoHeal) -and ($env:COMPUTERNAME -eq 'LAPTOP-R77M5D6M')) {
+    try {
+        $bootInfo = Invoke-RestMethod 'http://127.0.0.1:18765/api/bootstrap' -TimeoutSec 10
+        if ($bootInfo.csrf) {
+            Invoke-RestMethod -Uri 'http://127.0.0.1:18765/api/system/auto-heal-4step' -Method Post -Headers @{ 'X-CSRF-Token' = $bootInfo.csrf; 'Origin' = 'http://127.0.0.1:18765' } -Body '{}' -ContentType 'application/json' -TimeoutSec 45 | Out-Null
+        }
+    } catch {}
+}
 $r = Invoke-RestMethod 'http://127.0.0.1:18765/api/state' -TimeoutSec 25
 $newVer = [string]$r.version
 if ($newVer) {

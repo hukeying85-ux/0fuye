@@ -64,7 +64,7 @@ namespace ArenaDeskApp
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            string appDir = AppDomain.CurrentDomain.BaseDirectory;
+            string appDir = ResolveAppDir();
             bool bootDefault = IsBootEnabledByDefault(appDir);
             string initialHash = bootDefault ? "#boot" : "";
 
@@ -104,7 +104,7 @@ namespace ArenaDeskApp
                 catch { }
 
                 ContextMenuStrip menu = new ContextMenuStrip();
-                menu.Items.Add("\u6253\u5f00 Arena Desk v2.6 \u4e3b\u7a97\u53e3 (\u542b\u5f00\u673a\u52a8\u753b)", null, (s, e) => OpenAppWindow(appDir, IsBootEnabledByDefault(appDir) ? "#boot" : ""));
+                menu.Items.Add("\u6253\u5f00 Arena Desk v2.8 \u4e3b\u7a97\u53e3 (\u542b\u5f00\u673a\u52a8\u753b)", null, (s, e) => OpenAppWindow(appDir, IsBootEnabledByDefault(appDir) ? "#boot" : ""));
                 menu.Items.Add("\u76f4\u63a5\u8fdb\u5165\u4e3b\u9762\u677f (\u8df3\u8fc7\u52a8\u753b)", null, (s, e) => OpenAppWindow(appDir, "#overview"));
                 menu.Items.Add("\ud83d\udcf1 \u5b89\u5353\u624b\u673a App \u626b\u7801\u5b89\u88c5\u4e0e\u597d\u4e86\u5417 (#beacon)", null, (s, e) => OpenAppWindow(appDir, "#beacon"));
                 menu.Items.Add("\ud83d\udc96 \u7231\u60c5\u4e0e\u7eaa\u5ff5\u7a7a\u95f4 (#love)", null, (s, e) => OpenAppWindow(appDir, "#love"));
@@ -127,7 +127,7 @@ namespace ArenaDeskApp
                 tray = new NotifyIcon
                 {
                     Icon = appIcon,
-                    Text = "Arena Desk v2.6 \u00b7 \u5168\u57df\u79d1\u7814\u00b7\u7231\u60c5\u4e0e\u5b89\u5353\u4f34\u4fa3\u63a7\u5236\u4e2d\u5fc3",
+                    Text = "Arena Desk v2.8 \u00b7 \u4e09\u8d26\u53f7\u534f\u540c\u00b7\u53cc\u673a\u81ea\u6108\u4e0e\u7c97\u7c92\u5316\u63a7\u5236\u4e2d\u5fc3",
                     ContextMenuStrip = menu,
                     Visible = true
                 };
@@ -135,6 +135,24 @@ namespace ArenaDeskApp
 
                 Application.Run();
             }
+        }
+
+        private static string ResolveAppDir()
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            if (File.Exists(Path.Combine(baseDir, "server.py"))) return baseDir;
+            string[] roots = new string[]
+            {
+                @"E:\0apps\ArenaDesk",
+                @"D:\0apps\ArenaDesk",
+                @"C:\0apps\ArenaDesk",
+                @"C:\cgmd\0fuye\code\panel"
+            };
+            foreach (string r in roots)
+            {
+                if (File.Exists(Path.Combine(r, "server.py"))) return r;
+            }
+            return baseDir;
         }
 
         private static bool IsBootEnabledByDefault(string appDir)
@@ -279,37 +297,66 @@ namespace ArenaDeskApp
                 Thread.Sleep(500);
             }
 
+            string savedPy = "";
+            try
+            {
+                string pyHintFile = Path.Combine(appDir, @"data\pythonw-path.txt");
+                if (File.Exists(pyHintFile))
+                {
+                    savedPy = File.ReadAllText(pyHintFile, Encoding.UTF8).Trim();
+                }
+            }
+            catch { }
+
+            string userHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string localApp = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string[] pyCandidates = new string[]
             {
+                savedPy,
+                Path.Combine(appDir, @"python\pythonw.exe"),
+                Path.Combine(appDir, @"python\python.exe"),
                 @"E:\spider\pythonw.exe",
+                @"E:\spider\python.exe",
                 @"E:\Miniforge3\pythonw.exe",
                 @"E:\miniconda3\pythonw.exe",
-                "pythonw.exe"
+                @"C:\ProgramData\Miniforge3\pythonw.exe",
+                @"C:\ProgramData\Miniforge3\python.exe",
+                @"C:\ProgramData\anaconda3\pythonw.exe",
+                @"C:\ProgramData\miniconda3\pythonw.exe",
+                Path.Combine(userHome, @"Miniforge3\pythonw.exe"),
+                Path.Combine(userHome, @"miniconda3\pythonw.exe"),
+                Path.Combine(userHome, @"anaconda3\pythonw.exe"),
+                Path.Combine(localApp, @"Programs\Python\Python312\pythonw.exe"),
+                Path.Combine(localApp, @"Programs\Python\Python311\pythonw.exe"),
+                Path.Combine(localApp, @"Programs\Python\Python310\pythonw.exe"),
+                @"D:\Miniforge3\pythonw.exe",
+                @"D:\miniconda3\pythonw.exe",
+                @"C:\Python312\pythonw.exe",
+                @"C:\Python311\pythonw.exe"
             };
             string serverPy = Path.Combine(appDir, "server.py");
             foreach (string py in pyCandidates)
             {
-                if (py == "pythonw.exe" || File.Exists(py))
+                if (string.IsNullOrEmpty(py) || py.IndexOf("WindowsApps", StringComparison.OrdinalIgnoreCase) >= 0)
+                    continue;
+                if (!File.Exists(py))
+                    continue;
+                try
                 {
-                    try
+                    Process.Start(new ProcessStartInfo(py, "\"" + serverPy + "\"")
                     {
-                        Process.Start(new ProcessStartInfo(py, "\"" + serverPy + "\"")
-                        {
-                            WorkingDirectory = appDir,
-                            CreateNoWindow = true,
-                            UseShellExecute = false,
-                            WindowStyle = ProcessWindowStyle.Hidden
-                        });
-                        break;
+                        WorkingDirectory = appDir,
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    });
+                    for (int k = 0; k < 10; k++)
+                    {
+                        Thread.Sleep(400);
+                        if (IsBackendAlive()) return;
                     }
-                    catch { }
                 }
-            }
-
-            for (int i = 0; i < 12; i++)
-            {
-                if (IsBackendAlive()) return;
-                Thread.Sleep(500);
+                catch { }
             }
         }
 
