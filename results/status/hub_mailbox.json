@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T15:31:01+08:00",
+    "generated_at":  "2026-10-29T15:32:34+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T073039-b78f.json"
+                  "20261029T073120-60bd.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -30,12 +30,10 @@
                      "20261029T070436-3f40":  1,
                      "20261029T070612-9728":  1,
                      "20261029T070717-3684":  1,
-                     "20261029T073039-b78f":  1
+                     "20261029T073039-b78f":  1,
+                     "20261029T073120-60bd":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:50:57 [INFO] job kind=sync",
-                     "2026-10-29 14:51:51 [INFO] job 20261029T065021-c6ea (sync) -\u003e fail: sync exit 6",
-                     "2026-10-29 14:52:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:52:56 [INFO] job kind=sync",
                      "2026-10-29 14:53:57 [INFO] job 20261029T065241-deb3 (sync) -\u003e ok: sync exit 6 | panel restarted",
                      "2026-10-29 14:54:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -92,20 +90,30 @@
                      "2026-10-29 15:29:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 15:30:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 15:30:56 [INFO] job kind=ping",
-                     "2026-10-29 15:30:57 [INFO] job 20261029T073039-b78f (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                     "2026-10-29 15:30:57 [INFO] job 20261029T073039-b78f (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-29 15:31:58 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 15:31:58 [INFO] job kind=smoke",
+                     "2026-10-29 15:32:29 [INFO] job 20261029T073120-60bd (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
                       {
-                          "id":  "20261029T073039-b78f",
-                          "kind":  "ping",
+                          "id":  "20261029T073120-60bd",
+                          "kind":  "smoke",
                           "status":  "ok",
-                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T073120-60bd",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-29T15:32:29+08:00"
+                   },
                    {
                        "id":  "20261029T073039-b78f",
                        "kind":  "ping",
