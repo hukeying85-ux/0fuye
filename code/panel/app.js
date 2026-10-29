@@ -364,6 +364,13 @@
     const startPlaybackWhenVisible = () => {
       if (exiting || startedVisiblePlayback) return;
       startedVisiblePlayback = true;
+      // The clips are not shipped with the repository, so ask the server first:
+      // playing a missing file rejects instantly and used to skip the overlay.
+      const appearance = (STATE && STATE.appearance) || {};
+      if (appearance.boot_video_available === false) {
+        showBootFallback("boot_asset_absent");
+        return;
+      }
       if (BOOT_BG_SAFETY_TIMER) {
         clearTimeout(BOOT_BG_SAFETY_TIMER);
         BOOT_BG_SAFETY_TIMER = 0;
@@ -410,7 +417,9 @@
                 soundBtn.hidden = true;
               };
             }
-            bootVid.play().catch(() => enterWorkspace(300, "dsh_video_autoplay_fallback"));
+            // muted autoplay also refused (or the asset is gone): show the
+            // mascot layer instead of dropping the user into the workspace
+            bootVid.play().catch(() => showBootFallback("dsh_video_autoplay_fallback"));
           });
         }
       } else {
@@ -572,7 +581,7 @@
         vid.pause();
         vid.hidden = true;
       }
-    } else if (isBuiltinVideo && vid) {
+    } else if (isBuiltinVideo && vid && app.wallpaper_available !== false) {
       const targetVidSrc = `/assets/${encodeURIComponent(builtinWp)}?v=2.5.0`;
       if (vid.getAttribute("src") !== targetVidSrc && vid.dataset.src !== targetVidSrc) {
         vid.src = targetVidSrc;
@@ -581,6 +590,16 @@
       vid.hidden = false;
       if (!BOOT_RUNNING) vid.play().catch(() => {});
       if (img) img.hidden = true;
+    } else if (isBuiltinVideo && img) {
+      // dsh-bg.mp4 is not shipped: use the still artwork that is, instead of
+      // leaving the stage black behind a 404.
+      const art = app.wallpaper_fallback_art || "wallpaper-anime.jpg";
+      img.src = `/assets/${encodeURIComponent(art)}?v=2.5.0`;
+      img.hidden = false;
+      if (vid) {
+        vid.pause();
+        vid.hidden = true;
+      }
     } else {
       if (vid) {
         vid.pause();

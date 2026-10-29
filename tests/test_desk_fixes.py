@@ -246,3 +246,45 @@ def test_desk_http_check_proves_the_boot_art_and_mobile_page():
     source = (RUNNER / "Test-CgmdHub.ps1").read_text(encoding="ascii")
     assert "'/mobile', '/assets/boot-mascot.jpg', '/style.css'" in source
     assert "desk-http" in source
+
+
+# ---------------------------------------------------------------------------
+# 7. the boot overlay must not be skipped when the clip is absent
+# ---------------------------------------------------------------------------
+def test_appearance_reports_clip_availability():
+    source = (PANEL / "desktop_ops.py").read_text(encoding="utf-8")
+    assert "_with_media_availability" in source
+    assert "boot_video_available" in source and "wallpaper_available" in source
+
+
+def test_boot_never_jumps_to_the_workspace_when_the_clip_is_missing():
+    """The measured failure was mode=dsh_video_autoplay_fallback at +300 ms.
+
+    A missing mp4 makes play() reject immediately; the old code answered that
+    by calling enterWorkspace, so the fallback layer never appeared.
+    """
+    app = (PANEL / "app.js").read_text(encoding="utf-8")
+    assert 'if (appearance.boot_video_available === false)' in app
+    assert 'bootVid.play().catch(() => showBootFallback("dsh_video_autoplay_fallback"));' in app
+    assert 'enterWorkspace(300, "dsh_video_autoplay_fallback")' not in app
+    assert "wallpaper_available !== false" in app
+
+
+def test_the_boot_task_owns_the_logon_trigger_in_deploy():
+    deploy = (PANEL / "deploy.ps1").read_text(encoding="ascii")
+    boot_block = deploy[deploy.index("$bootAction"):deploy.index("} else {", deploy.index("$bootAction"))]
+    assert "-Trigger $trigger" in boot_block, "arena-desk-boot-demo used to be registered with no trigger"
+    assert "arena-desk-open-manual" in deploy
+
+
+def test_deskfix_job_exists_and_launches_the_animation():
+    source = (RUNNER / "Invoke-CgmdMailbox.ps1").read_text(encoding="ascii")
+    assert "function Invoke-JobDeskfix" in source
+    assert "arena-desk-boot-demo re-registered WITH an AtLogOn trigger" in source
+    assert "Start-ScheduledTask -TaskName 'arena-desk-boot-demo'" in source
+    assert "'deskfix'   { return Invoke-JobDeskfix }" in source
+
+
+def test_deskdiag_reports_the_browser_boot_ack():
+    source = (RUNNER / "Invoke-CgmdMailbox.ps1").read_text(encoding="ascii")
+    assert "boot_ack" in source and "boot-ack.json" in source

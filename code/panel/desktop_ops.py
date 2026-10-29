@@ -346,9 +346,33 @@ class DesktopOps:
                 write_json_atomic(self.data / "appearance.json", migrated)
             except OSError:
                 pass
-            return migrated
+            return self._with_media_availability(migrated)
         merged = {**DEFAULT_APPEARANCE, **saved}
-        return merged
+        return self._with_media_availability(merged)
+
+    def _with_media_availability(self, appearance: dict) -> dict:
+        """Tell the browser whether the configured clips actually exist.
+
+        dsh-boot.mp4 / dsh-bg.mp4 are not distributed with this repository.
+        Without this flag the page kept requesting a missing file, ``play()``
+        rejected, and the boot overlay jumped straight to the workspace - which
+        is exactly the "no animation, just a black flash" symptom.
+        """
+        out = dict(appearance or {})
+        assets = HERE / "assets"
+        for key, field in (("boot_video", "boot_video_available"),
+                           ("builtin_wallpaper", "wallpaper_available")):
+            name = str(out.get(key) or "")
+            exists = bool(name) and (assets / name).is_file()
+            if not exists and name:
+                # fall back to a file that is shipped
+                for candidate in ("dsh-boot.mp4", "boot-mascot.jpg"):
+                    if (assets / candidate).is_file():
+                        break
+            out[field] = exists
+        out["boot_fallback_art"] = "boot-mascot.jpg" if (assets / "boot-mascot.jpg").is_file() else ""
+        out["wallpaper_fallback_art"] = "wallpaper-anime.jpg" if (assets / "wallpaper-anime.jpg").is_file() else ""
+        return out
 
     def probe_love_local(self) -> dict:
         """Privacy-preserving local companion check for JevChat & local memory vault."""
