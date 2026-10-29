@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-29T14:45:57+08:00",
+    "generated_at":  "2026-10-29T14:47:57+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,17 +11,15 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261029T064433-5331.json"
+                  "20261029T064657-a850.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
                      "20261029T063955-a9b5":  1,
-                     "20261029T064433-5331":  1
+                     "20261029T064433-5331":  1,
+                     "20261029T064657-a850":  1
                  },
     "log_tail":  [
-                     "2026-10-29 14:13:56 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 14:14:57 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-29 14:15:57 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:15:57 [INFO] job kind=smoke",
                      "2026-10-29 14:16:28 [ERROR] mailbox cycle failed: 无法对 System.Management.Automation.PSObject 类型的对象进行索引。",
                      "2026-10-29 14:16:28 [ERROR] 在 \u003cScriptBlock\u003e、C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Invoke-CgmdMailbox.ps1 中: 第 753 行",
@@ -78,20 +76,30 @@
                      "2026-10-29 14:43:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-29 14:44:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-29 14:44:57 [INFO] job kind=sync",
-                     "2026-10-29 14:45:53 [INFO] job 20261029T064433-5331 (sync) -\u003e fail: sync exit 7"
+                     "2026-10-29 14:45:53 [INFO] job 20261029T064433-5331 (sync) -\u003e fail: sync exit 7",
+                     "2026-10-29 14:47:00 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-29 14:47:00 [INFO] job kind=sync",
+                     "2026-10-29 14:47:53 [INFO] job 20261029T064657-a850 (sync) -\u003e fail: sync exit 7"
                  ],
     "call_tail":  [
 
                   ],
     "processed":  [
                       {
-                          "id":  "20261029T064433-5331",
+                          "id":  "20261029T064657-a850",
                           "kind":  "sync",
                           "status":  "fail",
                           "summary":  "sync exit 7"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261029T064657-a850",
+                       "kind":  "sync",
+                       "status":  "fail",
+                       "summary":  "sync exit 7",
+                       "finished_at":  "2026-10-29T14:47:53+08:00"
+                   },
                    {
                        "id":  "20261029T064433-5331",
                        "kind":  "sync",
