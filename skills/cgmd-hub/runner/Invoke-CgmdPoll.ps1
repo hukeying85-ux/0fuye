@@ -191,7 +191,7 @@ function Invoke-MailboxOnce {
         state     = [string](Get-Property $last 'state' '')
         queued    = [int](Get-Property $last 'queued' 0)
         inbox     = @(@(Get-Property $last 'inbox' @()) | ForEach-Object { [string]$_ })
-        attempts  = (@(Get-Property $last 'attempts' $null) | ConvertTo-Json -Compress)
+        attempts  = ((Get-Property $last 'attempts' $null) | ConvertTo-Json -Compress)
         processed = @(@(Get-Property $last 'recent' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
     }
     $previous = Read-JsonFile -Path $target
@@ -201,7 +201,7 @@ function Invoke-MailboxOnce {
             state     = [string](Get-Property $previous 'state' '')
             queued    = [int](Get-Property $previous 'queued' 0)
             inbox     = @(@(Get-Property $previous 'inbox' @()) | ForEach-Object { [string]$_ })
-            attempts  = (@(Get-Property $previous 'attempts' $null) | ConvertTo-Json -Compress)
+            attempts  = ((Get-Property $previous 'attempts' $null) | ConvertTo-Json -Compress)
             processed = @(@(Get-Property $previous 'recent' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
         }
         $unchanged = (($signature | ConvertTo-Json -Compress) -eq ($oldSignature | ConvertTo-Json -Compress))

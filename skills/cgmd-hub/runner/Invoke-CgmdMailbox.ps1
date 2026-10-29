@@ -706,8 +706,14 @@ try {
         }
         $queuedCount = $requests.Count
         Write-Log ('mailbox: {0} queued, running at most {1}' -f $requests.Count, $MaxJobs)
-        $ledger = Read-JsonFile -Path $script:LedgerPath
-        if ($null -eq $ledger) { $ledger = [ordered]@{} }
+        # Read-JsonFile returns PSObjects, and PowerShell 5.1 refuses to index
+        # those ("Cannot index into an object of type PSObject").  Anything read
+        # back from disk is copied into a real dictionary first.
+        $ledgerRaw = Read-JsonFile -Path $script:LedgerPath
+        $ledger = [ordered]@{}
+        if ($null -ne $ledgerRaw) {
+            foreach ($prop in $ledgerRaw.PSObject.Properties) { $ledger[$prop.Name] = $prop.Value }
+        }
         # Attempts per job: a job that cannot be completed must still produce
         # an answer, otherwise the caller waits forever and the desk re-runs it
         # on every single poll.
@@ -725,8 +731,24 @@ try {
             $jobId = [System.IO.Path]::GetFileNameWithoutExtension($requestFile.Name)
             $answerPath = Join-Path $outboxDir ($jobId + '.json')
             if (Test-Path -LiteralPath $answerPath) {
-                Write-Log ('job {0} already answered, dropping the duplicate request' -f $jobId) 'WARN'
+                # The answer was written but a later step failed before it was
+                # published.  Publish it now instead of dropping the request:
+                # silently discarding a finished job left the caller waiting for
+                # 15 minutes on 2026-10-29.
+                Write-Log ('job {0} already has an answer on disk, publishing it instead of re-running' -f $jobId) 'WARN'
                 Remove-Item -LiteralPath $requestFile.FullName -Force -ErrorAction SilentlyContinue
+                $existing = Read-JsonFile -Path $answerPath
+                if ($null -ne $existing) {
+                    $normalised = [ordered]@{
+                        id          = [string](Get-Property $existing 'id' $jobId)
+                        kind        = [string](Get-Property $existing 'kind' 'unknown')
+                        status      = [string](Get-Property $existing 'status' 'error')
+                        summary     = [string](Get-Property $existing 'summary' '')
+                        finished_at = [string](Get-Property $existing 'finished_at' '')
+                    }
+                    $jobs += $normalised
+                    $ledger[$jobId] = $normalised
+                }
                 continue
             }
             $request = $null
@@ -795,8 +817,12 @@ try {
         if ($jobs.Count -gt 0) {
             $null = Publish-MailboxChanges -Message ('mailbox: {0} answer(s) from {1}' -f $jobs.Count, $env:COMPUTERNAME)
         }
-        Write-JsonFile -Path $script:AttemptsPath -Data $attempts
-        Write-JsonFile -Path $script:LedgerPath -Data $ledger
+        try { Write-JsonFile -Path $script:AttemptsPath -Data $attempts } catch {
+            Write-Log ('attempt ledger write failed: ' + $_.Exception.Message) 'WARN'
+        }
+        try { Write-JsonFile -Path $script:LedgerPath -Data $ledger } catch {
+            Write-Log ('ledger write failed: ' + $_.Exception.Message) 'WARN'
+        }
         # Remember the last few answers: an idle cycle must not make the
         # published report look like nothing ever ran.
         if ($jobs.Count -gt 0) {
@@ -815,6 +841,16 @@ try {
     $mailboxState = 'error'
     Write-Log ('mailbox cycle failed: ' + $_.Exception.Message) 'ERROR'
     Write-Log ($_.ScriptStackTrace) 'ERROR'
+    # A crash after the work is done must not strand the answer on this disk.
+    try {
+        if (Test-Path -LiteralPath (Join-Path $script:Worktree '.git')) {
+            $dirty = Invoke-Git -Directory $script:Worktree -GitArgs @('status', '--porcelain')
+            if ($dirty.Output) {
+                Write-Log 'publishing the mailbox state reached before the failure'
+                $null = Publish-MailboxChanges -Message ('mailbox: partial publish after an error on {0}' -f $env:COMPUTERNAME)
+            }
+        }
+    } catch { }
 }
 
 # Always leave a ledger behind, even when there was nothing to do: a remote
