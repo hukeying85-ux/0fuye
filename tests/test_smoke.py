@@ -17,69 +17,97 @@ import pytest
 
 from cgmd import smoke
 
-FAKE_GMX = textwrap.dedent(
-    """\
-    #!/bin/bash
-    set -u
-    cmd="${1:-}"; shift || true
-    deffnm=""; conf=""; out=""
-    args=("$@")
-    i=0
-    while [ $i -lt ${#args[@]} ]; do
-      case "${args[$i]}" in
-        -deffnm) deffnm="${args[$((i+1))]}" ;;
-        -c) conf="${args[$((i+1))]}" ;;
-        -o) out="${args[$((i+1))]}" ;;
-      esac
-      i=$((i+1))
-    done
-    case "$cmd" in
-      --version|version)
-        echo "GROMACS version:     2024.3-stub"
-        echo "Precision:           mixed"
-        echo "Memory model:        64 bit"
-        echo "SIMD instructions:   AVX2_256"
-        echo "GPU support:         CUDA"
-        echo "CUDA runtime:        12.2"
-        echo "CUDA driver:         12.2"
-        echo "FFT library:         fftw-3.3.10-sse2-avx"
-        echo "OpenMP:              enabled"
-        ;;
-      grompp)
-        echo "GROMACS grompp, stub"
-        echo > "$out"
-        echo "Analysing residue names:"
-        ;;
-      mdrun)
-        base="${deffnm:-md}"
-        echo "stub ran ${base}" > "${base}.log"
-        if [ "$base" = "smoke_em" ]; then
-          echo "Steepest Descents converged to Fmax < 500 in 120 steps" >> "${base}.log"
-          echo "Steepest Descents converged to Fmax < 500 in 120 steps"
-          echo "Maximum force     =  3.1e+02 on atom 12" >> "${base}.log"
-          printf '%s\\n' "stub minimized" > "${base}.gro"
-          printf '%s\\n' "stub checkpoint" > "${base}.cpt"
-        else
-          echo "   nsteps                 = 5000" >> "${base}.log"
-          echo "   dt                     = 0.02" >> "${base}.log"
-          echo "Step           Time" >> "${base}.log"
-          echo "       0        0.00000" >> "${base}.log"
-          echo "    2500       50.00000" >> "${base}.log"
-          echo "    5000      100.00000" >> "${base}.log"
-          echo "Performance:      1850.000       0.043" >> "${base}.log"
-          echo "Finished mdrun on rank 0" >> "${base}.log"
-          printf '%s\\n' "stub final" > "${base}.gro"
-          printf '%s\\n' "stub trajectory" > "${base}.xtc"
-          printf '%s\\n' "stub energy" > "${base}.edr"
-        fi
-        ;;
-      *)
-        echo "stub: unsupported command $cmd" >&2
-        exit 2
-        ;;
-    esac
-    """
-)
+FAKE_GMX = "\n".join([
+    "#!/bin/bash",
+    "set -u",
+    "cmd=\"${1:-}\"; shift || true",
+    "deffnm=\"\"; out=\"\"; top=\"\"",
+    "args=(\"$@\")",
+    "boxcount=0",
+    "i=0",
+    "while [ $i -lt ${#args[@]} ]; do",
+    "  case \"${args[$i]}\" in",
+    "    -deffnm) deffnm=\"${args[$((i+1))]}\" ;;",
+    "    -o) out=\"${args[$((i+1))]}\" ;;",
+    "    -p) top=\"${args[$((i+1))]}\" ;;",
+    "  esac",
+    "  i=$((i+1))",
+    "done",
+    "mdp_value() {",
+    "  awk -F= -v key=\"$1\" '$1 ~ (\"^[ \\t]*\" key \"[ \\t]*$\") {gsub(/[ \\t]+/, \"\", $2); print $2; exit}' smoke_md.mdp",
+    "}",
+    "case \"$cmd\" in",
+    "  --version|version)",
+    "    echo \"GROMACS version:     2024.3-stub\"",
+    "    echo \"Precision:           mixed\"",
+    "    echo \"Memory model:        64 bit\"",
+    "    echo \"SIMD instructions:   AVX2_256\"",
+    "    echo \"GPU support:         CUDA\"",
+    "    echo \"CUDA runtime:        12.2\"",
+    "    echo \"CUDA driver:         12.2\"",
+    "    echo \"FFT library:         fftw-3.3.10-sse2-avx\"",
+    "    echo \"OpenMP:              enabled\"",
+    "    ;;",
+    "  solvate)",
+    "    {",
+    "      echo \"SPC water box\"",
+    "      echo \"375\"",
+    "      n=0",
+    "      m=0",
+    "      while [ $m -lt 125 ]; do",
+    "        n=$((n+1))",
+    "        printf \"%5d%-5s%5s%5d%8.3f%8.3f%8.3f\\n\" 1 SOL OW $n 0.1 0.1 0.1",
+    "        n=$((n+1))",
+    "        printf \"%5d%-5s%5s%5d%8.3f%8.3f%8.3f\\n\" 1 SOL HW1 $n 0.2 0.1 0.1",
+    "        n=$((n+1))",
+    "        printf \"%5d%-5s%5s%5d%8.3f%8.3f%8.3f\\n\" 1 SOL HW2 $n 0.1 0.2 0.1",
+    "        m=$((m+1))",
+    "      done",
+    "      echo \"   1.00000   1.00000   1.00000\"",
+    "    } > \"$out\"",
+    "    if [ -n \"$top\" ]; then",
+    "      sed -i 's/^SOL 0$/SOL 125/' \"$top\"",
+    "    fi",
+    "    echo \"Number of solvent molecules: 125\"",
+    "    ;;",
+    "  grompp)",
+    "    echo \"GROMACS grompp, stub\"",
+    "    echo > \"$out\"",
+    "    ;;",
+    "  mdrun)",
+    "    base=\"${deffnm:-md}\"",
+    "    echo \"stub ran ${base}\" > \"${base}.log\"",
+    "    if [ \"$base\" = \"smoke_em\" ]; then",
+    "      echo \"Steepest Descents converged to Fmax < 500 in 120 steps\" >> \"${base}.log\"",
+    "      echo \"Steepest Descents converged to Fmax < 500 in 120 steps\"",
+    "      printf \"%s\\n\" \"stub minimized\" > \"${base}.gro\"",
+    "      printf \"%s\\n\" \"stub checkpoint\" > \"${base}.cpt\"",
+    "    else",
+    "      dt=$(mdp_value dt)",
+    "      [ -z \"$dt\" ] && dt=0.02",
+    "      ns=$(mdp_value nsteps)",
+    "      [ -z \"$ns\" ] && ns=5000",
+    "      total=$(awk -v a=\"$dt\" -v b=\"$ns\" 'BEGIN{printf \"%.5f\", a*b}')",
+    "      half=$(awk -v a=\"$dt\" -v b=\"$ns\" 'BEGIN{printf \"%.5f\", a*b/2}')",
+    "      echo \"   nsteps                 = ${ns}\" >> \"${base}.log\"",
+    "      echo \"   dt                     = ${dt}\" >> \"${base}.log\"",
+    "      echo \"Step           Time\" >> \"${base}.log\"",
+    "      echo \"       0        0.00000\" >> \"${base}.log\"",
+    "      echo \"   $((ns/2))      ${half}\" >> \"${base}.log\"",
+    "      echo \"   ${ns}      ${total}\" >> \"${base}.log\"",
+    "      echo \"Performance:      1850.000       0.043\" >> \"${base}.log\"",
+    "      echo \"Finished mdrun on rank 0\" >> \"${base}.log\"",
+    "      printf \"%s\\n\" \"stub final\" > \"${base}.gro\"",
+    "      printf \"%s\\n\" \"stub trajectory\" > \"${base}.xtc\"",
+    "      printf \"%s\\n\" \"stub energy\" > \"${base}.edr\"",
+    "    fi",
+    "    ;;",
+    "  *)",
+    "    echo \"stub: unsupported command $cmd\" >&2",
+    "    exit 2",
+    "    ;;",
+    "esac",
+]) + "\n"
 
 FF_BASE = """\
 [ defaults ]
@@ -212,7 +240,8 @@ def test_md_log_detects_a_fatal_error():
 def test_run_smoke_succeeds_and_reports_everything(tmp_path, stub_gmx, fake_ff, monkeypatch):
     monkeypatch.setenv("CGMD_MARTINI3_DIR", fake_ff)
     report = smoke.run_smoke(ps=100, workdir=str(tmp_path / "run"), gmx_binary=stub_gmx,
-                             martini3_dir=fake_ff, ntomp=1, timeout=120)
+                             martini3_dir=fake_ff, ntomp=1, timeout=120, system="martini",
+                             temperature=310.0)
     assert report["status"] == "ok", report.get("stage_error")
     assert report["ok"] is True
     assert report["ps_completed"] == 100.0
@@ -232,7 +261,7 @@ def test_run_smoke_succeeds_and_reports_everything(tmp_path, stub_gmx, fake_ff, 
 def test_run_smoke_writes_the_mdp_settings_the_pipeline_uses(tmp_path, stub_gmx, fake_ff):
     workdir = tmp_path / "run"
     smoke.run_smoke(ps=100, workdir=str(workdir), gmx_binary=stub_gmx,
-                    martini3_dir=fake_ff, ntomp=1, timeout=120)
+                    martini3_dir=fake_ff, ntomp=1, timeout=120, system="martini")
     md_mdp = (workdir / "smoke_md.mdp").read_text(encoding="utf-8")
     assert "dt                      = 0.02" in md_mdp
     assert "nsteps                  = 5000" in md_mdp
@@ -253,7 +282,7 @@ def test_run_smoke_without_gmx_reports_instead_of_crashing(tmp_path):
 
 def test_run_smoke_dry_run_touches_nothing(tmp_path, stub_gmx, fake_ff):
     report = smoke.run_smoke(ps=100, workdir=str(tmp_path / "run"), gmx_binary=stub_gmx,
-                             martini3_dir=fake_ff, dry_run=True)
+                             martini3_dir=fake_ff, dry_run=True, system="martini")
     assert report["status"] == "dry-run"
     assert report["stages"] == []
     assert report["steps"]["md"] == 5000
@@ -267,7 +296,8 @@ def test_report_validation_rejects_a_broken_document():
 
 def test_cli_show_renders_an_existing_report(tmp_path, capsys, stub_gmx, fake_ff):
     report = smoke.run_smoke(ps=100, workdir=str(tmp_path / "run"), gmx_binary=stub_gmx,
-                             martini3_dir=fake_ff, ntomp=1, timeout=120)
+                             martini3_dir=fake_ff, ntomp=1, timeout=120, system="martini",
+                             temperature=310.0)
     path = tmp_path / "gmx_smoke.json"
     smoke.dump(report, str(path))
     assert smoke.main(["--show", str(path)]) == 0
@@ -280,9 +310,123 @@ def test_cli_writes_the_report_file(tmp_path, capsys, stub_gmx, fake_ff):
     code = smoke.main([
         "--ps", "100", "--workdir", str(tmp_path / "run"), "--gmx", stub_gmx,
         "--martini3-dir", fake_ff, "--ntomp", "1", "--out", str(out), "--timeout", "120",
+        "--system", "martini",
     ])
     assert code == 0
     document = json.loads(out.read_text(encoding="utf-8"))
     assert document["schema"] == "cgmd.gmxsmoke.v1"
     assert document["ok"] is True
     assert smoke.validate_report(document) == []
+
+
+# ---------------------------------------------------------------------------
+# the stock-GROMACS flavour (what a native Windows install runs)
+# ---------------------------------------------------------------------------
+def test_spc_topology_uses_only_bundled_force_fields(tmp_path):
+    path = tmp_path / "spc.top"
+    smoke.write_spc_topology(str(path))
+    text = path.read_text(encoding="utf-8")
+    assert 'oplsaa.ff/forcefield.itp' in text
+    assert 'oplsaa.ff/spce.itp' in text
+    assert "[ molecules ]" in text and "SOL 0" in text
+
+
+def test_spc_run_fills_the_box_with_solvate(tmp_path, stub_gmx):
+    report = smoke.run_smoke(ps=100, workdir=str(tmp_path / "run"), gmx_binary=stub_gmx,
+                             ntomp=1, timeout=120, system="spc", box_nm=1.0)
+    assert report["ok"] is True, report.get("stage_error")
+    assert report["system_kind"] == "spc"
+    assert report["system"]["kind"] == "spc-water-box"
+    assert report["system"]["atoms"] == 375          # 125 SPC waters
+    assert report["system"]["molecules"] == 125
+    assert [stage["stage"] for stage in report["stages"]] == [
+        "solvate", "grompp-em", "mdrun-em", "grompp-md", "mdrun-md-gpu",
+    ]
+    assert report["dt_ps"] == 0.002
+    assert report["steps"]["md"] == 50000            # 100 ps / 0.002 ps
+    assert report["ps_completed"] == 100.0
+    assert smoke.validate_report(report) == []
+
+
+def test_spc_mdp_uses_pme_and_two_femtosecond_steps(tmp_path, stub_gmx):
+    workdir = tmp_path / "run"
+    smoke.run_smoke(ps=100, workdir=str(workdir), gmx_binary=stub_gmx, ntomp=1,
+                    timeout=120, system="spc", box_nm=1.0)
+    md = (workdir / "smoke_md.mdp").read_text(encoding="utf-8")
+    assert "dt                      = 0.002" in md
+    assert "nsteps                  = 50000" in md
+    assert "coulombtype             = PME" in md
+    assert "constraints             = h-bonds" in md
+    assert "v-rescale" in md and "c-rescale" in md
+
+
+def test_spc_reports_a_failed_solvate(tmp_path):
+    script = tmp_path / "gmx"
+    script.write_text("#!/bin/bash\ncase \"$1\" in --version) echo 'GROMACS version: 2024.3'; ;; "
+                      "solvate) echo 'Fatal error: spc216.gro not found' >&2; exit 1 ;; esac\n",
+                      encoding="utf-8")
+    script.chmod(0o755)
+    report = smoke.run_smoke(ps=100, workdir=str(tmp_path / "run"), gmx_binary=str(script),
+                             timeout=30, system="spc", box_nm=1.0)
+    assert report["ok"] is False
+    assert "solvate" in (report["stage_error"] or "")
+
+
+def test_martini_flavour_still_works_after_the_refactor(tmp_path, stub_gmx, fake_ff):
+    report = smoke.run_smoke(ps=100, workdir=str(tmp_path / "run"), gmx_binary=stub_gmx,
+                             martini3_dir=fake_ff, ntomp=1, timeout=120, system="spc",
+                             box_nm=1.0)
+    assert report["system_kind"] == "spc"
+    martini = smoke.run_smoke(ps=100, workdir=str(tmp_path / "m"), gmx_binary=stub_gmx,
+                              martini3_dir=fake_ff, ntomp=1, timeout=120, system="martini")
+    assert martini["system_kind"] == "martini"
+    assert martini["dt_ps"] == 0.02
+
+
+# ---------------------------------------------------------------------------
+# the native Windows runner (PowerShell, no python, no Martini files)
+# ---------------------------------------------------------------------------
+HUB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "skills", "cgmd-hub", "runner")
+
+
+def test_native_runner_exists_and_is_ascii():
+    path = os.path.join(HUB, "Run-Gmx-Native.ps1")
+    assert os.path.exists(path)
+    with open(path, "rb") as handle:
+        handle.read().decode("ascii")
+
+
+def test_native_runner_is_self_contained():
+    source = open(os.path.join(HUB, "Run-Gmx-Native.ps1"), encoding="ascii").read()
+    assert "oplsaa.ff/forcefield.itp" in source      # stock force field
+    assert "spc216.gro" in source                   # stock water box
+    assert "solvate" in source
+    assert "grompp" in source and "mdrun" in source
+    assert "cgmd.gmxsmoke.v1" in source             # same schema as python
+    assert "C:\\Program Files" in source            # finds a default install
+    assert "-nb', 'cpu" in source or "'-nb', 'cpu'" in source   # cpu fallback
+    assert "Steepest Descents" in source
+
+
+def test_native_runner_reports_every_version_field():
+    source = open(os.path.join(HUB, "Run-Gmx-Native.ps1"), encoding="ascii").read()
+    for field in ("version", "precision", "simd", "gpu_support", "cuda_runtime", "fft", "openmp"):
+        assert "gromacs." + field in source or "'" + field + "'" in source, field
+
+
+def test_smoke_runner_delegates_to_the_native_path():
+    source = open(os.path.join(HUB, "Run-Smoke.ps1"), encoding="ascii").read()
+    assert "Run-Gmx-Native.ps1" in source and "-Native" in source
+
+
+def test_poller_prefers_a_native_windows_gmx():
+    source = open(os.path.join(HUB, "Invoke-CgmdPoll.ps1"), encoding="ascii").read()
+    assert "Run-Gmx-Native.ps1" in source
+    assert "gmx.exe" in source
+
+
+def test_selfcheck_accepts_a_native_gmx_when_wsl_is_absent():
+    source = open(os.path.join(HUB, "Test-CgmdHub.ps1"), encoding="ascii").read()
+    assert "Find-NativeGmx" in source
+    assert "Get-GmxVersionLine" in source
+    assert "native windows" in source

@@ -132,6 +132,30 @@ python3 -m core.selfcheck show results/status/desktop_selfcheck.json
 powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\runner\Test-CgmdHub.ps1 -Push -Notify
 ```
 
+### 100 ps 实跑（证明 GROMACS 真能积分，而不只是「装着」）
+
+**Windows 原生版 GROMACS（不走 WSL，零依赖，连 Python 都不需要）**：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\runner\Run-Gmx-Native.ps1
+```
+
+* 力场用 GROMACS 自带的 `oplsaa.ff` + `spce.itp`，`gmx solvate -cs spc216.gro` 灌 2.5 nm 盒子（约 500 个 SPC 水）；
+* EM → `50000 × 0.002 ps = 100 ps` NPT 300 K（PME + LINCS h-bonds + v-rescale + C-rescale）；
+* 先 `-nb gpu`，失败自动回退 CPU；报告字段与 Python 通道一致（`cgmd.gmxsmoke.v1`）→ `results/status/gmx_smoke.json`，自动 push；
+* 自检同步升级：WSL 探测失败但 Windows 有 `gmx.exe` 时，`gromacs`/`gpu` 直接判 pass（`native windows`），不再误报 7 项 fail。
+
+```powershell
+# WSL 版（Linux GROMACS）等价入口，加 -Native 即转调上面那条
+powershell -NoProfile -ExecutionPolicy Bypass -File C:\cgmd\0fuye\skills\cgmd-hub\runner\Run-Smoke.ps1 -Native
+```
+
+```bash
+# 让台式机自己在下次轮询时跑（有 gmx.exe 走原生，否则走 WSL 里的 python3 -m cgmd.smoke）
+python3 -m core.selfcheck request --smoke --note "验证 gmx 100 ps" --write
+python3 -m cgmd.smoke --show results/status/gmx_smoke.json   # 读回版本/软件清单
+```
+
 | 退出码 | 含义 |
 | --- | --- |
 | `0` | 18 项全绿，可接微秒级任务 |

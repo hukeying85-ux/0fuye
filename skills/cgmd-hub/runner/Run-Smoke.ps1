@@ -41,6 +41,11 @@
 .PARAMETER ClearLock
     Delete state/poll.lock and stop stale poller processes before running.
 
+.PARAMETER Native
+    Use the Windows build of GROMACS instead of WSL2: delegates to
+    Run-Gmx-Native.ps1 (stock oplsaa.ff + SPC water, no Python, no Martini
+    files).  Use this when `gmx.exe --version` works in PowerShell.
+
 .PARAMETER NoPush
     Keep the report local.
 
@@ -59,6 +64,7 @@ param(
     [int]$GpuId = -1,
     [double]$Ps = 100,
     [switch]$ClearLock,
+    [switch]$Native,
     [switch]$NoPush
 )
 
@@ -177,6 +183,19 @@ if (-not $configuredDistro) { $configuredDistro = Get-Property $cfg 'wsl_distro'
 $gpuId = Get-Property $cfg 'gpu_id' 0
 if ($GpuId -ge 0) { $gpuId = $GpuId }
 $lockedRepo = Get-Property $cfg 'locked_repo' 'hukeying85-ux/0fuye'
+
+if ($Native) {
+    $nativeScript = Join-Path $PSScriptRoot 'Run-Gmx-Native.ps1'
+    if (-not (Test-Path -LiteralPath $nativeScript)) {
+        Write-Host '  [fail] Run-Gmx-Native.ps1 is missing from this clone' -ForegroundColor Red
+        exit 7
+    }
+    $nativeArgs = @('-Ps', $Ps)
+    if ($NoPush) { $nativeArgs += '-NoPush' }
+    if ($GpuId -ge 0) { $nativeArgs += @('-GpuId', $GpuId) }
+    & $nativeScript @nativeArgs
+    exit $LASTEXITCODE
+}
 
 Say ''
 Say '  CGMD-Engine - manual 100 ps GROMACS smoke test' 'White'

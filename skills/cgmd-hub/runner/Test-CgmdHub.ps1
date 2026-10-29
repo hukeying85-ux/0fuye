@@ -251,6 +251,43 @@ function Invoke-WslRaw {
     }
 }
 
+function Find-NativeGmx {
+    # A Windows GROMACS install is a perfectly good compute engine; the WSL
+    # probe is only one way of getting one.
+    foreach ($name in @('gmx.exe', 'gmx', 'gmx_mpi.exe')) {
+        $found = Get-Command $name -ErrorAction SilentlyContinue
+        if ($null -ne $found -and $found.Source) { return $found.Source }
+    }
+    $roots = @(
+        (Join-Path $env:ProgramFiles 'GROMACS*'),
+        (Join-Path $env:ProgramFiles 'gromacs*'),
+        'C:\GROMACS*',
+        (Join-Path $env:USERPROFILE 'miniconda3\envs\*\Library\bin'),
+        (Join-Path $env:USERPROFILE 'anaconda3\envs\*\Library\bin'),
+        'C:\ProgramData\miniconda3\envs\*\Library\bin'
+    )
+    foreach ($root in $roots) {
+        foreach ($leaf in @('bin\gmx.exe', 'gmx.exe')) {
+            try {
+                $hits = @(Get-ChildItem -Path (Join-Path $root $leaf) -ErrorAction SilentlyContinue)
+                foreach ($hit in $hits) { return $hit.FullName }
+            } catch { }
+        }
+    }
+    return ''
+}
+
+function Get-GmxVersionLine {
+    param([string]$Exe)
+    if (-not $Exe) { return '' }
+    try {
+        $out = & $Exe --version 2>&1
+        $match = [regex]::Match((($out | ForEach-Object { "$_" }) -join [Environment]::NewLine), 'GROMACS version:\s*(\S+)')
+        if ($match.Success) { return $match.Groups[1].Value }
+    } catch { }
+    return ''
+}
+
 function Get-WslDistros {
     $result = Invoke-WslRaw -Arguments '-l -q' -TimeoutSeconds 30
     $names = @()
@@ -497,6 +534,7 @@ echo "DISK_GB=$(df -Pk "$HOME" 2>/dev/null | awk 'NR==2 {printf "%.1f", $4/10485
 echo "PROBE_DONE=1"
 '@
 
+$script:NativeGmxVersion = ''
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 $probeResult = $null
 $probe = @{}
@@ -595,8 +633,37 @@ if ($probe.Count -gt 0 -and $probe.ContainsKey('PROBE_DONE')) {
         Add-Check 'disk' 'free space' 'pass' ('{0:N1} GB free in WSL home (workdir ' + $wslWork + ')' -f $disk)
     }
 } else {
-    foreach ($id in @(@('gpu', 'CUDA device'), @('gromacs', 'GROMACS + CUDA'), @('martini3', 'Martini 3 force field'), @('python', 'python packages'), @('tools', 'martinize2 + insane'), @('disk', 'free space'))) {
-        Add-Check $id[0] $id[1] 'fail' 'skipped: WSL2 probe failed'
+    # WSL2 did not answer.  That is only fatal when there is no native Windows
+    # GROMACS either: a workstation can legitimately compute with gmx.exe.
+    $nativeGmx = Find-NativeGmx
+    $nativeVersion = ''
+    if ($nativeGmx) { $nativeVersion = Get-GmxVersionLine -Exe $nativeGmx }
+    $script:NativeGmxVersion = $nativeVersion
+    if ($nativeVersion) {
+        $addWsL = 'WSL2 unavailable; using the native Windows GROMACS instead'
+        Add-Check 'gromacs' 'GROMACS + CUDA' 'pass' ('GROMACS ' + $nativeVersion + ' (native windows: ' + $nativeGmx + ')')
+        $smi = Get-Command 'nvidia-smi.exe' -ErrorAction SilentlyContinue
+        if ($null -ne $smi) {
+            $gpuLine = ''
+            try {
+                $gpuLine = ((& $smi.Source --query-gpu=name,driver_version,memory.total --format=csv,noheader 2>&1) | Select-Object -First 1)
+            } catch { $gpuLine = '' }
+            if ($gpuLine) {
+                Add-Check 'gpu' 'CUDA device' 'pass' ([string]$gpuLine)
+            } else {
+                Add-Check 'gpu' 'CUDA device' 'warn' 'nvidia-smi present but returned nothing'
+            }
+        } else {
+            Add-Check 'gpu' 'CUDA device' 'warn' 'no nvidia-smi on PATH; the smoke test will tell whether mdrun can use a GPU'
+        }
+        Add-Check 'martini3' 'Martini 3 force field' 'warn' ($addWsL + '; Martini files are only needed for the peptide pipeline, not for the 100 ps smoke test')
+        Add-Check 'python' 'python packages' 'warn' ($addWsL + '; the native smoke runner needs no python at all')
+        Add-Check 'tools' 'martinize2 + insane' 'warn' ($addWsL + '; peptide pipeline still needs WSL2 or a windows python env')
+        Add-Check 'disk' 'free space' 'warn' ('checked inside WSL2 only; native runs use ' + $env:USERPROFILE)
+    } else {
+        foreach ($id in @(@('gpu', 'CUDA device'), @('gromacs', 'GROMACS + CUDA'), @('martini3', 'Martini 3 force field'), @('python', 'python packages'), @('tools', 'martinize2 + insane'), @('disk', 'free space'))) {
+            Add-Check $id[0] $id[1] 'fail' 'skipped: WSL2 probe failed and no gmx.exe found on Windows'
+        }
     }
 }
 
@@ -789,7 +856,7 @@ $report = [pscustomobject]@{
         gpu_id     = $gpuId
     }
     versions   = [pscustomobject]@{
-        gromacs    = [string]$probe['GMX_VERSION']
+        gromacs    = $(if ($probe['GMX_VERSION']) { [string]$probe['GMX_VERSION'] } else { $script:NativeGmxVersion })
         nvidia     = [string]$probe['NVIDIA']
         python     = [string]$probe['PY_VER']
         vermouth   = [string]$probe['MOD_VERMOUTH']

@@ -381,7 +381,52 @@ try {
 
         # --- 1b-1. real GROMACS smoke test (100 ps) -----------------------
         if ($wantSmoke) {
-            Write-HubLog 'smoke requested: running cgmd.smoke (100 ps) inside WSL2'
+            # A native Windows GROMACS (gmx.exe on PATH) is preferred: it needs
+            # no WSL distro, no python and no Martini files.
+            $nativeGmx = $null
+            foreach ($name in @('gmx.exe', 'gmx')) {
+                $found = Get-Command $name -ErrorAction SilentlyContinue
+                if ($null -ne $found) { $nativeGmx = $found.Source; break }
+            }
+            $nativeRunner = Join-Path $PSScriptRoot 'Run-Gmx-Native.ps1'
+            if ($nativeGmx -and (Test-Path -LiteralPath $nativeRunner)) {
+                Write-HubLog ('smoke requested: native gmx at ' + $nativeGmx + ', running 100 ps in Windows')
+                Send-Beacon -Title '[CGMD] gmx smoke test' -Message ('desktop ' + $env:COMPUTERNAME + ' is integrating 100 ps with the Windows GROMACS now') -Tags @('microscope')
+                $nativeLog = Join-Path $script:StateDir 'smoke-call.log'
+                $nativeLine = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $nativeRunner + '" -Ps 100 -GpuId ' + $gpuId + ' -Quiet'
+                $nativeCode = Invoke-Captured -CommandLine $nativeLine -OutFile $nativeLog -TimeoutSeconds 1900
+                Write-HubLog ("native smoke finished with exit code {0}" -f $nativeCode)
+                if (Test-Path -LiteralPath $nativeLog) {
+                    $nativeTail = ([System.IO.File]::ReadAllLines($nativeLog, [System.Text.Encoding]::UTF8) | Select-Object -Last 30) -join [Environment]::NewLine
+                    Write-HubLog ("native smoke output (tail):" + [Environment]::NewLine + $nativeTail)
+                }
+                $nativeReport = Read-JsonFile -Path (Join-Path $repo 'results\status\gmx_smoke.json')
+                $nativeMessage = 'native gmx smoke: no report produced'
+                $nativeTags = @('rotating_light')
+                if ($null -ne $nativeReport) {
+                    $nativeStatus = [string](Get-Property $nativeReport 'status' 'unknown')
+                    $nativeVersion = ''
+                    $nativeSoftware = Get-Property $nativeReport 'software' $null
+                    if ($null -ne $nativeSoftware) {
+                        $nativeBlock = Get-Property $nativeSoftware 'gromacs' $null
+                        if ($null -ne $nativeBlock) { $nativeVersion = [string](Get-Property $nativeBlock 'version' '') }
+                    }
+                    $nativeMessage = ('gmx {0} (native): {1}, {2} ps integrated' -f $nativeVersion, $nativeStatus, (Get-Property $nativeReport 'ps_completed' 0))
+                    $nativeError = [string](Get-Property $nativeReport 'stage_error' '')
+                    if ($nativeError) { $nativeMessage += (' | ' + $nativeError) }
+                    if ($nativeStatus -eq 'ok') { $nativeTags = @('white_check_mark') }
+                }
+                Send-Beacon -Title '[CGMD] gmx smoke result' -Message $nativeMessage -Tags $nativeTags
+                Publish-Diagnostics -Repo $repo -Branch $branch -Label 'gmx-smoke-native'
+                Remove-Item -LiteralPath $requestFile -Force -ErrorAction SilentlyContinue
+                if (-not $NoPublish) {
+                    $null = Publish-Results -Repo $repo -Branch $branch -Message 'smoke: gmx 100 ps report (native) [desktop hub]'
+                }
+                Write-HubLog 'native smoke cycle complete'
+                Publish-Heartbeat -Repo $repo -Branch $branch -State 'smoke-done' -TaskId 'gmx-smoke' -Minutes $HeartbeatMinutes
+                exit 0
+            }
+            Write-HubLog 'smoke requested: no Windows gmx found, running cgmd.smoke (100 ps) inside WSL2'
             Send-Beacon -Title '[CGMD] gmx smoke test' -Message ('desktop ' + $env:COMPUTERNAME + ' is integrating 100 ps with GROMACS now') -Tags @('microscope')
             $wslRepoSmoke = Convert-ToWslPath -WindowsPath $repo
             $smokeWork = ($wslWork.TrimEnd('/') + '/smoke-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))

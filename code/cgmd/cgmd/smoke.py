@@ -9,10 +9,18 @@ without anybody logging into the machine.
 
 It is deliberately independent of the peptide pipeline:
 
-* no Martinize, no insane, no Martini lipid library is required;
-* the box is a plain grid of Martini 3 ``W`` beads written directly to ``.gro``;
-* the topology only includes the force-field base file plus the water itp, both
-  located with a tiny built-in itp scanner (no Python 3.7+ dependency);
+* two interchangeable flavours, selected with ``system=``:
+
+  ``spc`` (default)
+      stock GROMACS only: ``oplsaa.ff`` + ``spce.itp`` from the GROMACS share
+      directory, box filled by ``gmx solvate -cs spc216.gro``.  Works on a
+      **native Windows GROMACS install** where no Martini files exist.
+
+  ``martini``
+      Martini 3 ``W`` beads written directly to ``.gro``; needs the Martini 3
+      force field (``pip install martini-forcefields`` or CGMD_MARTINI3_DIR).
+      The topology only includes the base file plus the water itp, located with
+      a tiny built-in itp scanner (no Python 3.7+ dependency);
 * energy minimisation (steep) then ``ps`` picoseconds of NPT at ``dt`` = 2 fs /
   0.02 ps, exactly the settings the production pipeline uses.
 
@@ -347,6 +355,95 @@ compressed-x-grps       = System
 """
 
 
+SPC_EM_MDP = """\
+integrator              = steep
+emtol                   = 100.0
+emstep                  = 0.01
+nsteps                  = 500
+cutoff-scheme           = Verlet
+nstlist                 = 10
+pbc                     = xyz
+coulombtype             = PME
+rcoulomb                = 1.0
+rvdw                    = 1.0
+vdwtype                 = cutoff
+constraints             = none
+"""
+
+SPC_MD_MDP = """\
+integrator              = md
+dt                      = {dt}
+nsteps                  = {nsteps}
+constraints             = h-bonds
+constraint-algorithm    = lincs
+continuation            = no
+gen-vel                 = yes
+gen-temp                = {temperature}
+gen-seed                = -1
+cutoff-scheme           = Verlet
+nstlist                 = 10
+pbc                     = xyz
+coulombtype             = PME
+rcoulomb                = 1.0
+rvdw                    = 1.0
+vdwtype                 = cutoff
+dispcorr                = EnerPres
+tcoupl                  = v-rescale
+tc-grps                 = System
+tau-t                   = 0.1
+ref-t                   = {temperature}
+pcoupl                  = c-rescale
+pcoupltype              = isotropic
+tau-p                   = 1.0
+compressibility         = 4.5e-5
+ref-p                   = 1.0
+nstxout                 = 0
+nstvout                 = 0
+nstfout                 = 0
+nstenergy               = 50
+nstlog                  = 50
+nstcalcenergy           = 10
+nstxout-compressed      = {nstxout_compressed}
+compressed-x-grps       = System
+"""
+
+SPC_TOPOLOGY = "; CGMD smoke test -- SPC water, stock GROMACS force field\n" \
+    '#include "oplsaa.ff/forcefield.itp"\n' \
+    '#include "oplsaa.ff/spce.itp"\n' \
+    '#include "oplsaa.ff/ions.itp"\n' \
+    "\n[ system ]\nCGMD smoke test -- SPC water\n" \
+    "\n[ molecules ]\nSOL 0\n"
+
+SPC_DT_PS = 0.002
+
+
+def write_spc_topology(path: str) -> str:
+    """Topology that only uses force fields shipped with GROMACS itself."""
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(SPC_TOPOLOGY)
+    return path
+
+
+def count_gro_atoms(path: str) -> int:
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as handle:
+            handle.readline()
+            second = handle.readline().strip()
+        return int(second) if second.isdigit() else 0
+    except (OSError, ValueError):
+        return 0
+
+
+def box_from_gro(path: str) -> List[float]:
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as handle:
+            lines = handle.read().splitlines()
+        parts = [float(piece) for piece in lines[-1].split()[:3]]
+        return parts if len(parts) == 3 else []
+    except (OSError, ValueError):
+        return []
+
+
 def parse_md_log(text: str) -> Dict[str, Any]:
     """Steps, simulated time, performance and the convergence lines of a md.log."""
     info: Dict[str, Any] = {
@@ -402,14 +499,20 @@ def run_smoke(
     ps: float = 100.0,
     gpu_id: int = 0,
     workdir: Optional[str] = None,
-    temperature: float = 310.0,
+    temperature: float = 300.0,
     ntomp: int = 4,
     gmx_binary: Optional[str] = None,
     martini3_dir: Optional[str] = None,
     timeout: int = 1800,
     dry_run: bool = False,
+    system: str = "spc",
+    box_nm: float = 2.5,
 ) -> Dict[str, Any]:
-    """Minimise then integrate ``ps`` picoseconds; return the report document."""
+    """Minimise then integrate ``ps`` picoseconds; return the report document.
+
+    ``system`` is ``"spc"`` (stock GROMACS force field, default) or
+    ``"martini"`` (Martini 3 water beads, needs the Martini 3 files).
+    """
     workdir = os.path.abspath(workdir or os.path.join(os.path.expanduser("~"), "cgmd-runs", "smoke"))
     os.makedirs(workdir, exist_ok=True)
 
@@ -423,7 +526,8 @@ def run_smoke(
         "workdir": workdir,
         "gpu_id": int(gpu_id),
         "temperature_K": float(temperature),
-        "dt_ps": 0.02,
+        "dt_ps": SPC_DT_PS if system == "spc" else 0.02,
+        "system_kind": system,
         "steps": {},
         "stages": [],
         "stage_error": None,
@@ -464,46 +568,96 @@ def run_smoke(
     # --- 1. build the system -------------------------------------------------
     gro = os.path.join(workdir, "smoke_box.gro")
     top = os.path.join(workdir, "smoke_box.top")
-    atoms = write_water_box(gro)
-    roots: List[str] = []
-    for candidate in (martini3_dir, inventory.get("martini3_dir")):
-        if candidate and os.path.isdir(candidate):
-            roots.append(candidate)
-            if scan_force_field([candidate])["base_files"]:
-                break
-    try:
-        topology = write_water_topology(top, roots, atoms)
-    except Exception as exc:  # noqa: BLE001 - reported, never raised
-        report["system"] = {"atoms": atoms, "gro": gro, "box_nm": BONDS_NM}
-        report["stage_error"] = "topology: {}".format(exc)
-        report["notes"].append("pip install martini-forcefields, or set CGMD_MARTINI3_DIR")
-        return report
+    dt = SPC_DT_PS if system == "spc" else 0.02
+    atoms = 0
 
-    report["system"] = {
-        "kind": "martini3-water-box",
-        "atoms": atoms,
-        "molecules": atoms,
-        "box_nm": [BONDS_NM, BONDS_NM, BONDS_NM],
-        "gro": gro,
-        "top": top,
-        "topology": topology,
-    }
+    if system == "spc":
+        write_spc_topology(top)
+        box = float(box_nm)
+        solvate = _run(
+            [gmx, "solvate", "-cs", "spc216.gro", "-box", "{:.3f}".format(box),
+             "{:.3f}".format(box), "{:.3f}".format(box), "-o", "smoke_box.gro", "-p", "smoke_box.top"],
+            timeout=timeout,
+            cwd=workdir,
+        )
+        report["stages"].append({
+            "stage": "solvate",
+            "command": solvate["command"],
+            "returncode": solvate["returncode"],
+            "seconds": solvate["seconds"],
+            "stderr_tail": solvate["stderr"].strip().splitlines()[-6:],
+            "missing_markers": [],
+        })
+        if solvate["returncode"] != 0 or not os.path.exists(gro):
+            report["stage_error"] = "gmx solvate failed: {}".format(
+                (solvate["stderr"] or solvate["stdout"]).strip().splitlines()[-1:] or "no output"
+            )
+            report["seconds_total"] = round(sum(entry["seconds"] for entry in report["stages"]), 2)
+            return report
+        atoms = count_gro_atoms(gro)
+        report["system"] = {
+            "kind": "spc-water-box",
+            "atoms": atoms,
+            "molecules": atoms // 3,
+            "box_nm": box_from_gro(gro) or [box, box, box],
+            "gro": gro,
+            "top": top,
+            "topology": {"path": top, "force_field": "oplsaa.ff (bundled with GROMACS)",
+                         "water": "SPC/E (spc216.gro)"},
+        }
+    else:
+        atoms = write_water_box(gro)
+        roots: List[str] = []
+        for candidate in (martini3_dir, inventory.get("martini3_dir")):
+            if candidate and os.path.isdir(candidate):
+                roots.append(candidate)
+                if scan_force_field([candidate])["base_files"]:
+                    break
+        try:
+            topology = write_water_topology(top, roots, atoms)
+        except Exception as exc:  # noqa: BLE001 - reported, never raised
+            report["system"] = {"atoms": atoms, "gro": gro, "box_nm": [BONDS_NM, BONDS_NM, BONDS_NM]}
+            report["stage_error"] = "topology: {}".format(exc)
+            report["notes"].append("pip install martini-forcefields, or set CGMD_MARTINI3_DIR")
+            return report
+        report["system"] = {
+            "kind": "martini3-water-box",
+            "atoms": atoms,
+            "molecules": atoms,
+            "box_nm": [BONDS_NM, BONDS_NM, BONDS_NM],
+            "gro": gro,
+            "top": top,
+            "topology": topology,
+        }
 
     # --- 2. mdp files --------------------------------------------------------
     em_mdp = os.path.join(workdir, "smoke_em.mdp")
     md_mdp = os.path.join(workdir, "smoke_md.mdp")
-    steps = int(round(float(ps) / 0.02))
+    steps = int(round(float(ps) / dt))
     report["steps"]["md"] = steps
-    with open(em_mdp, "w", encoding="utf-8") as handle:
-        handle.write(EM_MDP)
-    with open(md_mdp, "w", encoding="utf-8") as handle:
-        handle.write(
-            MD_MDP.format(
-                nsteps=steps,
-                temperature=int(temperature),
-                nstxout_compressed=max(1, steps // 20),
+    if system == "spc":
+        with open(em_mdp, "w", encoding="utf-8") as handle:
+            handle.write(SPC_EM_MDP)
+        with open(md_mdp, "w", encoding="utf-8") as handle:
+            handle.write(
+                SPC_MD_MDP.format(
+                    dt=dt,
+                    nsteps=steps,
+                    temperature=int(temperature),
+                    nstxout_compressed=max(1, steps // 20),
+                )
             )
-        )
+    else:
+        with open(em_mdp, "w", encoding="utf-8") as handle:
+            handle.write(EM_MDP)
+        with open(md_mdp, "w", encoding="utf-8") as handle:
+            handle.write(
+                MD_MDP.format(
+                    nsteps=steps,
+                    temperature=int(temperature),
+                    nstxout_compressed=max(1, steps // 20),
+                )
+            )
 
     if dry_run:
         report["notes"].append("dry run: nothing executed")
@@ -556,6 +710,8 @@ def run_smoke(
     if major and major < 2021:
         gpu_args = ["-nb", "gpu", "-gpu_id", str(gpu_id)]
         report["notes"].append("GROMACS {} is older than 2021: using -nb gpu only".format(version_text))
+    elif system == "spc":
+        gpu_args = ["-nb", "gpu", "-pme", "gpu", "-bonded", "gpu", "-gpu_id", str(gpu_id)]
     else:
         gpu_args = ["-nb", "gpu", "-pme", "cpu", "-bonded", "gpu", "-gpu_id", str(gpu_id)]
     used = "gpu"
@@ -699,9 +855,13 @@ def dump(report: Dict[str, Any], path: str) -> str:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(prog="cgmd.smoke", description="100 ps GROMACS smoke test")
     parser.add_argument("--ps", type=float, default=100.0)
+    parser.add_argument("--system", choices=("spc", "martini"), default="spc",
+                        help="spc = stock GROMACS force field (default, works on Windows); "
+                             "martini = Martini 3 water beads")
+    parser.add_argument("--box", type=float, default=2.5, help="cubic box edge in nm (spc only)")
     parser.add_argument("--gpu-id", dest="gpu_id", type=int, default=0)
     parser.add_argument("--workdir", default=None)
-    parser.add_argument("--temperature", type=float, default=310.0)
+    parser.add_argument("--temperature", type=float, default=300.0)
     parser.add_argument("--ntomp", type=int, default=4)
     parser.add_argument("--gmx", dest="gmx", default=None)
     parser.add_argument("--martini3-dir", dest="martini3_dir", default=None)
@@ -728,6 +888,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         martini3_dir=args.martini3_dir,
         timeout=args.timeout,
         dry_run=args.dry_run,
+        system=args.system,
+        box_nm=args.box,
     )
     if args.out:
         dump(report, args.out)

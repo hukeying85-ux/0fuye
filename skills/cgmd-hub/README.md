@@ -21,6 +21,8 @@
 | `runner/Unregister-CgmdHubTask.ps1` | 停止并移除计划任务 |
 | `runner/Send-CgmdBeacon.ps1` | Windows 侧 ntfy 推送（与 Python 端同协议、同频道、北京时间戳） |
 | `runner/Test-CgmdHub.ps1` | **18 项自检**：仓库/origin/分支/凭据/WSL/GPU/GROMACS-CUDA/Martini3/python 依赖/martinize2+insane/磁盘/静默包装器/计划任务/推送；产出 `results/status/desktop_selfcheck.json`（`cgmd.selfcheck.v1`），可选 `-Push` `-Notify` |
+| `runner/Run-Gmx-Native.ps1` | **Windows 原生 100 ps 实测**：只用 GROMACS 自带 `oplsaa.ff` + SPC 水，`solvate` → EM → `50000×0.002 ps`，GPU 失败自动回退 CPU，产出 `results/status/gmx_smoke.json`（`cgmd.gmxsmoke.v1`）并推送；不依赖 WSL / Python / Martini 文件 |
+| `runner/Run-Smoke.ps1` | 手动 100 ps（WSL 版）；`-Native` 转调上一条；`-ClearLock` 先清卡死的 `poll.lock` 与残留轮询进程 |
 | `runner/Sync-Desktop.ps1` | **一键同步**：origin 校验 → `fetch` → `reset --hard origin/<branch>`（脏工作区默认拒绝）→ 可选 `-Desk` 重新部署 `code/panel` → 跑 18 项自检 → 提交并推送 `desktop_sync.json` + `desktop_selfcheck.json` |
 | `config/cgmd_hub.json` | 配置模板（真实配置 `cgmd_hub.local.json` 已 gitignore） |
 | `state/`、`logs/` | 运行期状态与日志（已 gitignore） |
