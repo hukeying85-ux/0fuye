@@ -107,6 +107,16 @@ function Read-JsonFile {
 function Get-Property {
     param($Object, [string]$Name, $Default = $null)
     if ($null -eq $Object) { return $Default }
+    # both the JSON objects (PSCustomObject) and the [ordered] hashtables built
+    # in this script must be readable with the same helper.
+    if ($Object -is [System.Collections.IDictionary]) {
+        if ($Object.Contains($Name)) {
+            $value = $Object[$Name]
+            if ($null -eq $value) { return $Default }
+            return $value
+        }
+        return $Default
+    }
     $prop = $Object.PSObject.Properties[$Name]
     if ($null -eq $prop) { return $Default }
     if ($null -eq $prop.Value) { return $Default }

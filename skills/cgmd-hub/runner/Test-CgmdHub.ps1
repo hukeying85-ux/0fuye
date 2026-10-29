@@ -144,6 +144,14 @@ function Read-JsonFile {
 function Get-Property {
     param($Object, [string]$Name, $Default = $null)
     if ($null -eq $Object) { return $Default }
+    if ($Object -is [System.Collections.IDictionary]) {
+        if ($Object.Contains($Name)) {
+            $value = $Object[$Name]
+            if ($null -eq $value) { return $Default }
+            return $value
+        }
+        return $Default
+    }
     $prop = $Object.PSObject.Properties[$Name]
     if ($null -eq $prop) { return $Default }
     if ($null -eq $prop.Value) { return $Default }
