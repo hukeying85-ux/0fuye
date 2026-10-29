@@ -146,6 +146,8 @@ netsh advfirewall firewall add rule name="CGMD bridge" dir=in action=allow proto
 | 回执内容 | `gmx 2025.1`、`NVIDIA RTX A4000 596.71 16376 MiB`、48 线程、`ready: true` |
 | 局域网发现 | 回执里直接给出 `lan: [100.84.137.117, 172.20.32.1, 192.168.110.226, 172.17.240.1]`、`bridge_port: 8765` |
 | 值守对外可见 | `results/status/hub_mailbox.json` 的 `state` 会在 `ran` / `no-branch` / `created` / `repaired` / `error` 之间如实变化 |
+| 从会话派 100 ps | `20261029T063704-9a27`：14:37:56 接单 → **29.85 s 回执**，`status ok`、`ps 100`、`mdrun-md-gpu rc=0`、576 ns/day |
+| 端到端阶段 | solvate → grompp(em, 自带 FF 崩→内联兜底) → mdrun-em → grompp(md) → **mdrun-md-gpu 15.6 s** → `Finished mdrun` |
 
 路上踩掉的两个坑（代码已修，留档备查）：
 
@@ -153,6 +155,10 @@ netsh advfirewall firewall add rule name="CGMD bridge" dir=in action=allow proto
    （`invalid path 'README.md?'`），worktree 建不起来。现在 mktree 从文件喂 LF，且分支不可用但为空时
    会自动重建（绝不强推有真实任务的分支）。
 2. 回执文件带 `generated_at`，最初每 60 s 就产生一个提交。现在只在「状态/队列长度/最近回执」真正变化时发布。
+3. `ConvertFrom-Json` 读回来的台账是 `PSObject`，PS 5.1 索引它会抛「无法对 PSObject 类型的对象进行索引」；
+   而这一抛发生在「回执已写盘、请求已删除、还没 push」的中间，于是下一轮又把请求恢复、看到本地已有回执、
+   直接 `continue` 丢掉——调用方等了 15 分钟。现在：读回来的字典先转 hashtable；**发现本地已有回执就立刻发布**
+   而不是丢请求；整轮崩了也要把已完成的回执推上去；同一单最多试 3 次，超了就回一条 `error` 解放调用方。
 
 ---
 
