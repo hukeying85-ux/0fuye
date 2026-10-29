@@ -183,12 +183,30 @@ function Invoke-MailboxOnce {
     if (-not (Test-Path -LiteralPath $statusDir)) {
         New-Item -ItemType Directory -Path $statusDir -Force | Out-Null
     }
-    Write-JsonFile -Path (Join-Path $statusDir 'hub_mailbox.json') -Data $last
-    # Publish on every cycle (Publish-Results is a no-op when nothing changed):
-    # a remote reader must be able to tell "worker ran, queue empty" from
-    # "worker never ran".
-    if (-not $NoPublish) {
-        $null = Publish-Results -Repo $Repo -Branch $Branch -Message 'mailbox: worker report [desktop hub]'
+    # Writing the ledger only when the content changed keeps the branch quiet:
+    # a per-minute commit of an identical message was pure churn, and the reader
+    # only needs to know "worker ran (state), queue size, what it answered".
+    $target = Join-Path $statusDir 'hub_mailbox.json'
+    $signature = [ordered]@{
+        state     = [string](Get-Property $last 'state' '')
+        queued    = [int](Get-Property $last 'queued' 0)
+        processed = @(@(Get-Property $last 'processed' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
+    }
+    $previous = Read-JsonFile -Path $target
+    $unchanged = $false
+    if ($null -ne $previous) {
+        $oldSignature = [ordered]@{
+            state     = [string](Get-Property $previous 'state' '')
+            queued    = [int](Get-Property $previous 'queued' 0)
+            processed = @(@(Get-Property $previous 'processed' @()) | ForEach-Object { [string](Get-Property $_ 'id' '') })
+        }
+        $unchanged = (($signature | ConvertTo-Json -Compress) -eq ($oldSignature | ConvertTo-Json -Compress))
+    }
+    if (-not $unchanged) {
+        Write-JsonFile -Path $target -Data $last
+        if (-not $NoPublish) {
+            $null = Publish-Results -Repo $Repo -Branch $Branch -Message 'mailbox: worker report [desktop hub]'
+        }
     }
 }
 

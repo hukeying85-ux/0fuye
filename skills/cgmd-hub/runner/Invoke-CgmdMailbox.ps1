@@ -192,9 +192,11 @@ function Initialize-Mailbox {
         ('+refs/heads/{0}:refs/remotes/origin/{0}' -f $Ref))
     if ($fetch.Code -ne 0) {
         if (-not (Test-Path -LiteralPath (Join-Path $script:Worktree '.git'))) {
+            $script:InitNote = 'branch does not exist'
             Write-Log ('mailbox branch {0} does not exist yet, nothing to do' -f $Ref)
             return $false
         }
+        $script:InitNote = ('fetch failed: ' + $fetch.Output)
         Write-Log ('mailbox fetch failed: ' + $fetch.Output) 'WARN'
         return $false
     }
@@ -210,9 +212,14 @@ function Initialize-Mailbox {
     if (Test-Path -LiteralPath $script:Worktree) {
         Remove-Item -LiteralPath $script:Worktree -Recurse -Force -ErrorAction SilentlyContinue
     }
+    # A half-finished earlier attempt leaves a registration behind and every
+    # later add then fails with "missing but already registered worktree".
+    $null = Invoke-Git -Directory $RepoPath -GitArgs @('worktree', 'remove', '--force', $script:Worktree)
+    $null = Invoke-Git -Directory $RepoPath -GitArgs @('worktree', 'prune')
     $add = Invoke-Git -Directory $RepoPath -GitArgs @('worktree', 'add', '--force', '-B', 'hub-mailbox',
         $script:Worktree, $tracking)
     if ($add.Code -ne 0) {
+        $script:InitNote = ('worktree add failed: ' + $add.Output)
         Write-Log ('mailbox worktree add failed: ' + $add.Output) 'ERROR'
         return $false
     }
@@ -242,14 +249,20 @@ function New-MailboxBranch {
     [System.IO.File]::WriteAllText($temp, $readme, (New-Object System.Text.UTF8Encoding($false)))
     $blob = (Invoke-Git -Directory $RepoPath -GitArgs @('hash-object', '-w', $temp)).Output
     if (-not $blob) { return $false }
-    $entry = '100644 blob ' + $blob + "`tREADME.md"
-    $previous = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
+    # mktree is fed from a file with LF endings: piping a string through
+    # PowerShell 5.1 appends CR and produced a file literally called
+    # "README.md`r" the first time this ran.
+    $entryFile = Join-Path $script:StateDir 'mailbox-mktree.txt'
+    $entry = '100644 blob ' + $blob + "`tREADME.md`n"
+    [System.IO.File]::WriteAllText($entryFile, $entry, (New-Object System.Text.ASCIIEncoding))
+    $treeOut = Join-Path $script:StateDir 'mailbox-mktree.out'
+    $cmd = 'git -C "' + $RepoPath + '" mktree < "' + $entryFile + '"'
+    $null = Invoke-Captured -CommandLine $cmd -OutFile $treeOut -TimeoutSeconds 60
+    $tree = ''
     try {
-        $tree = ($entry | & git -C $RepoPath mktree 2>&1 | Out-String).Trim()
-    } finally {
-        $ErrorActionPreference = $previous
-    }
+        $lines = @([System.IO.File]::ReadAllLines($treeOut, [System.Text.Encoding]::UTF8))
+        if ($lines.Count -gt 0) { $tree = $lines[0].Trim() }
+    } catch { }
     if (-not $tree -or $tree.Length -lt 8) { Write-Log ('mktree failed: ' + $tree) 'WARN'; return $false }
     $commit = (Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'user.name=CGMD-Desk',
         '-c', 'user.email=hukeying85-ux@users.noreply.github.com',
@@ -302,6 +315,39 @@ function Add-SelfTestRequest {
     Write-JsonFile -Path $marker -Data ([ordered]@{ last_at = Get-BeijingStamp; last_id = $jobId })
     Write-Log ('queued a mailbox self test: ' + $jobId)
     return $true
+}
+
+function Repair-MailboxLayout {
+    # First run created a file called "README.md`r" (see New-MailboxBranch), and
+    # an empty queue needs an inbox/ and outbox/ directory to exist.  Both are
+    # repaired here instead of asking a human to clean up.
+    $changed = $false
+    $bad = @(Get-ChildItem -LiteralPath $script:Worktree -Recurse -File -ErrorAction SilentlyContinue |
+             Where-Object { $_.Name -match "`r" })
+    foreach ($item in $bad) {
+        try {
+            Remove-Item -LiteralPath $item.FullName -Force
+            Write-Log ('repaired mailbox: removed a file with an embedded CR in its name') 'WARN'
+            $changed = $true
+        } catch { }
+    }
+    $readme = Join-Path $script:Worktree 'README.md'
+    if (-not (Test-Path -LiteralPath $readme)) {
+        $text = @(
+            '# CGMD mailbox',
+            '',
+            'Queue work for the workstation from any session, branch or machine:',
+            '',
+            '    python3 -m core.hub_mailbox run --kind smoke --timeout 1800',
+            '',
+            '* inbox/<id>.json   request  (cgmd.mailbox.request.v1)',
+            '* outbox/<id>.json  result   (cgmd.mailbox.result.v1)',
+            ''
+        ) -join [Environment]::NewLine
+        [System.IO.File]::WriteAllText($readme, $text, (New-Object System.Text.UTF8Encoding($false)))
+        $changed = $true
+    }
+    return $changed
 }
 
 function Publish-MailboxChanges {
@@ -578,6 +624,8 @@ function Invoke-Job {
 $jobs = @()
 $mailboxState = 'ran'
 $queuedCount = 0
+$script:InitNote = ''
+$branchCreated = $false
 try {
     $cfg = Get-HubConfig
     $script:Config = $cfg
@@ -598,6 +646,7 @@ try {
         if (-not (Get-MailboxBranchExists)) {
             Write-Log 'mailbox branch does not exist on origin yet, creating it'
             $created = New-MailboxBranch
+            $branchCreated = [bool]$created
             if ($created -and (Initialize-Mailbox)) {
                 $mailboxState = 'created'
             } else {
@@ -624,6 +673,9 @@ try {
         $outboxDir = Join-Path $script:Worktree 'outbox'
         if (-not (Test-Path -LiteralPath $outboxDir)) {
             New-Item -ItemType Directory -Path $outboxDir -Force | Out-Null
+        }
+        if (Repair-MailboxLayout) {
+            $null = Publish-MailboxChanges -Message 'mailbox: repair layout [desktop hub]'
         }
         # weekly proof that the bus works, queued by the desk itself
         $null = Add-SelfTestRequest
@@ -707,6 +759,9 @@ try {
         host         = $env:COMPUTERNAME
         ref          = $Ref
         state        = $mailboxState
+        branch_created = $branchCreated
+        init_note    = $script:InitNote
+        worktree     = $script:Worktree
         queued       = $queuedCount
         processed    = @($jobs | ForEach-Object { [ordered]@{ id = $_['id']; kind = $_['kind']; status = $_['status']; summary = $_['summary'] } })
     })
