@@ -303,6 +303,24 @@ function Get-GmxVersionLine {
     return ''
 }
 
+function Get-NativeGmxInfo {
+    # Version *and* GPU support of the Windows build.  The workstation has a
+    # CUDA build of 2025.1 while WSL2 carries an old CPU-only 2018.1, so the
+    # check has to say which one it means.
+    param([string]$Exe)
+    $info = [ordered]@{ exe = $Exe; version = ''; gpu_support = ''; cuda = $false }
+    if (-not $Exe) { return $info }
+    try {
+        $text = ((& $Exe --version 2>&1) | ForEach-Object { "$_" }) -join [Environment]::NewLine
+        $match = [regex]::Match($text, 'GROMACS version:\s*(\S+)')
+        if ($match.Success) { $info['version'] = $match.Groups[1].Value }
+        $gpu = [regex]::Match($text, 'GPU support:\s*(.+)')
+        if ($gpu.Success) { $info['gpu_support'] = $gpu.Groups[1].Value.Trim() }
+        $info['cuda'] = [bool]($info['gpu_support'] -match 'CUDA')
+    } catch { }
+    return $info
+}
+
 function Get-WslDistros {
     $result = Invoke-WslRaw -Arguments '-l -q' -TimeoutSeconds 30
     $names = @()
@@ -589,6 +607,12 @@ if ($null -eq $probeResult) {
 # ---------------------------------------------------------------------------
 # 6. GPU / GROMACS / Martini 3 / python / tools / disk  (all from the probe)
 # ---------------------------------------------------------------------------
+# Always look for a native Windows build, even when WSL2 answers: on this
+# workstation WSL carries GROMACS 2018.1 without CUDA while gmx.exe is 2025.1
+# with CUDA, and reporting the WSL copy as "the" engine is simply wrong.
+$nativeInfo = Get-NativeGmxInfo -Exe (Find-NativeGmx)
+$script:NativeGmxVersion = [string]$nativeInfo['version']
+
 if ($probe.Count -gt 0 -and $probe.ContainsKey('PROBE_DONE')) {
     $nvidia = [string]$probe['NVIDIA']
     if ($nvidia) {
@@ -599,8 +623,18 @@ if ($probe.Count -gt 0 -and $probe.ContainsKey('PROBE_DONE')) {
 
     $gmxVersion = [string]$probe['GMX_VERSION']
     $gmxCuda = [string]$probe['GMX_CUDA']
-    if (-not $gmxVersion) {
-        Add-Check 'gromacs' 'GROMACS + CUDA' 'fail' 'gmx not on PATH inside WSL2'
+    $wslNote = 'wsl ' + $gmxVersion + $(if ($gmxCuda -eq '1') { ' (cuda)' } else { ' (cpu only)' })
+    if ($nativeInfo['version']) {
+        $nativeDetail = 'GROMACS ' + $nativeInfo['version'] + ' native windows'
+        if ($nativeInfo['gpu_support']) { $nativeDetail += ' (GPU support: ' + $nativeInfo['gpu_support'] + ')' }
+        $nativeDetail += ' | ' + $wslNote + ' unused'
+        if ($nativeInfo['cuda']) {
+            Add-Check 'gromacs' 'GROMACS + CUDA' 'pass' $nativeDetail
+        } else {
+            Add-Check 'gromacs' 'GROMACS + CUDA' 'warn' ($nativeDetail + ' | the native build has no CUDA')
+        }
+    } elseif (-not $gmxVersion) {
+        Add-Check 'gromacs' 'GROMACS + CUDA' 'fail' 'no gmx on PATH, inside WSL2 or on Windows'
     } elseif ($gmxCuda -ne '1') {
         Add-Check 'gromacs' 'GROMACS + CUDA' 'warn' ('GROMACS ' + $gmxVersion + ' without GPU support; production will run on CPU')
     } else {
@@ -623,7 +657,14 @@ if ($probe.Count -gt 0 -and $probe.ContainsKey('PROBE_DONE')) {
     if (-not $pyVersion) {
         Add-Check 'python' 'python packages' 'fail' 'python3 not found inside WSL2'
     } elseif ($missing.Count -gt 0) {
-        Add-Check 'python' 'python packages' 'fail' ('missing: ' + ($missing -join ', ') + ' | bash code/cgmd/setup_env.sh --install --yes')
+        $pyDetail = 'missing: ' + ($missing -join ', ') + ' | bash code/cgmd/setup_env.sh --install --yes'
+        if ($nativeInfo['version']) {
+            # With a working native GROMACS the 100 ps / GPU path needs no
+            # python at all; only the Martini peptide pipeline does.
+            Add-Check 'python' 'python packages' 'warn' ($pyDetail + ' | only the Martini pipeline needs these')
+        } else {
+            Add-Check 'python' 'python packages' 'fail' $pyDetail
+        }
     } else {
         Add-Check 'python' 'python packages' 'pass' ('python ' + $pyVersion + ' | vermouth ' + $probe['MOD_VERMOUTH'] + ' | MDAnalysis ' + $probe['MOD_MDANALYSIS'] + ' | matplotlib ' + $probe['MOD_MATPLOTLIB'])
     }
@@ -634,6 +675,8 @@ if ($probe.Count -gt 0 -and $probe.ContainsKey('PROBE_DONE')) {
         Add-Check 'tools' 'martinize2 + insane' 'pass' ($martinize + ' | ' + $insaneBin)
     } elseif ($martinize -or $insaneBin) {
         Add-Check 'tools' 'martinize2 + insane' 'warn' ('martinize2=' + $martinize + ' insane=' + $insaneBin)
+    } elseif ($nativeInfo['version']) {
+        Add-Check 'tools' 'martinize2 + insane' 'warn' 'neither on PATH | only the Martini pipeline needs them; the native GROMACS path does not'
     } else {
         Add-Check 'tools' 'martinize2 + insane' 'fail' 'neither martinize2 nor insane on PATH'
     }
@@ -871,7 +914,10 @@ $report = [pscustomobject]@{
         gpu_id     = $gpuId
     }
     versions   = [pscustomobject]@{
-        gromacs    = $(if ($probe['GMX_VERSION']) { [string]$probe['GMX_VERSION'] } else { $script:NativeGmxVersion })
+        gromacs    = $(if ($nativeInfo['version']) { [string]$nativeInfo['version'] } elseif ($probe['GMX_VERSION']) { [string]$probe['GMX_VERSION'] } else { '' })
+        gromacs_native = [string]$nativeInfo['version']
+        gromacs_wsl    = [string]$probe['GMX_VERSION']
+        gromacs_gpu    = $(if ($nativeInfo['gpu_support']) { [string]$nativeInfo['gpu_support'] } elseif ($probe['GMX_CUDA'] -eq '1') { 'CUDA' } else { '' })
         nvidia     = [string]$probe['NVIDIA']
         python     = [string]$probe['PY_VER']
         vermouth   = [string]$probe['MOD_VERMOUTH']

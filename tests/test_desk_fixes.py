@@ -200,3 +200,23 @@ def test_the_junk_selfcheck_report_is_gone():
     tracked = subprocess.check_output(["git", "ls-files", "--", "results/status/desktop_selfcheck.json"],
                                       cwd=str(ROOT)).decode().strip()
     assert tracked == "", "the literal False report must not be tracked"
+
+
+# ---------------------------------------------------------------------------
+# 5. the self-check must report the engine that actually computes
+# ---------------------------------------------------------------------------
+def test_selfcheck_prefers_the_native_build_over_a_stale_wsl_one():
+    source = (RUNNER / "Test-CgmdHub.ps1").read_text(encoding="ascii")
+    assert "function Get-NativeGmxInfo" in source
+    assert "GPU support:" in source
+    # the native probe has to run even when WSL answers
+    assert "$nativeInfo = Get-NativeGmxInfo -Exe (Find-NativeGmx)" in source
+    assert "native windows" in source
+    assert "gromacs_native = [string]$nativeInfo['version']" in source
+    assert "gromacs_wsl    = [string]$probe['GMX_VERSION']" in source
+
+
+def test_martini_deps_do_not_fail_a_workstation_that_runs_native_gromacs():
+    source = (RUNNER / "Test-CgmdHub.ps1").read_text(encoding="ascii")
+    assert "only the Martini pipeline needs these" in source
+    assert "the native GROMACS path does not" in source
