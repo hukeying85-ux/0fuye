@@ -1,0 +1,20 @@
+{
+  "args": {
+    "box_nm": 6.0,
+    "eq_timeout": 900,
+    "gpu_id": 0,
+    "mode": "all",
+    "ns": 100.0,
+    "prod_timeout": 3000,
+    "sequence": "KLVFFAE",
+    "timeout_s": 3550
+  },
+  "created_at": "2026-10-30T08:37:06+0000",
+  "from": "user",
+  "host": "e2b.local",
+  "id": "20261030T083706-a8ba",
+  "kind": "cgmd",
+  "note": "100 ns backbone-only Martini 3 production",
+  "schema": "cgmd.mailbox.request.v1",
+  "timeout_s": 3600
+}
