@@ -12,6 +12,7 @@ Google Drive 连接器只能读取已在云端的文件；台式机没有 G: 本
 且未确认其上有监听本队列的进程，私有 `outbox` 为空。单纯上传云端脚本
 不会自动在台式机上执行，也不会自动把 F: 目录备份到 Drive。
 
+- [现有桌面 hub 一次性接入本分支的受限 peer 任务通道](bridge/PEER.md)
 - [Google Drive 云端搜索与旧版镜像队列的适用条件](bridge/DRIVE.md)
 - [GitHub 分支握手与安全边界](bridge/README.md)
 - [F: 肽结构与日志的人工只读采集备用方案](bridge/EVIDENCE.md)（用户目前不采用）
