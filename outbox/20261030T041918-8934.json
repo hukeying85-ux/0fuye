@@ -1,0 +1,43 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T041918-8934",
+    "kind":  "gmx",
+    "status":  "timeout",
+    "summary":  "gmx gyrate -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg exit 124: \u003e ",
+    "detail":  {
+                   "exit_code":  124,
+                   "argv":  [
+                                "gyrate",
+                                "-s",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr",
+                                "-f",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc",
+                                "-n",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx",
+                                "-o",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-122054",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx gyrate, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-122054",
+                      "Command line:",
+                      "  gmx gyrate -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg",
+                      "Available static index groups:",
+                      " Group  0 \"Peptide\" (54 atoms)",
+                      "Specify a selection for option \u0027sel\u0027",
+                      "(Select group to compute gyrate radius):",
+                      "(one per line, \u003center\u003e for status/groups, \u0027help\u0027 for help)",
+                      "\u003e "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T12:20:54+08:00",
+    "finished_at":  "2026-10-30T12:22:54+08:00",
+    "seconds":  120.46,
+    "worker":  "DESKTOP-IEUDGS5"
+}
