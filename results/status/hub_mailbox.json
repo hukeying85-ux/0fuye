@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:24:20+08:00",
+    "generated_at":  "2026-10-30T15:28:07+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -79,12 +79,6 @@
                      "20261030T071928-c462":  1
                  },
     "log_tail":  [
-                     "2026-10-30 14:47:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:48:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:49:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:50:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:51:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:52:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:53:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:54:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:55:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -138,7 +132,13 @@
                      "2026-10-30 15:23:00 [INFO] peer hukeying85-ux/JevHarness job 20261030T072114-5eb3 (gmx) -\u003e ok: gmx mdrun -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -nsteps 25000 -nb gpu -gpu_id 0 -noconfout -noappend exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 15:23:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:23:59 [INFO] job kind=gmx",
-                     "2026-10-30 15:24:14 [INFO] peer hukeying85-ux/JevHarness job 20261030T072342-5db6 (gmx) -\u003e ok: gmx mdrun -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -nsteps 25000 -nb gpu -gpu_id 0 -ntmpi 1 -ntomp 12 -noconfout -noappend exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 15:24:14 [INFO] peer hukeying85-ux/JevHarness job 20261030T072342-5db6 (gmx) -\u003e ok: gmx mdrun -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -nsteps 25000 -nb gpu -gpu_id 0 -ntmpi 1 -ntomp 12 -noconfout -noappend exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 15:24:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:25:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:26:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:27:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:27:59 [INFO] job kind=gmx",
+                     "2026-10-30 15:27:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T072726-9c39 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 "
                  ],
     "call_tail":  [
 
@@ -163,13 +163,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T072342-5db6",
+                          "id":  "20261030T072726-9c39",
                           "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx mdrun -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -nsteps 25000 -nb gpu -gpu_id 0 -ntmpi 1 -ntomp 12 -noconfout -noappend exit 0: CGMD_EXIT_CODE=0 "
+                          "status":  "fail",
+                          "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 "
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T072726-9c39",
+                       "kind":  "gmx",
+                       "status":  "fail",
+                       "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 ",
+                       "finished_at":  "2026-10-30T15:27:59+08:00"
+                   },
                    {
                        "id":  "20261030T072342-5db6",
                        "kind":  "gmx",
@@ -302,13 +309,6 @@
                        "status":  "ok",
                        "summary":  "gmx traj -h exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T12:18:54+08:00"
-                   },
-                   {
-                       "id":  "20261030T041741-e427",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx check -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-30T12:17:55+08:00"
                    }
                ]
 }
