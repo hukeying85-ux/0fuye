@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T19:59:06+08:00",
+    "generated_at":  "2026-10-30T20:00:05+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T115827-1991.json"
+                  "20261030T115927-a0c5.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -118,12 +118,10 @@
                      "20261030T115316-60ce":  1,
                      "20261030T115622-62e3":  1,
                      "20261030T115622-b2fa":  1,
-                     "20261030T115827-1991":  1
+                     "20261030T115827-1991":  1,
+                     "20261030T115927-a0c5":  1
                  },
     "log_tail":  [
-                     "2026-10-30 19:21:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 19:22:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 19:23:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:24:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:25:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:26:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -180,7 +178,10 @@
                      "2026-10-30 19:57:55 [INFO] job 20261030T115622-b2fa (gmx) -\u003e ok: gmx editconf -f F:\\0wsh\\asd\\gromacs_md\\md_fllhttr\\complex.gro -n F:\\Abeta_MD_20261030_01\\fllhttr_source_selection_20261030.ndx -o F:\\Abeta_MD_20261030_01\\fllhttr_extracted_20261030.gro exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 19:58:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 19:58:55 [INFO] job kind=cgmd",
-                     "2026-10-30 19:58:56 [INFO] job 20261030T115827-1991 (cgmd) -\u003e ok: cgmd search: 2 candidate run(s); newest F:\\Abeta_MD_20261030_01 (0.0 d ago) | sequence ALLLHRC"
+                     "2026-10-30 19:58:56 [INFO] job 20261030T115827-1991 (cgmd) -\u003e ok: cgmd search: 2 candidate run(s); newest F:\\Abeta_MD_20261030_01 (0.0 d ago) | sequence ALLLHRC",
+                     "2026-10-30 19:59:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 19:59:55 [INFO] job kind=gmx",
+                     "2026-10-30 19:59:56 [INFO] job 20261030T115927-a0c5 (gmx) -\u003e fail: gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro -ff charmm36-jul2022 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.gro -p F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.top -i F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.itp exit 1: CGMD_EXIT_CODE=1 "
                  ],
     "call_tail":  [
 
@@ -205,13 +206,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T115827-1991",
-                          "kind":  "cgmd",
-                          "status":  "ok",
-                          "summary":  "cgmd search: 2 candidate run(s); newest F:\\Abeta_MD_20261030_01 (0.0 d ago) | sequence ALLLHRC"
+                          "id":  "20261030T115927-a0c5",
+                          "kind":  "gmx",
+                          "status":  "fail",
+                          "summary":  "gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro -ff charmm36-jul2022 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.gro -p F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.top -i F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.itp exit 1: CGMD_EXIT_CODE=1 "
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T115927-a0c5",
+                       "kind":  "gmx",
+                       "status":  "fail",
+                       "summary":  "gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro -ff charmm36-jul2022 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.gro -p F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.top -i F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.itp exit 1: CGMD_EXIT_CODE=1 ",
+                       "finished_at":  "2026-10-30T19:59:56+08:00"
+                   },
                    {
                        "id":  "20261030T115827-1991",
                        "kind":  "cgmd",
@@ -344,13 +352,6 @@
                        "status":  "ok",
                        "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                        "finished_at":  "2026-10-30T16:59:59+08:00"
-                   },
-                   {
-                       "id":  "20261030T083706-a8ba",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd all: 100000.0 ps CG on gpu at 6889.954 ns/day (1711 beads)",
-                       "finished_at":  "2026-10-30T16:59:02+08:00"
                    }
                ]
 }
