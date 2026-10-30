@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T19:31:07+08:00",
+    "generated_at":  "2026-10-30T19:32:01+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T113039-db9f.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -111,7 +111,6 @@
                      "20261030T113039-db9f":  1
                  },
     "log_tail":  [
-                     "2026-10-30 18:33:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 18:34:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 18:35:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 18:36:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -170,7 +169,8 @@
                      "2026-10-30 19:29:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:30:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 19:30:55 [INFO] job kind=ping",
-                     "2026-10-30 19:30:56 [INFO] job 20261030T113039-db9f (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                     "2026-10-30 19:30:56 [INFO] job 20261030T113039-db9f (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-30 19:31:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -194,12 +194,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T113039-db9f",
-                          "kind":  "ping",
-                          "status":  "ok",
-                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
-                      }
+
                   ],
     "recent":  [
                    {
