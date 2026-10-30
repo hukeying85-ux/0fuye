@@ -625,6 +625,14 @@ def mode_ff(args, note):
 # ---------------------------------------------------------------------------
 # mode: build
 # ---------------------------------------------------------------------------
+def residue_name(letter):
+    """One-letter -> three-letter, because grompp classifies a bare 'A' as RNA."""
+    for three, one in AA3.items():
+        if one == letter:
+            return three
+    return letter
+
+
 def peptide_charges(sequence):
     """Net charge per backbone bead: sidechain charge plus the two termini."""
     charges = []
@@ -683,7 +691,7 @@ def build_system(sequence, workdir, ff_file, box_nm=None, salt_m=0.15, temperatu
     peptide = []
     for index, residue in enumerate(sequence):
         xyz = (positions[index][0] + shift[0], positions[index][1] + shift[1], positions[index][2] + shift[2])
-        peptide.append((residue, "BB", xyz))
+        peptide.append((residue_name(residue), "BB", xyz))
 
     # --- water on a Martini 3 grid, minus the peptide's own volume
     step = box_nm / max(2, int(round(box_nm / WATER_SPACING_NM)))
@@ -748,7 +756,7 @@ def build_system(sequence, workdir, ff_file, box_nm=None, salt_m=0.15, temperatu
     ]
     for index, residue in enumerate(sequence, start=1):
         itp_lines.append("{:5d} {:>4s} {:5d} {:>5s} {:>4s} {:5d} {:8.3f} {:8.2f}".format(
-            index, bead_type(charges[index - 1]), index, residue, "BB", index,
+            index, bead_type(charges[index - 1]), index, residue_name(residue), "BB", index,
             charges[index - 1], 72.0))
     itp_lines += ["", "[ bonds ]", ";  ai  aj  funct  b0(nm)  kb(kJ/mol/nm2)"]
     for index in range(1, count):
@@ -920,6 +928,10 @@ def mode_build(args, note):
 # ---------------------------------------------------------------------------
 # mode: run
 # ---------------------------------------------------------------------------
+class GmxStageFailed(Exception):
+    """A grompp/mdrun stage returned non-zero; the report carries the log tail."""
+
+
 def parse_mdrun_log(path):
     """Pull the numbers a reviewer asks for out of mdrun's log."""
     report = {"performance_ns_per_day": None, "steps": None, "finished": False,
@@ -1058,26 +1070,32 @@ def mode_run(args, note):
         return entry
 
     top = os.path.join(workdir, "topol.top")
-    for label, mdp, coord, deffnm in (
-        ("grompp-em", "em.mdp", "system.gro", "em"),
-        ("grompp-eq", "eq.mdp", "em.gro", "eq"),
-        ("grompp-prod", "prod.mdp", "eq.gro", "prod"),
-    ):
-        entry = stage(label, ["grompp", "-f", mdp, "-c", coord, "-p", top, "-o", deffnm + ".tpr",
-                              "-maxwarn", "4"], timeout=300)
-        if entry["returncode"] != 0:
-            return "fail", "{} failed (exit {})".format(label, entry["returncode"]), {
-                "workdir": workdir, "stages": stages, "gmx": gmx}
 
-    entry = stage("mdrun-em", ["mdrun", "-deffnm", "em"] + (gmx_args if use_gpu else []), timeout=600)
-    if entry["returncode"] != 0:
-        return "fail", "mdrun-em failed (exit {})".format(entry["returncode"]), {
-            "workdir": workdir, "stages": stages}
-    entry = stage("mdrun-eq", ["mdrun", "-deffnm", "eq"] + gmx_args,
-                  timeout=int(args.get("eq_timeout") or 1200))
-    if entry["returncode"] != 0:
-        return "fail", "mdrun-eq failed (exit {})".format(entry["returncode"]), {
-            "workdir": workdir, "stages": stages}
+    def grompp(label, mdp, coord, deffnm):
+        entry = stage(label, ["grompp", "-f", mdp, "-c", coord, "-p", top,
+                              "-o", deffnm + ".tpr", "-maxwarn", "4"], timeout=300)
+        if entry["returncode"] != 0:
+            raise GmxStageFailed("{} failed (exit {})".format(label, entry["returncode"]))
+        return entry
+
+    # grompp for eq needs em.gro and grompp for prod needs eq.gro, so the
+    # stages have to interleave: all three grompp calls up front only ever
+    # reached 'File em.gro does not exist'.
+    try:
+        grompp("grompp-em", "em.mdp", "system.gro", "em")
+        entry = stage("mdrun-em", ["mdrun", "-deffnm", "em"] + (gmx_args if use_gpu else []),
+                      timeout=int(args.get("em_timeout") or 600))
+        if entry["returncode"] != 0:
+            raise GmxStageFailed("mdrun-em failed (exit {})".format(entry["returncode"]))
+        grompp("grompp-eq", "eq.mdp", "em.gro", "eq")
+        entry = stage("mdrun-eq", ["mdrun", "-deffnm", "eq"] + gmx_args,
+                      timeout=int(args.get("eq_timeout") or 1200))
+        if entry["returncode"] != 0:
+            raise GmxStageFailed("mdrun-eq failed (exit {})".format(entry["returncode"]))
+        grompp("grompp-prod", "prod.mdp", "eq.gro", "prod")
+    except GmxStageFailed as failure:
+        return "fail", str(failure), {"workdir": workdir, "stages": stages, "gmx": gmx}
+
     budget = int(args.get("prod_timeout") or 2400)
     # A 100 ns production run outlives one job slice, so a later job can pick
     # the run up where the checkpoint left it instead of starting over.
