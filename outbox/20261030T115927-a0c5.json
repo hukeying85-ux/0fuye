@@ -1,0 +1,53 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T115927-a0c5",
+    "kind":  "gmx",
+    "status":  "fail",
+    "summary":  "gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro -ff charmm36-jul2022 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.gro -p F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.top -i F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.itp exit 1: CGMD_EXIT_CODE=1 ",
+    "detail":  {
+                   "exit_code":  1,
+                   "argv":  [
+                                "pdb2gmx",
+                                "-f",
+                                "F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro",
+                                "-ff",
+                                "charmm36-jul2022",
+                                "-water",
+                                "tip3p",
+                                "-ignh",
+                                "-o",
+                                "F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.gro",
+                                "-p",
+                                "F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.top",
+                                "-i",
+                                "F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.itp"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-195955",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                     :-) GROMACS - gmx pdb2gmx, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-195955",
+                      "Command line:",
+                      "  gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro -ff charmm36-jul2022 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.gro -p F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.top -i F:\\Abeta_MD_20261030_01\\ylsllqr_charmm36_probe_20261030.itp",
+                      "-------------------------------------------------------",
+                      "Program:     gmx pdb2gmx, version 2025.1",
+                      "Source file: src\\gromacs\\gmxpreprocess\\pdb2top.cpp (line 224)",
+                      "Function:    class std::filesystem::path __cdecl choose_ff_impl(const char *,char *,int,const class gmx::MDLogger \u0026)",
+                      "Inconsistency in user input:",
+                      "Could not find force field \u0027charmm36-jul2022\u0027 in current directory, install",
+                      "tree or GMXLIB path.",
+                      "For more information and tips for troubleshooting, please check the GROMACS",
+                      "website at https://manual.gromacs.org/current/user-guide/run-time-errors.html",
+                      "-------------------------------------------------------",
+                      "CGMD_EXIT_CODE=1 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T19:59:55+08:00",
+    "finished_at":  "2026-10-30T19:59:56+08:00",
+    "seconds":  0.55,
+    "worker":  "DESKTOP-IEUDGS5"
+}
