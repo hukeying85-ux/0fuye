@@ -1,0 +1,128 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T085346-8dc1",
+    "kind":  "cgmd",
+    "status":  "ok",
+    "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
+    "detail":  {
+                   "exit_code":  0,
+                   "python":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "mode":  "probe",
+                   "ops":  {
+                               "detail":  {
+                                              "cwd":  "C:\\cgmd\\0fuye",
+                                              "drives":  [
+                                                             "C:\\",
+                                                             "F:\\"
+                                                         ],
+                                              "ff_molecules":  [
+
+                                                               ],
+                                              "gmx":  {
+                                                          "cuda_runtime":  "12.80",
+                                                          "gpu_support":  "CUDA",
+                                                          "how":  "PATH",
+                                                          "path":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                                                          "version":  "2025.1"
+                                                      },
+                                              "host":  "DESKTOP-IEUDGS5",
+                                              "martini":  {
+                                                              "dir":  "C:\\Users\\BNI\\cgmd-runs\\martini3\\martini-forcefields-main\\martini_forcefields\\regular\\v3.0.0\\gmx_files",
+                                                              "file":  "C:\\Users\\BNI\\cgmd-runs\\martini3\\martini-forcefields-main\\martini_forcefields\\regular\\v3.0.0\\gmx_files\\martini_v3.0.0.itp",
+                                                              "how":  "cache"
+                                                          },
+                                              "platform":  "Windows-10-10.0.19045-SP0",
+                                              "pythons":  [
+                                                              {
+                                                                  "args":  [
+
+                                                                           ],
+                                                                  "exe":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                                                                  "how":  "running",
+                                                                  "pip":  true,
+                                                                  "version":  "3.12.10"
+                                                              },
+                                                              {
+                                                                  "args":  [
+                                                                               "-3"
+                                                                           ],
+                                                                  "exe":  "C:\\WINDOWS\\py.exe",
+                                                                  "how":  "py-launcher",
+                                                                  "pip":  true,
+                                                                  "version":  "3.12.10"
+                                                              },
+                                                              {
+                                                                  "args":  [
+
+                                                                           ],
+                                                                  "exe":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
+                                                                  "how":  "glob",
+                                                                  "pip":  true,
+                                                                  "version":  "3.7.3"
+                                                              },
+                                                              {
+                                                                  "args":  [
+
+                                                                           ],
+                                                                  "exe":  "C:\\Python32\\python.exe",
+                                                                  "how":  "PATH",
+                                                                  "pip":  false,
+                                                                  "version":  "3.2.2"
+                                                              }
+                                                          ],
+                                              "roots_checked":  [
+                                                                    {
+                                                                        "exists":  false,
+                                                                        "root":  "F:\\Abeta_MD_20261030_01"
+                                                                    }
+                                                                ]
+                                          },
+                               "generated_at":  "2026-10-30T16:59:59",
+                               "host":  "DESKTOP-IEUDGS5",
+                               "mode":  "probe",
+                               "python":  "3.12.10",
+                               "schema":  "cgmd.desk_ops.v1",
+                               "seconds":  3.36,
+                               "status":  "ok",
+                               "summary":  "gmx 2025.1 | python 3.12.10 | martini3 found"
+                           }
+               },
+    "logs_tail":  [
+                      "        \"how\": \"glob\",",
+                      "        \"pip\": true",
+                      "      },",
+                      "      {",
+                      "        \"exe\": \"C:\\\\Python32\\\\python.exe\",",
+                      "        \"args\": [],",
+                      "        \"version\": \"3.2.2\",",
+                      "        \"how\": \"PATH\",",
+                      "        \"pip\": false",
+                      "      }",
+                      "    ],",
+                      "    \"martini\": {",
+                      "      \"dir\": \"C:\\\\Users\\\\BNI\\\\cgmd-runs\\\\martini3\\\\martini-forcefields-main\\\\martini_forcefields\\\\regular\\\\v3.0.0\\\\gmx_files\",",
+                      "      \"file\": \"C:\\\\Users\\\\BNI\\\\cgmd-runs\\\\martini3\\\\martini-forcefields-main\\\\martini_forcefields\\\\regular\\\\v3.0.0\\\\gmx_files\\\\martini_v3.0.0.itp\",",
+                      "      \"how\": \"cache\"",
+                      "    },",
+                      "    \"ff_molecules\": [],",
+                      "    \"roots_checked\": [",
+                      "      {",
+                      "        \"root\": \"F:\\\\Abeta_MD_20261030_01\",",
+                      "        \"exists\": false",
+                      "      }",
+                      "    ]",
+                      "  },",
+                      "  \"generated_at\": \"2026-10-30T16:59:59\",",
+                      "  \"seconds\": 3.36,",
+                      "  \"python\": \"3.12.10\",",
+                      "  \"host\": \"DESKTOP-IEUDGS5\"",
+                      "}",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T16:59:54+08:00",
+    "finished_at":  "2026-10-30T16:59:59+08:00",
+    "seconds":  4.9,
+    "worker":  "DESKTOP-IEUDGS5"
+}
