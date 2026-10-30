@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T16:35:03+08:00",
+    "generated_at":  "2026-10-30T16:36:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T083306-8d56.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -101,7 +101,6 @@
                      "20261030T083306-8d56":  1
                  },
     "log_tail":  [
-                     "2026-10-30 16:08:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:08:55 [INFO] job kind=cgmd",
                      "2026-10-30 16:09:09 [INFO] job 20261030T080755-8d9a (cgmd) -\u003e ok: cgmd search: 46 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.3 d ago)",
                      "2026-10-30 16:09:55 [INFO] mailbox: 1 queued, running at most 1",
@@ -160,7 +159,8 @@
                      "2026-10-30 16:34:03 [INFO] job 20261030T082539-816f (cgmd) -\u003e warn: cgmd all: 40.0 ps CG on gpu at None ns/day (1711 beads)",
                      "2026-10-30 16:34:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:34:54 [INFO] job kind=gmx",
-                     "2026-10-30 16:34:54 [INFO] job 20261030T083306-8d56 (gmx) -\u003e ok: gmx check -f F:\\cgmd_20ns_20261030_0820.xtc exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 16:34:54 [INFO] job 20261030T083306-8d56 (gmx) -\u003e ok: gmx check -f F:\\cgmd_20ns_20261030_0820.xtc exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 16:35:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -184,12 +184,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T083306-8d56",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx check -f F:\\cgmd_20ns_20261030_0820.xtc exit 0: CGMD_EXIT_CODE=0 "
-                      }
+
                   ],
     "recent":  [
                    {
