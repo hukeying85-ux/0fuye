@@ -41,16 +41,19 @@ FAKE_GMX = textwrap.dedent(
         echo "GPU support:        CUDA"
         ;;
       grompp)
-        echo stub > "$out"
+        cp "$mdp" "$out"
         ;;
       mdrun)
         base="${deffnm:-md}"
         echo "Started mdrun on rank 0" > "${base}.log"
         if [ "$base" != "em" ]; then
-          echo "   nsteps = 50000000" >> "${base}.log"
-          echo "   dt = 0.02" >> "${base}.log"
+          steps=$(awk '$1 == "nsteps" {print $3; exit}' "${base}.tpr")
+          dt=$(awk '$1 == "dt" {print $3; exit}' "${base}.tpr")
+          echo "   nsteps = $steps" >> "${base}.log"
+          echo "   dt = $dt" >> "${base}.log"
           echo "Step           Time" >> "${base}.log"
-          echo "       0        0.00000" >> "${base}.log"
+          awk -v n="$steps" -v dt="$dt" 'BEGIN {printf "%d %.5f\\n", n, n*dt}' >> "${base}.log"
+          echo stub > "${base}.cpt"
           echo "Performance:      1200.000       0.072" >> "${base}.log"
           echo "Finished mdrun on rank 0" >> "${base}.log"
         else

@@ -922,11 +922,24 @@ function Invoke-JobPipeline {
     }
     $taskId = [string](Get-Property $JobArgs 'task_id' '')
     if (-not $taskId) { $taskId = 'cgmd-' + (Get-Date -Format 'yyyyMMdd-HHmmss') }
+    # These values are interpolated into cmd.exe below. Restrict them before
+    # constructing the command, including the task id used in local paths.
+    $name = [string](Get-Property $JobArgs 'name' 'peptide')
+    if ($sequence -notmatch '^[ACDEFGHIKLMNPQRSTVWY]+$' -or
+        $taskId -notmatch '^[A-Za-z0-9_-]+$' -or $name -notmatch '^[A-Za-z0-9_. -]+$') {
+        return [ordered]@{ status = 'unsupported'; summary = 'invalid pipeline sequence, task_id or name' }
+    }
+    foreach ($key in @('workdir', 'outdir')) {
+        $value = [string](Get-Property $JobArgs $key '')
+        if ($value -and $value -notmatch '^[A-Za-z0-9_ .:\\/-]+$') {
+            return [ordered]@{ status = 'unsupported'; summary = ('invalid pipeline path: ' + $key) }
+        }
+    }
     $resultFile = Join-Path $script:StateDir ('pipeline-' + $taskId + '.json')
     $out = Join-Path $script:StateDir ('mailbox-pipeline-' + $taskId + '.log')
     $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runner + '"'
     $line += ' -Sequence "' + $sequence + '"'
-    $line += ' -Name "' + [string](Get-Property $JobArgs 'name' 'peptide') + '"'
+    $line += ' -Name "' + $name + '"'
     $line += ' -ProductionNs ' + [double](Get-Property $JobArgs 'production_ns' 100)
     $line += ' -EquilibrationNs ' + [double](Get-Property $JobArgs 'equilibration_ns' 10)
     $line += ' -GpuId ' + [int](Get-Property $JobArgs 'gpu_id' 0)
@@ -947,10 +960,16 @@ function Invoke-JobPipeline {
     $lipids = Get-Property $JobArgs 'lipids' $null
     if ($null -ne $lipids) {
         if ($lipids -is [string]) {
+            if ($lipids -notmatch '^[A-Za-z0-9_:., -]+$') {
+                return [ordered]@{ status = 'unsupported'; summary = 'invalid lipid specification' }
+            }
             $line += (' -Lipids "' + [string]$lipids + '"')
         } else {
             $pairs = @()
-            foreach ($prop in $lipids.PSObject.Properties) { $pairs += ($prop.Name + ':' + $prop.Value) }
+            foreach ($prop in $lipids.PSObject.Properties) {
+                if ($prop.Name -notmatch '^[A-Za-z0-9_]+$') { return [ordered]@{ status = 'unsupported'; summary = 'invalid lipid name' } }
+                $pairs += ($prop.Name + ':' + [double]$prop.Value)
+            }
             if ($pairs.Count -gt 0) { $line += (' -Lipids "' + ($pairs -join ',') + '"') }
         }
     }

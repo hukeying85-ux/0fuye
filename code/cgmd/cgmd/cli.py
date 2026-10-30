@@ -82,6 +82,8 @@ def build_config(args: argparse.Namespace) -> tuple:
     cfg.dry_run = bool(args.dry_run)
     cfg.resume = not bool(args.no_resume)
     cfg.max_frames = int(args.max_frames)
+    if getattr(args, "ss", None):
+        cfg.secondary_structure = args.ss.upper()
     if args.gpu_id is not None:
         cfg.gpu_id = args.gpu_id
     if args.ntomp is not None:
@@ -127,41 +129,42 @@ def cmd_run(args: argparse.Namespace) -> int:
     pipeline = Pipeline(cfg, output_dir=os.path.abspath(output), notify=notify)
     notify(
         "start",
-        "粗粒化流水线启动：{}".format(cfg.peptide_name),
+        "Coarse-grained pipeline started: {}".format(cfg.peptide_name),
         [
-            "肽长: {} aa".format(len(cfg.sequence)),
-            "体系: {} 比 {}".format(":".join(cfg.lipids), ":".join(_num(v) for v in cfg.lipids.values())),
-            "生产: {} ns @ GPU {}".format(cfg.production_ns, cfg.gpu_id),
-            "任务: {}".format(cfg.task_id),
+            "Peptide length: {} aa".format(len(cfg.sequence)),
+            "System: {} ratio {}".format(":".join(cfg.lipids), ":".join(_num(v) for v in cfg.lipids.values())),
+            "Production: {} ns @ GPU {}".format(cfg.production_ns, cfg.gpu_id),
+            "Task: {}".format(cfg.task_id),
         ],
     )
     try:
         metrics = pipeline.run()
     except PipelineError as exc:
-        notify("error", "流水线失败", [str(exc)[:400], "任务: {}".format(cfg.task_id)])
+        notify("error", "Pipeline failed", [str(exc)[:400], "Task: {}".format(cfg.task_id)])
         print("ERROR: {}".format(exc), file=sys.stderr)
         return 2
     except Exception as exc:  # noqa: BLE001 - report and fail loudly
-        notify("error", "流水线异常", ["{}: {}".format(type(exc).__name__, str(exc)[:300]),
-                                       "任务: {}".format(cfg.task_id)])
+        notify("error", "Pipeline error", ["{}: {}".format(type(exc).__name__, str(exc)[:300]),
+                                       "Task: {}".format(cfg.task_id)])
         raise
 
     summary_path = os.path.join(output, "summary_metrics.json")
     simulation = metrics.get("simulation", {})
     insertion = metrics.get("membrane_insertion", {})
     pore = metrics.get("pore", {})
-    headline = "模拟完成：{}".format(cfg.peptide_name)
+    completed = bool(simulation.get("production", {}).get("completed"))
+    headline = "Simulation finished: {}".format(cfg.peptide_name) if completed else "Simulation incomplete: {}".format(cfg.peptide_name)
     if simulation.get("diverged"):
-        headline = "模拟发散：{}".format(cfg.peptide_name)
+        headline = "Simulation diverged: {}".format(cfg.peptide_name)
     notify(
-        "done" if not simulation.get("diverged") else "error",
+        "done" if completed and not simulation.get("diverged") else "error",
         headline,
         [
-            "嵌膜深度: {} nm".format(insertion.get("z_distance_mean_nm")),
-            "脂序参数: {}".format(metrics.get("lipid_order", {}).get("mean")),
-            "水孔: {}".format("形成" if pore.get("pore_formed") else "未形成"),
-            "速度: {} ns/day".format(simulation.get("ns_per_day")),
-            "结果: {}".format(os.path.relpath(summary_path)),
+            "Insertion depth: {} nm".format(insertion.get("z_distance_mean_nm")),
+            "Lipid order: {}".format(metrics.get("lipid_order", {}).get("mean")),
+            "Pore: {}".format("unknown" if pore.get("pore_formed") is None else ("formed" if pore.get("pore_formed") else "not formed")),
+            "Speed: {} ns/day".format(simulation.get("ns_per_day")),
+            "Result: {}".format(os.path.relpath(summary_path)),
         ],
     )
     print("summary: {}".format(summary_path))
@@ -243,6 +246,7 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--task", default=None, help="task JSON (results/status/cgmd_task.json)")
         p.add_argument("--sequence", default=None, help="ad-hoc one-letter peptide sequence")
         p.add_argument("--name", default=None, help="peptide name")
+        p.add_argument("--ss", default=None, help="secondary structure, e.g. H or one code per residue")
         p.add_argument("--workdir", default=None, help="scratch directory for trajectories")
         p.add_argument("--output", default=None, help="results directory (git tracked)")
         p.add_argument("--production-ns", dest="production_ns", type=float, default=None)
