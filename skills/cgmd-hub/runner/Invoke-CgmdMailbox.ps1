@@ -1362,6 +1362,46 @@ function Invoke-JobShell {
     }
 }
 
+function Invoke-JobAbetaPreflight {
+    # Fixed script and paths only: no arguments, installer, shell access, or
+    # modifications to the user's source data. Requires deployment first.
+    $runner = Join-Path $RepoPath 'code\abeta\preflight.py'
+    if (-not (Test-Path -LiteralPath $runner -PathType Leaf)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'A-beta preflight script is not deployed' }
+    }
+    $python = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
+    if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'Python 3.12 not found at the documented desktop location' }
+    }
+    $out = Join-Path $script:StateDir ('abeta-preflight-' + [guid]::NewGuid().ToString('N') + '.log')
+    $line = '"' + $python + '" "' + $runner + '"'
+    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds ([math]::Min($MaxJobSeconds, 120)) -WorkingDirectory $RepoPath
+    if ($code -ne 0) {
+        return [ordered]@{ status = 'fail'; summary = ('A-beta preflight exit ' + $code); detail = @{ exit_code = $code } }
+    }
+    try {
+        $jsonLine = @(Get-Content -LiteralPath $out -Encoding UTF8 | Where-Object { $_ -match '^\{' })[0]
+        $report = $jsonLine | ConvertFrom-Json -ErrorAction Stop
+        if ($report.schema -ne 'abeta.preflight.v1') { throw 'unexpected report schema' }
+        # The mailbox ref may be public. Never publish coordinates, atom lists,
+        # sequences, file hashes, titles, or absolute source paths there.
+        $states = @()
+        foreach ($prop in $report.inputs.PSObject.Properties) {
+            $states += [string](Get-Property $prop.Value 'status' 'missing')
+        }
+        $detail = [ordered]@{
+            input_count = $states.Count
+            input_states = $states
+            project_exists = [bool]$report.project.exists
+            drive_free_bytes = $report.drive.free_bytes
+            path_tools_found_count = @($report.executables_on_path.PSObject.Properties | Where-Object { $_.Value }).Count
+        }
+        return [ordered]@{ status = 'ok'; summary = 'read-only A-beta preflight completed; inspect individual input status'; detail = $detail }
+    } catch {
+        return [ordered]@{ status = 'fail'; summary = ('A-beta preflight result invalid: ' + $_.Exception.Message) }
+    }
+}
+
 function Invoke-Job {
     param($Request)
     $kind = [string](Get-Property $Request 'kind' 'ping')
@@ -1379,6 +1419,7 @@ function Invoke-Job {
         'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
         'pipeline'  { return Invoke-JobPipeline -JobArgs $jobArgs }
+        'abeta_preflight' { return Invoke-JobAbetaPreflight }
         default     { return [ordered]@{ status = 'unsupported'; summary = ('unknown kind: ' + $kind) } }
     }
 }

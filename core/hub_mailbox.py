@@ -52,7 +52,7 @@ SCHEMA_RESULT = "cgmd.mailbox.result.v1"
 DEFAULT_REF = "hub/mailbox"
 
 # Kinds the desktop worker knows.  shell is opt-in on the desk side.
-KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline")
+KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline", "abeta_preflight")
 
 # One line per kind, printed by ``caps`` so a brand-new session never has to
 # guess what the desk can do.
@@ -66,6 +66,7 @@ JOB_HELP = {
     "deskfix": "re-arm the logon trigger, keep the panel alive, launch the boot animation now",
     "shell": "opt-in on the desk side (allow_shell=false by default)",
     "pipeline": '{"sequence": "...", "production_ns": 100} full Martini 3 chain on the native python + gmx.exe (no WSL)',
+    "abeta_preflight": "read-only inspection of the fixed three A-beta project inputs; requires an updated desktop worker",
 }
 
 # Status files the desk publishes; ``caps`` reads them straight from the tree.
