@@ -2,6 +2,7 @@
 
 与本地 Windows 台式机打通：
 
+- [从 F: 只读核验 YLSLLQR 结构与运行记录（无需 G:）](bridge/EVIDENCE.md)
 - [Google Drive 云端搜索与旧版镜像队列的适用条件](bridge/DRIVE.md)
 - [GitHub 分支握手与安全边界](bridge/README.md)
 
