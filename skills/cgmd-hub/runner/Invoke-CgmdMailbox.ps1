@@ -1162,6 +1162,76 @@ function Invoke-JobShell {
     }
 }
 
+function Get-DeskPython {
+    # Every interpreter this box has, best first.  The panel runs on a Windows
+    # python that is often NOT on PATH, so globbing the usual install roots is
+    # what actually finds it.
+    param($JobArgs)
+    $list = @()
+    $explicit = [string](Get-Property $JobArgs 'python' '')
+    if ($explicit) { $list += $explicit }
+    foreach ($name in @('python.exe', 'python3.exe', 'python')) {
+        $found = Get-Command $name -ErrorAction SilentlyContinue
+        if ($null -ne $found -and $found.Source) { $list += $found.Source }
+    }
+    $patterns = @()
+    if ($env:LOCALAPPDATA) { $patterns += (Join-Path $env:LOCALAPPDATA 'Programs\Python\Python*\python.exe') }
+    if ($env:ProgramFiles) { $patterns += (Join-Path $env:ProgramFiles 'Python*\python.exe') }
+    $patterns += 'C:\Python3*\python.exe'
+    $patterns += 'C:\ProgramData\Anaconda3\python.exe'
+    foreach ($pattern in $patterns) {
+        foreach ($hit in @(Get-ChildItem -Path $pattern -ErrorAction SilentlyContinue)) {
+            $list += $hit.FullName
+        }
+    }
+    foreach ($candidate in @($list | Select-Object -Unique)) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate)) { return $candidate }
+    }
+    return ''
+}
+
+function Invoke-JobCgmd {
+    # Coarse-grained work without a shell: one fixed dispatcher script, six
+    # fixed modes.  The caller passes a JSON document, never a command line.
+    param($JobArgs)
+    $script = Join-Path $RepoPath 'code\cgmd\desk_ops.py'
+    if (-not (Test-Path -LiteralPath $script)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'code/cgmd/desk_ops.py is missing on this checkout' }
+    }
+    $python = Get-DeskPython -JobArgs $JobArgs
+    if (-not $python) {
+        return [ordered]@{ status = 'unsupported'; summary = 'no python interpreter found on this workstation' }
+    }
+    $mode = [string](Get-Property $JobArgs 'mode' 'probe')
+    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $argFile = Join-Path $script:StateDir ('cgmd-args-' + $stamp + '.json')
+    $resultFile = Join-Path $script:StateDir ('cgmd-result-' + $stamp + '.json')
+    $log = Join-Path $script:StateDir ('mailbox-cgmd-' + $stamp + '.log')
+    Write-JsonFile -Path $argFile -Data $JobArgs
+    $line = '"' + $python + '" "' + $script + '" --mode ' + $mode + ' --args "' + $argFile + '" --out "' + $resultFile + '"'
+    $limit = [math]::Min($MaxJobSeconds, [int](Get-Property $JobArgs 'timeout_s' 1800))
+    $code = Invoke-Captured -CommandLine $line -OutFile $log -TimeoutSeconds $limit -WorkingDirectory $RepoPath
+    $result = Read-JsonFile -Path $resultFile
+    $tail = @(Get-Tail -Path $log -Count 30)
+    if ($null -eq $result) {
+        return [ordered]@{
+            status    = $(if ($code -eq 124) { 'timeout' } else { 'fail' })
+            summary   = ('cgmd ' + $mode + ' exit ' + $code + ': no result file')
+            detail    = [ordered]@{ exit_code = $code; python = $python; mode = $mode }
+            logs_tail = $tail
+        }
+    }
+    $status = [string](Get-Property $result 'status' 'fail')
+    if ($code -eq 124) { $status = 'timeout' }
+    $summary = [string](Get-Property $result 'summary' '')
+    return [ordered]@{
+        status    = $status
+        summary   = ('cgmd ' + $mode + ': ' + $summary)
+        detail    = [ordered]@{ exit_code = $code; python = $python; mode = $mode; ops = $result }
+        logs_tail = $tail
+    }
+}
+
 function Invoke-Job {
     param($Request)
     $kind = [string](Get-Property $Request 'kind' 'ping')
@@ -1178,6 +1248,7 @@ function Invoke-Job {
         'deskdiag'  { return Invoke-JobDeskdiag }
         'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
+        'cgmd'      { return Invoke-JobCgmd -JobArgs $jobArgs }
         'pipeline'  { return [ordered]@{ status = 'unsupported'
                                          summary = 'the Martini pipeline job kind is not wired yet; use smoke or gmx' } }
         default     { return [ordered]@{ status = 'unsupported'; summary = ('unknown kind: ' + $kind) } }
