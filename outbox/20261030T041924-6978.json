@@ -1,0 +1,49 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T041924-6978",
+    "kind":  "gmx",
+    "status":  "timeout",
+    "summary":  "gmx energy -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.edr -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\energy.xvg exit 124:  41  Box-Vel-YY      42  Box-Vel-ZZ      43  T-System        44  Lamb-System   ",
+    "detail":  {
+                   "exit_code":  124,
+                   "argv":  [
+                                "energy",
+                                "-f",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.edr",
+                                "-o",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\energy.xvg"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-122355",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx energy, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-122355",
+                      "Command line:",
+                      "  gmx energy -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.edr -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\energy.xvg",
+                      "Opened C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.edr as single precision energy file",
+                      "Select the terms you want from the following list by",
+                      "selecting either (part of) the name or the number or a combination.",
+                      "End your selection with an empty line or a zero.",
+                      "-------------------------------------------------------------------",
+                      "  1  Bond             2  G96Angle         3  Restr.-Angles    4  Proper-Dih.   ",
+                      "  5  LJ-(SR)          6  Coulomb-(SR)     7  Potential        8  Kinetic-En.   ",
+                      "  9  Total-Energy    10  Conserved-En.   11  Temperature     12  Pressure      ",
+                      " 13  Constr.-rmsd    14  Box-X           15  Box-Y           16  Box-Z         ",
+                      " 17  Volume          18  Density         19  pV              20  Enthalpy      ",
+                      " 21  Vir-XX          22  Vir-XY          23  Vir-XZ          24  Vir-YX        ",
+                      " 25  Vir-YY          26  Vir-YZ          27  Vir-ZX          28  Vir-ZY        ",
+                      " 29  Vir-ZZ          30  Pres-XX         31  Pres-XY         32  Pres-XZ       ",
+                      " 33  Pres-YX         34  Pres-YY         35  Pres-YZ         36  Pres-ZX       ",
+                      " 37  Pres-ZY         38  Pres-ZZ         39  #Surf*SurfTen   40  Box-Vel-XX    ",
+                      " 41  Box-Vel-YY      42  Box-Vel-ZZ      43  T-System        44  Lamb-System   "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T12:23:55+08:00",
+    "finished_at":  "2026-10-30T12:25:25+08:00",
+    "seconds":  90.42,
+    "worker":  "DESKTOP-IEUDGS5"
+}
