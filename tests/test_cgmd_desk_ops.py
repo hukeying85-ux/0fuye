@@ -162,3 +162,46 @@ def test_peptide_itp_declares_no_molecules(tmp_path, ff_dir):
     # one BB bead per residue, plus the solvent and ions, must add up to the .gro
     total = counts["Peptide"] * system["residues"] + counts["W"] + counts["NA"] + counts["CL"]
     assert total == system["beads_total"]
+
+
+@pytest.mark.skipif(os.name == "nt", reason="the stub driver is a shell script")
+def test_run_interleaves_grompp_and_mdrun(tmp_path, ff_dir):
+    """eq.gro only exists after mdrun-em; the stages must therefore interleave.
+
+    The first live run fired all three grompp calls up front and stopped at
+    'File em.gro does not exist or is not accessible'.
+    """
+    workdir = tmp_path / "run"
+    workdir.mkdir()
+    system = desk_ops.build_system("KLVFFAE", str(workdir),
+                                   os.path.join(ff_dir, "martini_v3.0.0.itp"), box_nm=6.0)
+    assert system["beads_total"] > 0
+
+    calls = tmp_path / "calls.txt"
+    stub = tmp_path / "gmx"
+    stub.write_text(
+        '#!/bin/sh\n'
+        'echo "$@" >> "' + str(calls) + '"\n'
+        'case "$1" in\n'
+        '  grompp) out=""; prev=""\n'
+        '    for a in "$@"; do if [ "$prev" = "-o" ]; then out="$a"; fi; prev="$a"; done\n'
+        '    : > "$out" ;;\n'
+        '  mdrun) deffnm=""; prev=""\n'
+        '    for a in "$@"; do if [ "$prev" = "-deffnm" ]; then deffnm="$a"; fi; prev="$a"; done\n'
+        '    printf "Performance: 1234.5\\nFinished mdrun\\n" > "$deffnm.log"\n'
+        '    : > "$deffnm.gro" ;;\n'
+        'esac\n'
+        'exit 0\n', encoding="utf-8")
+    stub.chmod(0o755)
+
+    status, summary, detail = desk_ops.mode_run(
+        {"workdir": str(workdir), "gmx": str(stub), "ns": 0.02, "gpu": False,
+         "prod_timeout": 60, "eq_timeout": 60, "em_timeout": 60}, "")
+    order = [entry["stage"] for entry in detail["stages"]]
+    assert order == ["grompp-em", "mdrun-em", "grompp-eq", "mdrun-eq",
+                     "grompp-prod", "mdrun-prod-gpu"], order
+    assert status == "ok", (summary, detail["stages"])
+    report = detail["report"]
+    assert report["finished"] is True
+    assert report["performance_ns_per_day"] == 1234.5
+    assert report["steps_requested"] == 1000
