@@ -11,14 +11,23 @@
 因此必须由掌管台式机的用户**只执行一次**配置动作。没有这一步，任何云端
 任务都只是排队，绝不能说已在台式机运行。
 
-## 一次性配置（审阅后，在目标台式机交互式 PowerShell）
+## 一次性配置（先辨认终端，再复制相应命令）
 
-若之前克隆的 `arena-0fuye-drive-runner` 工作区无未保存改动，可只读取本分支新提交：
+如果提示符为 `C:\Users\BNI>`，那是 **cmd.exe**，不是 PowerShell。
+在该窗口请复制**下列完整的一行**（不能拆行；`&&` 保证更新失败时不会运行旧脚本）：
+
+```cmd
+git -C "%USERPROFILE%\arena-0fuye-drive-runner" pull --ff-only origin arena/7ed6241a-0fuye && powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%USERPROFILE%\arena-0fuye-drive-runner\bridge\enable-existing-hub-peer.ps1"
+```
+
+如已打开 **PowerShell**（提示符常以 `PS C:\...>` 开头），并确认之前克隆的
+`arena-0fuye-drive-runner` 工作区无未保存改动，则可用下面的 PowerShell 版本：
 
 ```powershell
 $repo = Join-Path $HOME 'arena-0fuye-drive-runner'
 git -C $repo status --short    # 若这里有重要未保存修改，先停下，不要 reset
 git -C $repo pull --ff-only origin arena/7ed6241a-0fuye
+if ($LASTEXITCODE -ne 0) { throw '更新失败；不要运行旧脚本' }
 $script = Join-Path $repo 'bridge\enable-existing-hub-peer.ps1'
 Get-Content -LiteralPath $script
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -WhatIf
