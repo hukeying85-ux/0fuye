@@ -1,0 +1,26 @@
+; ===================================================================
+; CGMD-Engine topology -- generated automatically, do not edit by hand
+; Martini 3 force field: /tmp/mff/martini_forcefields/regular/v3.0.0/gmx_files
+; peptide moleculetype : Protein_0 x1
+; includes are flat copies in this directory (5 file(s) copied next to this topology)
+; ===================================================================
+
+#include "martini_v3.0.0.itp"
+#include "martini_v3.0.0_phospholipids_v1.itp"
+#include "martini_v3.0.0_solvents_v1.itp"
+#include "martini_v3.0.0_ions_v1.itp"
+#include "Protein_0.itp"
+
+[ system ]
+; name
+CGMD magainin2 in POPE:POPG bilayer
+
+[ molecules ]
+; name  number
+Protein_0              1
+POPE                  90
+POPG                  30
+POPE                  85
+POPG                  28
+W                   1797
+NA                    55
