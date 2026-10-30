@@ -17,7 +17,9 @@
     runs it here on the Windows GROMACS / GPU, and publishes the answer back.
     Nothing is ever written to the caller's branch, so no rebase conflicts.
 
-    Supported kinds: ping, selfcheck, smoke, sync, gmx, shell (opt-in).
+    Supported kinds: ping, selfcheck, smoke, sync, gmx, pipeline, deskdiag,
+    deskfix, shell (opt-in).  pipeline runs the whole Martini 3 chain with the
+    NATIVE Windows python + gmx.exe (no WSL).
 
 .PARAMETER RepoPath
     Checkout of the hub (default C:\cgmd\0fuye from the config).
@@ -45,7 +47,7 @@ param(
     [string]$ConfigPath = '',
     [string]$Ref = '',
     [int]$MaxJobs = 1,
-    [int]$MaxJobSeconds = 3600,
+    [int]$MaxJobSeconds = 5400,
     [switch]$AllowShell,
     [switch]$Quiet
 )
@@ -63,6 +65,7 @@ $script:MaxAttempts = 3
 $script:LastPath = Join-Path $script:StateDir 'mailbox-last.json'
 $script:Stopped = $false
 $script:PeerJobs = @()
+$script:PeerAnswers = @()
 $script:PeerInfo = @()
 
 foreach ($dir in @($script:StateDir, $script:LogDir)) {
@@ -102,7 +105,7 @@ function Read-JsonFile {
     } catch {
         # Not JSON (a literal "False" once landed in results/status and made
         # every reader throw).  Treat it as missing, never as fatal.
-        Write-HubLog ('ignoring a status file that is not JSON: ' + $Path) 'WARN'
+        Write-Log ('ignoring a status file that is not JSON: ' + $Path) 'WARN'
         return $null
     }
 }
@@ -230,9 +233,123 @@ function Fetch-PeerRef {
     }
 }
 
+function Get-PeerRefs {
+    # A peer is "owner/repo" or "owner/repo#ref".  Besides its configured ref the
+    # desk also scans every arena/* branch of that repository: an Arena session
+    # can only push to the branch its own session owns, so a session that cannot
+    # use hub/mailbox still gets served by queueing on its arena/<id> branch.
+    param($Peer)
+    $refs = @()
+    $configured = [string]$Peer.Ref
+    if ($configured) { $refs += $configured }
+    try {
+        $heads = Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'credential.helper=', 'ls-remote',
+            '--heads', $Peer.Url, 'refs/heads/arena/*')
+        if ($heads.Code -eq 0 -and $heads.Output) {
+            foreach ($line in @($heads.Output -split "`r?`n")) {
+                $match = [regex]::Match([string]$line, 'refs/heads/(\S+)$')
+                if ($match.Success) {
+                    $name = [string]$match.Groups[1].Value
+                    if ($refs -notcontains $name) { $refs += $name }
+                }
+            }
+        }
+    } catch { }
+    return $refs
+}
+
+function Receive-PeerRefJobs {
+    # Claim (at most $Budget) requests from one peer branch and publish the
+    # answers onto our own mailbox outbox, so the caller reads them by job id.
+    param([string]$Url, [string]$PeerRef, [string]$Label, [string]$Tracking,
+          [int]$Budget = 1, $Ledger = $null, [string]$OutboxDir)
+
+    $result = [ordered]@{ ran = 0; status = 'skipped'; note = ''; empty = $false; waiting = $false }
+    $ls = Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'credential.helper=', 'ls-remote',
+        '--heads', $Url, ('refs/heads/' + $PeerRef))
+    if ($ls.Code -ne 0) {
+        $result.status = 'unreachable'
+        $result.note = ([string]$ls.Output).Trim()
+        return $result
+    }
+    if ($ls.Output -notmatch [regex]::Escape('refs/heads/' + $PeerRef)) {
+        $result.status = 'waiting'
+        $result.note = 'branch not published yet'
+        $result.waiting = $true
+        return $result
+    }
+    $fetch = Fetch-PeerRef -Url $Url -PeerRef $PeerRef -Tracking $Tracking
+    if ($fetch.Code -ne 0) {
+        $result.status = 'unreachable'
+        $result.note = ([string]$fetch.Output).Trim()
+        return $result
+    }
+    $refPath = $Tracking + '/' + $PeerRef
+    $tree = Invoke-Git -Directory $RepoPath -GitArgs @('ls-tree', '-r', '--name-only', $refPath, 'inbox/')
+    $names = @()
+    if ($tree.Code -eq 0 -and $tree.Output) {
+        $names = @(($tree.Output -split "`r?`n") | Where-Object { $_ -match '^inbox/.+\.json$' } | Sort-Object)
+    }
+    if ($names.Count -eq 0) {
+        $result.status = 'empty'
+        $result.empty = $true
+        return $result
+    }
+    foreach ($name in $names) {
+        if ($result.ran -ge $Budget) { break }
+        $jobId = [System.IO.Path]::GetFileNameWithoutExtension($name)
+        $answerPath = Join-Path $OutboxDir ($jobId + '.json')
+        if (Test-Path -LiteralPath $answerPath) { continue }
+        if ($null -ne $Ledger -and $Ledger.Contains($jobId)) { continue }
+        $raw = Invoke-Git -Directory $RepoPath -GitArgs @('show', ($refPath + ':' + $name))
+        if ($raw.Code -ne 0) { continue }
+        $request = $null
+        try { $request = $raw.Output | ConvertFrom-Json } catch { $request = $null }
+        $started = Get-Date
+        $outcome = $null
+        try {
+            if ($null -eq $request) {
+                $outcome = [ordered]@{ status = 'error'; summary = 'peer request JSON could not be parsed' }
+            } else {
+                $outcome = Invoke-Job -Request $request
+            }
+        } catch {
+            $outcome = [ordered]@{ status = 'error'; summary = ('peer job crashed: ' + $_.Exception.Message) }
+        }
+        $finished = Get-Date
+        $answer = [ordered]@{
+            schema       = 'cgmd.mailbox.result.v1'
+            id           = $jobId
+            kind         = [string](Get-Property $request 'kind' 'unknown')
+            status       = [string](Get-Property $outcome 'status' 'error')
+            summary      = [string](Get-Property $outcome 'summary' '')
+            detail       = Get-Property $outcome 'detail' $null
+            logs_tail    = @(Get-Property $outcome 'logs_tail' @())
+            note         = [string](Get-Property $request 'note' '')
+            requested_by = [string](Get-Property $request 'from' 'peer')
+            peer         = $Label
+            worker       = $env:COMPUTERNAME
+            started_at   = $started.ToUniversalTime().AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
+            finished_at  = $finished.ToUniversalTime().AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
+            seconds      = [math]::Round(($finished - $started).TotalSeconds, 2)
+        }
+        Write-JsonFile -Path $answerPath -Data $answer
+        $script:PeerAnswers += $answer
+        $result.ran = $result.ran + 1
+        Write-Log ('peer {0} [{1}] job {2} ({3}) -> {4}: {5}' -f $Label, $PeerRef, $jobId,
+            $answer['kind'], $answer['status'], $answer['summary'])
+        if ($null -ne $Ledger) {
+            $Ledger[$jobId] = [ordered]@{ kind = $answer['kind']; status = $answer['status'];
+                                          finished_at = $answer['finished_at']; summary = $answer['summary'] }
+        }
+    }
+    if ($result.ran -gt 0) { $result.status = 'ran' }
+    return $result
+}
+
 function Invoke-PeerCycle {
     param([int]$Budget = 1, $Ledger = $null)
-    $answers = @()
+    $script:PeerAnswers = @()
     $peers = @(Get-PeerRepos)
     if ($peers.Count -eq 0) { return @() }
     $outboxDir = Join-Path $script:Worktree 'outbox'
@@ -243,99 +360,49 @@ function Invoke-PeerCycle {
     foreach ($peer in $peers) {
         $index++
         $label = [string]$peer.Label
-        $entry = [ordered]@{ peer = $label; status = 'skipped'; ran = 0; note = '' }
+        $entry = [ordered]@{ peer = $label; status = 'skipped'; ran = 0; note = ''; refs = @() }
+        $remaining = $Budget - $entry.ran
+        if ($remaining -le 0) {
+            $script:PeerInfo += $entry
+            continue
+        }
+        $refs = @(Get-PeerRefs -Peer $peer)
+        $entry['refs'] = @($refs)
+        $statuses = @()
+        $notes = @()
         try {
-            # A peer that has never queued anything has no mailbox branch yet:
-            # that is "waiting", not an error, and must not spam the log.
-            $ls = Invoke-Git -Directory $RepoPath -GitArgs @('-c', 'credential.helper=', 'ls-remote',
-                '--heads', $peer.Url, ('refs/heads/' + $peer.Ref))
-            if ($ls.Code -ne 0) {
-                $entry.status = 'unreachable'
-                $entry.note = ([string]$ls.Output).Trim()
-                if ($entry.note.Length -gt 200) { $entry.note = $entry.note.Substring(0, 200) }
-                $script:PeerInfo += $entry
-                Write-Log ('peer {0} unreachable: {1}' -f $label, $entry.note) 'WARN'
-                continue
-            }
-            if ($ls.Output -notmatch [regex]::Escape('refs/heads/' + $peer.Ref)) {
-                $entry.status = 'waiting'
-                $entry.note = 'no mailbox branch yet (appears on the first send)'
-                $script:PeerInfo += $entry
-                continue
-            }
-            $tracking = ('refs/remotes/peer-{0}' -f $index)
-            $fetch = Fetch-PeerRef -Url $peer.Url -PeerRef $peer.Ref -Tracking $tracking
-            if ($fetch.Code -ne 0) {
-                $entry.status = 'unreachable'
-                $entry.note = ([string]$fetch.Output).Trim()
-                if ($entry.note.Length -gt 200) { $entry.note = $entry.note.Substring(0, 200) }
-                $script:PeerInfo += $entry
-                Write-Log ('peer {0} unreachable: {1}' -f $label, $entry.note) 'WARN'
-                continue
-            }
-            $refPath = $tracking + '/' + $peer.Ref
-            $tree = Invoke-Git -Directory $RepoPath -GitArgs @('ls-tree', '-r', '--name-only', $refPath, 'inbox/')
-            $names = @()
-            if ($tree.Code -eq 0 -and $tree.Output) {
-                $names = @(($tree.Output -split "`r?`n") | Where-Object { $_ -match '^inbox/.+\.json$' } | Sort-Object)
-            }
-            if ($names.Count -eq 0) {
-                $entry.status = 'empty'
-                $script:PeerInfo += $entry
-                continue
-            }
-            foreach ($name in $names) {
+            $position = 0
+            foreach ($ref in $refs) {
                 if ($entry.ran -ge $Budget) { break }
-                $jobId = [System.IO.Path]::GetFileNameWithoutExtension($name)
-                $answerPath = Join-Path $outboxDir ($jobId + '.json')
-                if (Test-Path -LiteralPath $answerPath) { continue }
-                if ($null -ne $Ledger -and $Ledger.Contains($jobId)) { continue }
-                $raw = Invoke-Git -Directory $RepoPath -GitArgs @('show', ($refPath + ':' + $name))
-                if ($raw.Code -ne 0) { continue }
-                $request = $null
-                try { $request = $raw.Output | ConvertFrom-Json } catch { $request = $null }
-                $started = Get-Date
-                $outcome = $null
-                try {
-                    if ($null -eq $request) {
-                        $outcome = [ordered]@{ status = 'error'; summary = 'peer request JSON could not be parsed' }
-                    } else {
-                        $outcome = Invoke-Job -Request $request
-                    }
-                } catch {
-                    $outcome = [ordered]@{ status = 'error'; summary = ('peer job crashed: ' + $_.Exception.Message) }
-                }
-                $finished = Get-Date
-                $answer = [ordered]@{
-                    schema       = 'cgmd.mailbox.result.v1'
-                    id           = $jobId
-                    kind         = [string](Get-Property $request 'kind' 'unknown')
-                    status       = [string](Get-Property $outcome 'status' 'error')
-                    summary      = [string](Get-Property $outcome 'summary' '')
-                    detail       = Get-Property $outcome 'detail' $null
-                    logs_tail    = @(Get-Property $outcome 'logs_tail' @())
-                    note         = [string](Get-Property $request 'note' '')
-                    requested_by = [string](Get-Property $request 'from' 'peer')
-                    peer         = $label
-                    worker       = $env:COMPUTERNAME
-                    started_at   = $started.ToUniversalTime().AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
-                    finished_at  = $finished.ToUniversalTime().AddHours(8).ToString('yyyy-MM-ddTHH:mm:ss') + '+08:00'
-                    seconds      = [math]::Round(($finished - $started).TotalSeconds, 2)
-                }
-                Write-JsonFile -Path $answerPath -Data $answer
-                $answers += $answer
-                $entry.ran = $entry.ran + 1
-                Write-Log ('peer {0} job {1} ({2}) -> {3}: {4}' -f $label, $jobId, $answer['kind'], $answer['status'], $answer['summary'])
-                if ($null -ne $Ledger) {
-                    $Ledger[$jobId] = [ordered]@{ kind = $answer['kind']; status = $answer['status'];
-                                                  finished_at = $answer['finished_at']; summary = $answer['summary'] }
+                $position++
+                # A tracked ref is unique per (peer, branch, position) so two
+                # arena branches never overwrite each other's objects.
+                $tracking = ('refs/remotes/peer-{0}-{1}' -f $index, $position)
+                $outcome = Receive-PeerRefJobs -Url $peer.Url -PeerRef $ref -Label $label `
+                    -Tracking $tracking -Budget ($Budget - $entry.ran) -Ledger $Ledger -OutboxDir $outboxDir
+                $entry.ran = $entry.ran + [int]$outcome.ran
+                $statuses += [string]$outcome.status
+                if ($outcome.note) {
+                    $note = [string]$outcome.note
+                    if ($note.Length -gt 160) { $note = $note.Substring(0, 160) }
+                    $notes += ($ref + ': ' + $note)
                 }
             }
-            if ($entry.ran -eq 0 -and $entry.status -eq 'skipped') {
-                $entry.status = 'idle'
-                $entry.note = ('{0} request(s) seen, all already answered' -f $names.Count)
-            } elseif ($entry.ran -gt 0) {
+            if ($entry.ran -gt 0) {
                 $entry.status = 'ran'
+            } elseif ($statuses -contains 'unreachable') {
+                $entry.status = 'unreachable'
+                Write-Log ('peer {0} unreachable: {1}' -f $label, ($notes -join ' | ')) 'WARN'
+            } elseif ($statuses -contains 'waiting') {
+                $entry.status = 'waiting'
+            } elseif ($statuses -contains 'empty') {
+                $entry.status = 'empty'
+            } else {
+                $entry.status = 'idle'
+            }
+            $entry.note = ($notes -join ' | ')
+            if (-not $entry.note) {
+                $entry.note = ('{0} branch(es) scanned' -f @($refs).Count)
             }
         } catch {
             $entry.status = 'error'
@@ -344,7 +411,7 @@ function Invoke-PeerCycle {
         }
         $script:PeerInfo += $entry
     }
-    return $answers
+    return @($script:PeerAnswers)
 }
 
 function Invoke-Captured {
@@ -838,6 +905,89 @@ function Invoke-JobGmx {
     }
 }
 
+function Invoke-JobPipeline {
+    # The whole Martini 3 chain (structure -> martinize2 -> insane -> topology ->
+    # EM -> eq -> production -> analysis) executed by the NATIVE Windows python
+    # and the NATIVE gmx.exe.  WSL is never involved, and every heavy artefact
+    # stays in skills/cgmd-hub/state/cgmd-runs (git-ignored) so nothing large can
+    # ever reach the repository.
+    param($JobArgs)
+    $runner = Join-Path $script:ScriptDir 'Invoke-CgmdPipeline.ps1'
+    if (-not (Test-Path -LiteralPath $runner)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'Invoke-CgmdPipeline.ps1 is missing' }
+    }
+    $sequence = [string](Get-Property $JobArgs 'sequence' '')
+    if (-not $sequence) {
+        return [ordered]@{ status = 'unsupported'; summary = 'pipeline needs args.sequence (one-letter peptide)' }
+    }
+    $taskId = [string](Get-Property $JobArgs 'task_id' '')
+    if (-not $taskId) { $taskId = 'cgmd-' + (Get-Date -Format 'yyyyMMdd-HHmmss') }
+    $resultFile = Join-Path $script:StateDir ('pipeline-' + $taskId + '.json')
+    $out = Join-Path $script:StateDir ('mailbox-pipeline-' + $taskId + '.log')
+    $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runner + '"'
+    $line += ' -Sequence "' + $sequence + '"'
+    $line += ' -Name "' + [string](Get-Property $JobArgs 'name' 'peptide') + '"'
+    $line += ' -ProductionNs ' + [double](Get-Property $JobArgs 'production_ns' 100)
+    $line += ' -EquilibrationNs ' + [double](Get-Property $JobArgs 'equilibration_ns' 10)
+    $line += ' -GpuId ' + [int](Get-Property $JobArgs 'gpu_id' 0)
+    $line += ' -TaskId "' + $taskId + '"'
+    $line += ' -ResultFile "' + $resultFile + '"'
+    if ($RepoPath) { $line += ' -RepoPath "' + $RepoPath + '"' }
+    foreach ($pair in @(@('box_xy_nm', 'BoxXyNm'), @('box_z_nm', 'BoxZNm'),
+                        @('maxh_hours', 'Maxh'), @('segment_ns', 'SegmentNs'))) {
+        $value = Get-Property $JobArgs $pair[0] $null
+        if ($null -ne $value) { $line += (' -' + $pair[1] + ' ' + [double]$value) }
+    }
+    $salt = Get-Property $JobArgs 'salt_M' $null
+    if ($null -eq $salt) { $salt = Get-Property $JobArgs 'salt_m' $null }
+    if ($null -ne $salt) { $line += (' -SaltM ' + [double]$salt) }
+    $temperature = Get-Property $JobArgs 'temperature_K' $null
+    if ($null -eq $temperature) { $temperature = Get-Property $JobArgs 'temperature_k' $null }
+    if ($null -ne $temperature) { $line += (' -TemperatureK ' + [double]$temperature) }
+    $lipids = Get-Property $JobArgs 'lipids' $null
+    if ($null -ne $lipids) {
+        if ($lipids -is [string]) {
+            $line += (' -Lipids "' + [string]$lipids + '"')
+        } else {
+            $pairs = @()
+            foreach ($prop in $lipids.PSObject.Properties) { $pairs += ($prop.Name + ':' + $prop.Value) }
+            if ($pairs.Count -gt 0) { $line += (' -Lipids "' + ($pairs -join ',') + '"') }
+        }
+    }
+    $workdir = [string](Get-Property $JobArgs 'workdir' '')
+    if ($workdir) { $line += ' -WorkDir "' + $workdir + '"' }
+    $outdir = [string](Get-Property $JobArgs 'outdir' '')
+    if ($outdir) { $line += ' -OutDir "' + $outdir + '"' }
+    if ([bool](Get-Property $JobArgs 'install' $false)) { $line += ' -Install' }
+    if ([bool](Get-Property $JobArgs 'no_fetch_ff' $false)) { $line += ' -NoFetchForcefield' }
+    if ($script:Config) {
+        $ff = [string](Get-Property $script:Config 'martini3_dir' '')
+        if ($ff) { $line += ' -Martini3Dir "' + $ff + '"' }
+        $gmxConfigured = [string](Get-Property $script:Config 'gmx_binary' '')
+        if ($gmxConfigured) { $line += ' -Gmx "' + $gmxConfigured + '"' }
+    }
+    $requested = [int](Get-Property $JobArgs 'timeout_s' $MaxJobSeconds)
+    $limit = [math]::Max(120, [math]::Min($MaxJobSeconds, $requested) - 60)
+    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $script:StateDir
+    $answer = Read-JsonFile -Path $resultFile
+    if ($null -eq $answer) {
+        return [ordered]@{
+            status    = $(if ($code -eq 124) { 'timeout' } else { 'fail' })
+            summary   = ('pipeline runner exit {0} without a result file' -f $code)
+            detail    = [ordered]@{ exit_code = $code; task_id = $taskId; runner = $runner }
+            logs_tail = @(Get-Tail -Path $out -Count 40)
+        }
+    }
+    $detail = Get-Property $answer 'detail' ([ordered]@{})
+    try { $detail['exit_code'] = $code } catch { }
+    return [ordered]@{
+        status    = [string](Get-Property $answer 'status' 'fail')
+        summary   = [string](Get-Property $answer 'summary' '')
+        detail    = $detail
+        logs_tail = @(Get-Property $answer 'logs_tail' @(Get-Tail -Path $out -Count 30))
+    }
+}
+
 function Get-FileHashShort {
     param([string]$Path)
     if (-not $Path -or -not (Test-Path -LiteralPath $Path)) { return '' }
@@ -1033,6 +1183,35 @@ function Invoke-JobDeskfix {
             $notes += ('peer_repos write failed: ' + $_.Exception.Message)
         }
     }
+    # --- 0b. move the whole hub onto another branch, from here -------------
+    # This is how a new session gets its freshly merged code live on the desk
+    # without anyone typing on the workstation: write the branch into the local
+    # config, then fetch + checkout + reset so the very next poll cycle runs the
+    # new scripts (Invoke-CgmdPoll.ps1 calls this file by path every cycle).
+    $branchValue = [string](Get-Property $JobArgs 'branch' '')
+    if ($branchValue) {
+        try {
+            $cfgPath = Set-HubConfigValue -Name 'branch' -Value $branchValue
+            $script:Config = Read-JsonFile -Path $cfgPath
+            $notes += ('branch -> ' + $branchValue + ' in ' + $cfgPath)
+            $fetch = Invoke-Git -Directory $RepoPath -GitArgs @('fetch', '--quiet', 'origin', $branchValue)
+            if ($fetch.Code -ne 0) {
+                $notes += ('branch fetch failed: ' + ([string]$fetch.Output).Trim().Substring(0, [math]::Min(200, ([string]$fetch.Output).Trim().Length)))
+            } else {
+                $null = Invoke-Git -Directory $RepoPath -GitArgs @('checkout', '--quiet', '--force', $branchValue)
+                $reset = Invoke-Git -Directory $RepoPath -GitArgs @('reset', '--hard', ('origin/' + $branchValue))
+                if ($reset.Code -eq 0) {
+                    $head = Invoke-Git -Directory $RepoPath -GitArgs @('rev-parse', '--short', 'HEAD')
+                    $notes += ('checkout reset to origin/' + $branchValue + ' @ ' + ([string]$head.Output).Trim())
+                    $script:Branch = $branchValue
+                } else {
+                    $notes += ('branch reset failed: ' + ([string]$reset.Output).Trim())
+                }
+            }
+        } catch {
+            $notes += ('branch switch failed: ' + $_.Exception.Message)
+        }
+    }
     if (-not $deskRoot) {
         return [ordered]@{ status = 'fail'; summary = 'Arena Desk is not deployed on any drive'; detail = @{} }
     }
@@ -1123,8 +1302,9 @@ function Invoke-JobDeskfix {
     Start-Sleep -Seconds 3
     $tasks = Get-DesktopTasks
     $boot = @($tasks | Where-Object { $_['name'] -eq 'arena-desk-boot-demo' })[0]
-    $summary = ('panel {0} | boot task trigger {1} | launched {2}' -f
-        $(if ($panelUp) { 'up' } else { 'DOWN' }), @($boot['triggers']).Count, $launched)
+    $summary = ('panel {0} | boot task trigger {1} | launched {2} | branch {3}' -f
+        $(if ($panelUp) { 'up' } else { 'DOWN' }), @($boot['triggers']).Count, $launched,
+        [string](Get-Property $script:Config 'branch' $Branch))
     $status = 'ok'
     if (-not $panelUp) { $status = 'fail' }
     elseif (-not $bootRegistered -or @($boot['triggers']).Count -eq 0) { $status = 'fail' }
@@ -1137,6 +1317,7 @@ function Invoke-JobDeskfix {
             panel_up  = $panelUp
             launched  = $launched
             peer_repos = @(Get-Property $script:Config 'peer_repos' @())
+            branch    = [string](Get-Property $script:Config 'branch' $Branch)
             tasks     = $tasks
             notes     = $notes
         }
@@ -1178,8 +1359,7 @@ function Invoke-Job {
         'deskdiag'  { return Invoke-JobDeskdiag }
         'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
-        'pipeline'  { return [ordered]@{ status = 'unsupported'
-                                         summary = 'the Martini pipeline job kind is not wired yet; use smoke or gmx' } }
+        'pipeline'  { return Invoke-JobPipeline -JobArgs $jobArgs }
         default     { return [ordered]@{ status = 'unsupported'; summary = ('unknown kind: ' + $kind) } }
     }
 }

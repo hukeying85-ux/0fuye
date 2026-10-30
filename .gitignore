@@ -31,6 +31,10 @@ no*.xvg
 *.part000*
 #mdrun.log
 
+# --- Martini 3 force field (third-party, cloned on demand) -------------------
+forcefields/
+*.itp
+
 # --- MD run sandbox directories ---------------------------------------------
 runs/
 run/

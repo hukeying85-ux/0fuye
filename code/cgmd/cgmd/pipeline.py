@@ -139,8 +139,12 @@ class Pipeline:
         ))
         if not self.cfg.dry_run:
             try:
-                self.cfg.martini3_dir = resolve_martini3_dir(self.cfg.martini3_dir)
-            except FileNotFoundError as exc:
+                self.cfg.martini3_dir = resolve_martini3_dir(
+                    self.cfg.martini3_dir,
+                    auto_clone=self.cfg.fetch_forcefield,
+                    logger=self.log,
+                )
+            except (FileNotFoundError, RuntimeError) as exc:
                 raise PipelineError(str(exc))
             self.log("Martini 3 force field: {}".format(self.cfg.martini3_dir))
             self.engine = Gromacs(self.cfg, logger=self.log)
@@ -219,14 +223,17 @@ class Pipeline:
                 "(this provides the martinize2 executable)."
             )
         force_field = self._choose_force_field(martinize)
+        ss = self.secondary_structure_string()
+        cg_pdb = os.path.abspath(self.cfg.path("peptide_cg.pdb"))
+        peptide_top = os.path.abspath(self.cfg.path("peptide.top"))
         command = [
             martinize,
-            "-f", str(structure["path"]),
-            "-x", self.cfg.path("peptide_cg.pdb"),
-            "-o", self.cfg.path("peptide.top"),
+            "-f", os.path.abspath(str(structure["path"])),
+            "-x", cg_pdb,
+            "-o", peptide_top,
             "-name", "Protein",
             "-ff", force_field,
-            "-ss", (self.cfg.secondary_structure or "C").upper(),
+            "-ss", ss,
             "-ignh",
             "-elastic",
             "-ef", "500",
@@ -235,21 +242,34 @@ class Pipeline:
             "-p", "backbone",
             "-maxwarn", "1",
         ]
-        for extra_dir in self._vermouth_dirs():
-            flag = "-ff-dir" if "force_fields" in extra_dir else "-map-dir"
-            command += [flag, extra_dir]
-        self.engine.run(command, log_path=self.cfg.path("logs", "martinize2.out"))  # type: ignore[union-attr]
+        # No -ff-dir / -map-dir on purpose: martinize2 must use the force field
+        # and mappings bundled with vermouth (martini3001).  Pointing it at an
+        # external vermouth_files checkout is how the mappings went missing and
+        # the whole stage failed on the workstation.
+        #
+        # cwd=workdir is equally deliberate: martinize2 writes <molecule>.itp in
+        # the current directory, not next to -o, so without it Protein_0.itp
+        # landed in whatever directory the poller happened to start in.
+        assert self.engine is not None
+        self.engine.run(
+            command,
+            log_path=self.cfg.path("logs", "martinize2.out"),
+            cwd=self.cfg.workdir,
+        )
 
-        cg_pdb = self.cfg.path("peptide_cg.pdb")
         if not os.path.exists(cg_pdb):
             raise PipelineError("martinize2 did not produce {}".format(cg_pdb))
         beads = sum(1 for line in open(cg_pdb, encoding="utf-8", errors="replace") if line.startswith("ATOM"))
         info = {
             "cg_pdb": cg_pdb,
-            "top": self.cfg.path("peptide.top"),
+            "top": peptide_top,
             "force_field": force_field,
             "beads": beads,
-            "secondary_structure": (self.cfg.secondary_structure or "C").upper(),
+            "secondary_structure": ss,
+            "secondary_structure_letter": (self.cfg.secondary_structure or "C").upper()[:1],
+            "ss_expanded_to_residues": len(ss),
+            "cwd": os.path.abspath(self.cfg.workdir),
+            "external_vermouth_dirs": [],
         }
         write_json(self.cfg.path("martinize.json"), info)
         self._mark(name, "done", seconds=round(time.time() - started, 1), beads=beads)
@@ -270,21 +290,27 @@ class Pipeline:
                 return candidate
         return "martini3001"
 
+    def secondary_structure_string(self) -> str:
+        """Secondary structure as martinize2 wants it: **one code per residue**.
+
+        ``martinize2 -ss H`` is parsed as a *sequence* annotation, so a single
+        letter does not mean "all helix" -- the residue-by-residue string does.
+        A one-letter request is therefore expanded to the residue count
+        (``"H" * len(seq)``), and a string that already has the right length is
+        passed through untouched.
+        """
+        letter = (self.cfg.secondary_structure or "C").upper()[:1] or "C"
+        requested = (self.cfg.secondary_structure or "C").upper()
+        residues = len(self.cfg.sequence or "")
+        if len(requested) > 1 and residues and len(requested) >= residues:
+            return requested[:residues]
+        if residues:
+            return letter * residues
+        return letter
+
     def _vermouth_dirs(self) -> List[str]:
-        """Locate vermouth force-field / mapping directories next to the FF."""
-        dirs: List[str] = []
-        base = self.cfg.martini3_dir or ""
-        candidates = [
-            os.path.join(base, "..", "vermouth_files", "force_fields"),
-            os.path.join(base, "..", "vermouth_files", "mappings"),
-            os.path.join(base, "vermouth_files", "force_fields"),
-            os.path.join(base, "vermouth_files", "mappings"),
-        ]
-        for candidate in candidates:
-            candidate = os.path.abspath(candidate)
-            if os.path.isdir(candidate):
-                dirs.append(candidate)
-        return dirs
+        """Deprecated: martinize2 now always uses vermouth's bundled files."""
+        return []
 
     def stage_insane(self, martinized: Dict[str, Any]) -> Dict[str, Any]:
         name = "insane"
@@ -389,6 +415,7 @@ class Pipeline:
             ff_roots=[str(self.cfg.martini3_dir)],
             out_path=self.cfg.path("topol.top"),
             system_name="CGMD {} in POPE:POPG bilayer".format(self.cfg.peptide_name),
+            flat_includes=True,
         )
         validation = topology.validate_topology(report, str(system["gro"]))
         report["validation"] = validation
@@ -400,8 +427,9 @@ class Pipeline:
                 "(off by {})".format(validation["topology_atoms"], validation["gro_atoms"], validation["difference"])
             )
         self.log(
-            "topology: {} | {} molecule types | {:d} atoms".format(
-                report["peptide_moleculetype"], len(report["molecules"]), int(report["expected_atoms"] or 0)
+            "topology: {} | {} molecule types | {:d} atoms | {} flat include(s)".format(
+                report["peptide_moleculetype"], len(report["molecules"]),
+                int(report["expected_atoms"] or 0), len(report.get("flat_includes") or []),
             )
         )
         return report
@@ -451,6 +479,68 @@ class Pipeline:
         self.log("em: converged={} max_force={}".format(report.get("converged"), report.get("max_force")))
         return report
 
+    def _mdrun_until(self, deffnm: str, target_ns: float, name: str) -> Dict[str, Any]:
+        """Integrate ``deffnm`` until ``target_ns``, resuming from the checkpoint.
+
+        A microsecond production run cannot finish inside one job budget, and a
+        killed mdrun loses everything since the last checkpoint.  ``-maxh``
+        makes mdrun stop *itself* at a step boundary shortly before the ceiling,
+        write a ``.cpt`` and exit 0; the next call continues with ``-cpi``.  The
+        loop therefore yields honest partial progress instead of a timeout, and
+        re-issuing the same job picks up where it left off.
+        """
+        assert self.engine is not None
+        started = time.time()
+        state = gmx_log.parse_log_text(_read_text(self.cfg.path("{}.log".format(deffnm))))
+        calls = 0
+        while True:
+            done_ns = state.simulated_ns
+            if done_ns >= target_ns - 1e-9:
+                break
+            remaining_ns = target_ns - done_ns
+            segment = self.cfg.segment_ns if self.cfg.segment_ns and self.cfg.segment_ns > 0 else remaining_ns
+            steps = max(1, int(round(min(segment, remaining_ns) / self.cfg.dt_ps * 1000.0)))
+            checkpoint = self.cfg.path("{}.cpt".format(deffnm))
+            resume = bool(self.cfg.resume and done_ns > 0 and os.path.exists(checkpoint))
+            if resume:
+                self.log("{}: continuing from {:.3f} ns (checkpoint)".format(name, done_ns))
+            self.engine.mdrun(
+                deffnm,
+                nsteps=steps,
+                continue_run=resume,
+                maxh=self.cfg.maxh_hours or None,
+            )
+            calls += 1
+            state = gmx_log.parse_log_text(_read_text(self.cfg.path("{}.log".format(deffnm))))
+            if state.is_diverged:
+                break
+            if state.simulated_ns <= done_ns + 1e-9:
+                # No forward progress: stop instead of spinning on the same step.
+                self.log("{}: mdrun made no progress, stopping the loop".format(name))
+                break
+            if calls >= 200:
+                self.log("{}: reached the 200-call safety limit".format(name))
+                break
+        report = {
+            "seconds": round(time.time() - started, 1),
+            "ns": round(state.simulated_ns, 3),
+            "target_ns": target_ns,
+            "completed": state.simulated_ns >= target_ns - 1e-9,
+            "remaining_ns": round(max(0.0, target_ns - state.simulated_ns), 3),
+            "steps": state.step,
+            "nsteps_completed": int(round(state.simulated_ns / self.cfg.dt_ps * 1000.0)),
+            "nsteps_target": int(round(target_ns / self.cfg.dt_ps * 1000.0)),
+            "ns_per_day": state.ns_per_day,
+            "finished": state.finished,
+            "diverged": state.is_diverged,
+            "divergence": state.divergence,
+            "lincs_warnings": state.lincs_warnings,
+            "mdrun_calls": calls,
+            "maxh_hours": self.cfg.maxh_hours,
+            "checkpoint": self.cfg.path("{}.cpt".format(deffnm)),
+        }
+        return report
+
     def stage_equilibration(self) -> Dict[str, Any]:
         name = "eq"
         if self.cfg.resume and self._stage_done(name):
@@ -463,13 +553,11 @@ class Pipeline:
         assert self.engine is not None
         self.engine.grompp("eq", self.cfg.path("eq.mdp"), self.cfg.path("em.gro"), self.cfg.path("topol.top"),
                            self.cfg.path("eq.tpr"), ndx=self.cfg.path("index.ndx"))
-        self.engine.mdrun("eq")
-        state = gmx_log.parse_log_text(_read_text(self.cfg.path("eq.log")))
-        report = {"seconds": round(time.time() - started, 1), "ns": round(state.simulated_ns, 3),
-                  "ns_per_day": state.ns_per_day, "finished": state.finished,
-                  "diverged": state.is_diverged}
+        report = self._mdrun_until("eq", self.cfg.equilibration_ns, "eq")
+        report["wall_seconds"] = round(time.time() - started, 1)
         write_json(self.cfg.path("eq.json"), report)
-        self._mark(name, "done", seconds=report["seconds"], ns=report["ns"])
+        complete = report.get("completed") or report.get("diverged")
+        self._mark(name, "done" if complete else "partial", seconds=report["seconds"], ns=report["ns"])
         self.log("eq: {} ns at {} ns/day".format(report["ns"], report["ns_per_day"]))
         return report
 
@@ -488,21 +576,17 @@ class Pipeline:
         self.notify("start", "生产模拟已启动（{} ns, GPU {}）".format(self.cfg.production_ns, self.cfg.gpu_id),
                     ["肽: {} ({} aa)".format(self.cfg.peptide_name, len(self.cfg.sequence)),
                      "速度与 ETA 由 node_agent 每秒跟踪"])
-        self.engine.mdrun("prod")
-        state = gmx_log.parse_log_text(_read_text(self.cfg.path("prod.log")))
-        report = {
-            "seconds": round(time.time() - started, 1),
-            "ns": round(state.simulated_ns, 3),
-            "ns_per_day": state.ns_per_day,
-            "finished": state.finished,
-            "diverged": state.is_diverged,
-            "divergence": state.divergence,
-            "lincs_warnings": state.lincs_warnings,
-        }
+        report = self._mdrun_until("prod", self.cfg.production_ns, "prod")
+        report["wall_seconds"] = round(time.time() - started, 1)
+        report["gpu_flags"] = " ".join(self.cfg.mdrun_gpu_flags)
         write_json(self.cfg.path("prod.json"), report)
-        self._mark(name, "done", seconds=report["seconds"], ns=report["ns"],
+        # "done" only when the requested length really was integrated: a
+        # partial production must resume, not be skipped on the next call.
+        complete = bool(report.get("completed")) or bool(report.get("diverged"))
+        self._mark(name, "done" if complete else "partial", seconds=report["seconds"], ns=report["ns"],
                    diverged=report["diverged"], ns_per_day=report["ns_per_day"])
-        self.log("prod: {} ns, {} ns/day, diverged={}".format(report["ns"], report["ns_per_day"], report["diverged"]))
+        self.log("prod: {} ns / {} ns, {} ns/day, diverged={}".format(
+            report["ns"], report["target_ns"], report["ns_per_day"], report["diverged"]))
         if report["diverged"]:
             self.notify("error", "生产模拟发散", ["原因: {}".format(report["divergence"] or "unknown"),
                                                  "已完成 {:.1f} ns".format(report["ns"])])
@@ -535,6 +619,17 @@ class Pipeline:
             walltime_s=prod_report.get("seconds") if isinstance(prod_report, dict) else None,
         )
         simulation["equilibration"] = eq_report
+        simulation["production"] = {
+            "completed_ns": prod_report.get("ns"),
+            "target_ns": prod_report.get("target_ns"),
+            "completed": prod_report.get("completed"),
+            "steps_completed": prod_report.get("nsteps_completed"),
+            "steps_target": prod_report.get("nsteps_target"),
+            "mdrun_calls": prod_report.get("mdrun_calls"),
+            "maxh_hours": prod_report.get("maxh_hours"),
+            "gpu_flags": prod_report.get("gpu_flags"),
+            "wall_seconds": prod_report.get("wall_seconds"),
+        }
 
         metrics: Dict[str, Any] = {
             "schema": "cgmd.summary.v1",
@@ -551,6 +646,7 @@ class Pipeline:
                 "molecules": topo.get("molecules"),
                 "peptide_beads": topo.get("peptide_atoms_per_copy"),
                 "force_field": topo.get("forcefield"),
+                "topology_includes": topo.get("flat_includes") or [],
                 "index_groups": self._read_json(self.cfg.path("index.json"), {}).get("groups", {}),
             },
             "simulation": simulation,

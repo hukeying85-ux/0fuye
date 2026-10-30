@@ -197,6 +197,10 @@ class Gromacs:
                 command, 127, "",
             )
         self._record(command)
+        if log_path:
+            parent = os.path.dirname(os.path.abspath(log_path))
+            if parent:
+                os.makedirs(parent, exist_ok=True)
         if self.cfg.dry_run:
             if log_path:
                 with open(log_path, "a", encoding="utf-8") as handle:
@@ -250,21 +254,38 @@ class Gromacs:
         nsteps: Optional[int] = None,
         continue_run: bool = False,
         nb: str = "gpu",
-        pme: bool = True,
+        pme: Optional[str] = None,
+        bonded: str = "gpu",
+        maxh: Optional[float] = None,
         extra: Sequence[str] = (),
     ) -> int:
+        """Run ``gmx mdrun``.
+
+        Martini 3 electrostatics is **reaction-field**, so there is no PME mesh
+        at all: the documented GPU invocation is ``-nb gpu -bonded gpu -gpu_id
+        N`` with no ``-pme`` flag.  Passing ``-pme cpu``/``-pme gpu`` to a
+        reaction-field run only makes mdrun complain about an incompatible
+        setting, so ``pme`` defaults to ``None`` (omit the flag) and is only
+        emitted when a caller explicitly asks for it (e.g. an all-atom smoke
+        test).  ``maxh`` maps onto ``-maxh``, which lets a long production run
+        exit cleanly at a step boundary so the next call can continue from the
+        checkpoint instead of being killed by a job timeout.
+        """
         command = [self.exe, "mdrun", "-deffnm", deffnm, "-nb", nb]
-        if pme and nb == "gpu":
-            # reaction-field has no PME, but telling GROMACS where the (unused)
-            # PME work would live keeps it from over-subscribing the GPU
-            command += ["-pme", "cpu", "-bonded", "gpu"]
-        command += ["-dlb", "yes", "-pin", "on"]
+        if bonded and nb == "gpu":
+            command += ["-bonded", bonded]
         gpu = self.cfg.gpu_id if gpu_id is None else gpu_id
         if nb == "gpu":
+            # keep the documented trio together: -nb gpu -bonded gpu -gpu_id N
             command += ["-gpu_id", str(gpu)]
+        if pme:
+            command += ["-pme", str(pme)]
+        command += ["-dlb", "yes", "-pin", "on"]
         threads = self.cfg.ntomp if ntomp is None else ntomp
         if threads:
             command += ["-ntomp", str(threads)]
+        if maxh:
+            command += ["-maxh", "{:.3f}".format(float(maxh))]
         if nsteps is not None:
             command += ["-nsteps", str(nsteps)]
         if continue_run:

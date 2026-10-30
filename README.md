@@ -174,6 +174,47 @@ python3 -m cgmd.smoke --show results/status/gmx_smoke.json   # 读回版本/软�
 
 ---
 
+### 一条命令跑完整条 Martini 3 链路（`--kind pipeline`，原生 Windows，不走 WSL）
+
+台式机值守现在自己就能跑完整条流水线：原生 Python（优先 3.12）+ 原生 `gmx.exe`，
+`structure -> martinize2 -> insane -> 拓扑 -> index -> EM -> 预平衡 -> 生产 -> 分析`。
+
+```bash
+python3 -m core.hub_mailbox run --kind pipeline --timeout 5400 \
+  --json-args '{"sequence":"GIGKFLHSAKKFGKAFVGEIMNS","name":"magainin2",
+                "production_ns":100,"equilibration_ns":10,
+                "lipids":{"POPE":3,"POPG":1},"salt_M":0.15,"temperature_K":310,
+                "box_xy_nm":9,"gpu_id":0,"maxh_hours":1.3,"segment_ns":10,
+                "task_id":"cgmd-100ns-magainin2","install":true}'
+```
+
+* 重轨迹（`.top/.gro/.tpr/.xtc/.edr/.cpt`）全部留在
+  `skills/cgmd-hub/state/cgmd-runs/<task_id>/`（`.gitignore` 已排除），回仓库的只有
+  `results/cgmd/<task_id>/summary_metrics.json` 与 `figures/*.svg`（合计 < 1 MB）；
+* `maxh_hours` → `mdrun -maxh`，让生产段在步边界自我收停并写 `.cpt`；下一次同一条命令用
+  `-cpi` 续跑，因此**一个 100 ns 任务可以跨多个 5400 s 工单接力跑完**，被超时打断也不丢数据；
+* 返回值里直接给出 `completed_ns / target_ns / steps_completed / ns_per_day / gpu_flags /
+  z_distance_nm`。GPU 参数固定 `-nb gpu -bonded gpu -gpu_id 0`（Martini 3 是 reaction-field，**不带 `-pme`**）。
+
+### 让值守切到新代码（不用碰台式机键盘）
+
+```bash
+python3 -m core.hub_mailbox run --kind deskfix --timeout 900 \
+  --json-args '{"branch":"main"}'
+```
+
+`deskfix` 会把 `branch` 写进 `cgmd_hub.local.json`，并对本地 clone 做
+`fetch -> checkout --force -> reset --hard origin/<branch>`；下一轮 60 s 轮询就跑新脚本。
+
+### 四个实测建模问题的修复（2026-10-30，DESKTOP-IEUDGS5）
+
+| # | 问题 | 修复 |
+| --- | --- | --- |
+| a | PyPI 上没有 `martini-forcefields`，找不到 Martini 3 参数 | `resolve_martini3_dir(auto_clone=True)` 浅克隆 `marrink-lab/martini-forcefields`（`--depth 1`）并定位 `regular/v3.0.0/gmx_files`（上游实际在 `martini_forcefields/regular/v3.0.0/gmx_files`，两种布局都能解析） |
+| b | `martinize2` 被外部 `-ff-dir/-map-dir` 带偏；`-ss H` 不是「全螺旋」；`Protein_0.itp` 不落在 workdir | 去掉外部目录，直接用内置 `martini3001`；`-ss` 展开成残基长度（`"H" * len(seq)`）；以 `cwd=workdir` 运行 |
+| c | `topol.top` 指向力场目录，换机器/换目录就断 | 把 `martini_v3.0.0*.itp` 平铺复制到 `topol.top` 同目录，写成 `#include "martini_v3.0.0.itp"`（并记 `flat_includes`） |
+| d | 沿用全原子参数 `-pme cpu` | Martini 3 是 reaction-field：`-nb gpu -bonded gpu -gpu_id 0`，不带 `-pme` |
+
 ### 完全不用人管（自愈 + 信箱 + 局域网直连）
 
 值守现在会自己修自己、自己安排验证，别的会话也能直接给它派活：
@@ -182,6 +223,8 @@ python3 -m cgmd.smoke --show results/status/gmx_smoke.json   # 读回版本/软�
 | --- | --- | --- |
 | 自愈值守 | 死锁自动破、100 ps 每 24 h 自动复验（失败 3 h 退避重试） | 无需操作，`Invoke-CgmdPoll.ps1` 每轮自检 |
 | 信箱总线 | 任何会话/分支/机器 → 台式机，走独立分支 `hub/mailbox`，**不碰调用方分支** | `python3 -m core.hub_mailbox run --kind smoke` |
+| 整条流水线 | `--kind pipeline`：原生 Python + 原生 gmx.exe 跑 Martini 3 全链路 | `python3 -m core.hub_mailbox run --kind pipeline` |
+| 切分支 | `--kind deskfix` 带 `branch`：写配置 + fetch/checkout/reset | `... run --kind deskfix --json-args '{"branch":"main"}'` |
 | 局域网直连 | 同一 WiFi 下笔记本毫秒级调用台式机（`/health` `/status` `/job`） | `python3 -m core.desk_bridge ping --host <台式机IP>` |
 | 分工 | 跨网络/要留档用信箱，同网要秒回用直连，两者返回值同 schema | 见 `docs/hub_automation_zh.md` |
 

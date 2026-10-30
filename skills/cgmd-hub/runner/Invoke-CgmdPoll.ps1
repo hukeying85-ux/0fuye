@@ -204,7 +204,9 @@ function Invoke-MailboxOnce {
     $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $worker + '" -RepoPath "' + $Repo + '" -MaxJobs ' + $MaxJobs + ' -Quiet'
     if ($Branch) { $line += ' -Branch "' + $Branch + '"' }
     if ($Ref) { $line += ' -Ref "' + $Ref + '"' }
-    $code = Invoke-Captured -CommandLine $line -OutFile $log -TimeoutSeconds 2700
+    # The worker may legitimately spend up to 5400 s on one job (a 100 ns
+    # Martini production segment), so the wrapper must not cut it short first.
+    $code = Invoke-Captured -CommandLine $line -OutFile $log -TimeoutSeconds 5700
     Write-HubLog ('mailbox worker exit ' + $code)
     $last = Read-JsonFile -Path (Join-Path $script:StateDir 'mailbox-last.json')
     if ($null -eq $last) { return }

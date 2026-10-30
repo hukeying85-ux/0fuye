@@ -11,7 +11,7 @@
 
         GET  /health                 liveness + gmx version + gpus
         GET  /status                 last smoke report, heartbeat, disk
-        POST /job                    {"kind":"ping|smoke|selfcheck|gmx","args":{...}}
+        POST /job                    {"kind":"ping|smoke|selfcheck|gmx|pipeline","args":{...}}
 
     Every answer is the same JSON shape the mailbox uses
     (cgmd.mailbox.result.v1), so one client reads both transports.
@@ -42,7 +42,7 @@ param(
     [string]$Branch = '',
     [int]$Port = 0,
     [string]$Token = '',
-    [int]$MaxJobSeconds = 900,
+    [int]$MaxJobSeconds = 5400,
     [switch]$AllowShell,
     [switch]$OpenFirewall,
     [switch]$Once,
@@ -315,6 +315,49 @@ function Invoke-BridgeJob {
             return New-Result -Kind 'gmx' -Status $(if ($code -eq 0) { 'ok' } else { 'fail' }) `
                 -Summary ('gmx {0} exit {1}' -f ($argv -join ' '), $code) `
                 -Detail ([ordered]@{ exit_code = $code; argv = $argv; workdir = $scratch }) -Tail $tail
+        }
+        'pipeline' {
+            # Same native runner the mailbox uses: native python (3.12 first) and
+            # the native gmx.exe, never WSL.
+            $runner = Join-Path $script:ScriptDir 'Invoke-CgmdPipeline.ps1'
+            if (-not (Test-Path -LiteralPath $runner)) {
+                return New-Result -Kind 'pipeline' -Status 'unsupported' -Summary 'Invoke-CgmdPipeline.ps1 is missing'
+            }
+            $sequence = [string](Get-Property $jobArgs 'sequence' '')
+            if (-not $sequence) {
+                return New-Result -Kind 'pipeline' -Status 'unsupported' -Summary 'args.sequence is required'
+            }
+            $taskId = [string](Get-Property $jobArgs 'task_id' '')
+            if (-not $taskId) { $taskId = 'cgmd-' + (Get-Date -Format 'yyyyMMdd-HHmmss') }
+            $resultFile = Join-Path $script:StateDir ('pipeline-' + $taskId + '.json')
+            $out = Join-Path $script:StateDir ('bridge-pipeline-' + $taskId + '.log')
+            $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runner + '"'
+            $line += ' -Sequence "' + $sequence + '"'
+            $line += ' -Name "' + [string](Get-Property $jobArgs 'name' 'peptide') + '"'
+            $line += ' -ProductionNs ' + [double](Get-Property $jobArgs 'production_ns' 100)
+            $line += ' -EquilibrationNs ' + [double](Get-Property $jobArgs 'equilibration_ns' 10)
+            $line += ' -GpuId ' + [int](Get-Property $jobArgs 'gpu_id' 0)
+            $line += ' -TaskId "' + $taskId + '"'
+            $line += ' -ResultFile "' + $resultFile + '"'
+            if ($RepoPath) { $line += ' -RepoPath "' + $RepoPath + '"' }
+            $salt = Get-Property $jobArgs 'salt_M' $null
+            if ($null -ne $salt) { $line += (' -SaltM ' + [double]$salt) }
+            $temperature = Get-Property $jobArgs 'temperature_K' $null
+            if ($null -ne $temperature) { $line += (' -TemperatureK ' + [double]$temperature) }
+            if ([bool](Get-Property $jobArgs 'install' $false)) { $line += ' -Install' }
+            $requested = [int](Get-Property $jobArgs 'timeout_s' $MaxJobSeconds)
+            $limit = [math]::Max(120, [math]::Min($MaxJobSeconds, $requested) - 60)
+            $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $script:StateDir
+            $answer = Read-JsonFile -Path $resultFile
+            if ($null -eq $answer) {
+                return New-Result -Kind 'pipeline' -Status $(if ($code -eq 124) { 'timeout' } else { 'fail' }) `
+                    -Summary ('pipeline runner exit {0} without a result file' -f $code) `
+                    -Detail ([ordered]@{ exit_code = $code; task_id = $taskId }) -Tail (Get-Tail -Path $out -Count 30)
+            }
+            return New-Result -Kind 'pipeline' -Status ([string](Get-Property $answer 'status' 'fail')) `
+                -Summary ([string](Get-Property $answer 'summary' '')) `
+                -Detail (Get-Property $answer 'detail' $null) `
+                -Tail (Get-Property $answer 'logs_tail' @(Get-Tail -Path $out -Count 30))
         }
         'shell' {
             if (-not $AllowShell) {

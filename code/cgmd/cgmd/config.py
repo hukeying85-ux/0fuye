@@ -19,12 +19,27 @@ from __future__ import annotations
 import glob
 import json
 import os
+import subprocess
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-__all__ = ["Config", "resolve_martini3_dir", "find_binary", "load_local_config"]
+__all__ = [
+    "Config",
+    "resolve_martini3_dir",
+    "fetch_martini_forcefields",
+    "find_binary",
+    "load_local_config",
+    "MARTINI_FF_URL",
+    "MARTINI_FF_SUBDIR",
+]
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+
+#: Upstream home of the Martini 3 parameter files.  There is **no PyPI
+#: package** called ``martini-forcefields``, so the pipeline clones this
+#: repository (shallow) and picks ``regular/v3.0.0/gmx_files`` out of it.
+MARTINI_FF_URL = "https://github.com/marrink-lab/martini-forcefields.git"
+MARTINI_FF_SUBDIR = os.path.join("regular", "v3.0.0", "gmx_files")
 
 DEFAULT_FF_CANDIDATES = (
     os.environ.get("CGMD_MARTINI3_DIR", ""),
@@ -68,8 +83,108 @@ def find_binary(*names: str) -> Optional[str]:
     return None
 
 
-def resolve_martini3_dir(explicit: Optional[str] = None) -> str:
-    """Locate a directory that contains the Martini 3 ``*.itp`` files."""
+def _contains_itp(path: str) -> bool:
+    return bool(glob.glob(os.path.join(path, "**", "*.itp"), recursive=True))
+
+
+def find_gmx_files(root: str) -> Optional[str]:
+    """Locate the directory that holds ``martini_v3.0.0*.itp`` under *root*.
+
+    ``marrink-lab/martini-forcefields`` keeps the runnable parameters in
+    ``martini_forcefields/regular/v3.0.0/gmx_files`` (the package directory is
+    inside the repository, not at its root); older mirrors and hand-made copies
+    put them straight in ``regular/v3.0.0/gmx_files`` or at the top level.  All
+    of those resolve, and an explicit layout wins so a checkout carrying several
+    Martini versions never mixes them.
+    """
+    if not root or not os.path.isdir(root):
+        return None
+    direct = [
+        os.path.join(root, MARTINI_FF_SUBDIR),
+        os.path.join(root, "martini_forcefields", MARTINI_FF_SUBDIR),
+        root,
+    ]
+    for candidate in direct:
+        if os.path.isdir(candidate) and glob.glob(os.path.join(candidate, "martini_v3*.itp")):
+            return os.path.abspath(candidate)
+    for pattern in ("**/" + MARTINI_FF_SUBDIR.replace(os.sep, "/"),
+                    "**/gmx_files",
+                    "**/martini_v3*.itp"):
+        for candidate in sorted(glob.glob(os.path.join(root, pattern), recursive=True)):
+            folder = candidate if os.path.isdir(candidate) else os.path.dirname(candidate)
+            if glob.glob(os.path.join(folder, "martini_v3*.itp")):
+                return os.path.abspath(folder)
+    return None
+
+
+def fetch_martini_forcefields(
+    dest: Optional[str] = None,
+    url: Optional[str] = None,
+    depth: int = 1,
+    timeout: int = 900,
+    logger: Optional[Any] = None,
+) -> str:
+    """Shallow-clone the Martini 3 parameters and return the ``gmx_files`` dir.
+
+    PyPI has no ``martini-forcefields`` distribution, so the only automatic
+    source is the upstream git repository.  The clone is *shallow* (``--depth
+    1``, a handful of MB) and lands in ``<repo>/forcefields/martini-forcefields``
+    which ``.gitignore`` keeps out of version control (third-party licence).
+    """
+    say = logger or (lambda message: None)
+    url = url or os.environ.get("CGMD_MARTINI_FF_URL") or MARTINI_FF_URL
+    dest = dest or os.environ.get("CGMD_MARTINI_FF_CLONE") or os.path.join(
+        REPO_ROOT, "forcefields", "martini-forcefields"
+    )
+    dest = os.path.abspath(os.path.expanduser(os.path.expandvars(dest)))
+    found = find_gmx_files(dest)
+    if found:
+        say("Martini 3 force field already cloned: {}".format(found))
+        return found
+
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    if os.path.isdir(os.path.join(dest, ".git")):
+        command = ["git", "-C", dest, "fetch", "--depth", str(depth), "origin"]
+        say("$ " + " ".join(command))
+        subprocess.run(command, capture_output=True, text=True, timeout=timeout, check=False)
+        command = ["git", "-C", dest, "reset", "--hard", "FETCH_HEAD"]
+    else:
+        if os.path.isdir(dest) and os.listdir(dest):
+            raise RuntimeError(
+                "{} exists but does not contain the Martini 3 files; remove it first".format(dest)
+            )
+        command = ["git", "clone", "--depth", str(depth), "--single-branch", url, dest]
+    say("$ " + " ".join(command))
+    completed = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+    if completed.returncode != 0:
+        raise RuntimeError(
+            "git clone of {} failed ({}): {}".format(
+                url, completed.returncode, (completed.stderr or completed.stdout or "").strip()[:300]
+            )
+        )
+    found = find_gmx_files(dest)
+    if not found:
+        raise RuntimeError(
+            "{} was cloned but no martini_v3*.itp was found under {}".format(url, dest)
+        )
+    say("Martini 3 force field ready: {}".format(found))
+    return found
+
+
+def resolve_martini3_dir(
+    explicit: Optional[str] = None,
+    auto_clone: bool = False,
+    clone_root: Optional[str] = None,
+    logger: Optional[Any] = None,
+) -> str:
+    """Locate a directory that contains the Martini 3 ``*.itp`` files.
+
+    Search order: the argument, the workstation-local hub config, the usual
+    on-disk locations, an existing ``marrink-lab/martini-forcefields`` checkout
+    and (only when *auto_clone* is true) a fresh shallow clone of that
+    repository.  PyPI is deliberately not consulted: no such distribution
+    exists, and a stale pip name in the error message only wastes a round trip.
+    """
     candidates: List[str] = []
     if explicit:
         candidates.append(explicit)
@@ -80,7 +195,7 @@ def resolve_martini3_dir(explicit: Optional[str] = None) -> str:
             candidates.append(value)
     candidates.extend(DEFAULT_FF_CANDIDATES)
 
-    # pip package `martini_forcefields` (recommended, keeps the licence local)
+    # pip package `martini_forcefields` (kept for workstations that have it)
     try:  # pragma: no cover - depends on the workstation environment
         import martini_forcefields  # type: ignore
 
@@ -91,18 +206,33 @@ def resolve_martini3_dir(explicit: Optional[str] = None) -> str:
     except Exception:
         pass
 
+    # an existing clone from a previous run (cheap, no network)
+    clone_dest = clone_root or os.path.join(REPO_ROOT, "forcefields", "martini-forcefields")
+    candidates.append(clone_dest)
+
     for candidate in candidates:
         if not candidate:
             continue
         path = os.path.expanduser(os.path.expandvars(candidate))
-        if os.path.isdir(path) and glob.glob(os.path.join(path, "**", "*.itp"), recursive=True):
-            return os.path.abspath(path)
+        if not os.path.isdir(path):
+            continue
+        resolved = find_gmx_files(path) or path
+        if _contains_itp(resolved):
+            return os.path.abspath(resolved)
+
+    if auto_clone:
+        return fetch_martini_forcefields(dest=clone_dest, logger=logger)
+
     raise FileNotFoundError(
-        "Martini 3 force field not found. Install it with\n"
-        "    pip install martini-forcefields\n"
-        "or download martini_v3.0.0 from https://cgmartini.nl and point\n"
-        "    CGMD_MARTINI3_DIR=/path/to/gmx_files\n"
-        "at the directory that contains martini_v3.0.0.itp."
+        "Martini 3 force field not found. The parameters are not on PyPI; fetch them with\n"
+        "    git clone --depth 1 {} {}\n"
+        "and point\n"
+        "    CGMD_MARTINI3_DIR={}\n"
+        "at that directory (or pass --martini3-dir / --fetch-forcefield).".format(
+            MARTINI_FF_URL,
+            clone_dest,
+            os.path.join(clone_dest, MARTINI_FF_SUBDIR),
+        )
     )
 
 
@@ -144,6 +274,14 @@ class Config:
     insane_binary: Optional[str] = None
     python_binary: str = ""
     keep_raw: bool = True
+    #: Shallow-clone marrink-lab/martini-forcefields when nothing is found.
+    fetch_forcefield: bool = True
+    #: Wall-clock ceiling per mdrun call (hours).  0 = run to the last step.
+    #: A positive value lets one mdrun return cleanly with a checkpoint before
+    #: a mailbox/job-level timeout fires, and the next call continues from it.
+    maxh_hours: float = 0.0
+    #: Longest single production segment (ns).  0 = the whole production run.
+    segment_ns: float = 0.0
 
     task_id: str = ""
     ntfy_topic: str = "arena-beacon-95bc796a66"
@@ -172,6 +310,11 @@ class Config:
     @property
     def npt_atom_limit(self) -> int:
         return 10_000_000
+
+    @property
+    def mdrun_gpu_flags(self) -> List[str]:
+        """Martini 3 uses reaction-field: there is no PME to place on the GPU."""
+        return ["-nb", "gpu", "-bonded", "gpu", "-gpu_id", str(self.gpu_id)]
 
     def to_dict(self) -> Dict[str, Any]:
         data = self.__dict__.copy()
@@ -224,4 +367,7 @@ def config_from_task(task: Dict[str, Any], workdir: str) -> Config:
         gmx_binary=local.get("gmx_binary"),
         martinize_binary=local.get("martinize_binary"),
         insane_binary=local.get("insane_binary"),
+        fetch_forcefield=bool(local.get("fetch_forcefield", True)),
+        maxh_hours=float(sim.get("maxh_hours", 0.0) or 0.0),
+        segment_ns=float(sim.get("segment_ns", 0.0) or 0.0),
     )

@@ -26,6 +26,7 @@ import difflib
 import glob
 import os
 import re
+import shutil
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
@@ -210,6 +211,35 @@ def _include_path(target: str, top_dir: str) -> str:
     return relative.replace(os.sep, "/")
 
 
+def _flatten_into(paths: Sequence[str], target_dir: str) -> Dict[str, str]:
+    """Copy every file in *paths* into *target_dir*, keyed by its basename.
+
+    GROMACS resolves ``#include "x.itp"`` relative to the file that contains the
+    include (and to the working directory), which makes a ``topol.top`` that
+    points into a force-field checkout fragile: the run directory moves, the
+    clone moves, or a path with a space breaks the argv.  Copying the handful of
+    ``martini_v3.0.0*.itp`` files next to ``topol.top`` and including them by
+    basename removes every one of those failure modes and is what the desk
+    actually runs.
+    """
+    copied: Dict[str, str] = {}
+    for source in paths:
+        source = os.path.abspath(source)
+        name = os.path.basename(source)
+        destination = os.path.join(target_dir, name)
+        copied[name] = source
+        if os.path.abspath(destination) == source:
+            continue
+        if os.path.exists(destination):
+            try:
+                if os.path.samefile(destination, source):
+                    continue
+            except OSError:
+                pass
+        shutil.copyfile(source, destination)
+    return copied
+
+
 def build_topology(
     insane_top: str,
     peptide_top: str,
@@ -217,8 +247,15 @@ def build_topology(
     out_path: str,
     system_name: str = "CGMD Martini 3 system",
     peptide_count: Optional[int] = None,
+    flat_includes: bool = True,
 ) -> Dict[str, object]:
-    """Write a complete ``topol.top`` and return a validation report."""
+    """Write a complete ``topol.top`` and return a validation report.
+
+    With *flat_includes* (the default, and what the desktop runs) every
+    ``martini_v3.0.0*.itp`` the topology needs is copied next to the output file
+    and included by basename -- ``#include "martini_v3.0.0.itp"`` -- so the run
+    directory is self-contained and movable.
+    """
     index = MoleculeTypeIndex(ff_roots)
     if not index.base_files:
         raise RuntimeError(
@@ -290,16 +327,27 @@ def build_topology(
 
     top_dir = os.path.dirname(os.path.abspath(out_path))
     os.makedirs(top_dir, exist_ok=True)
+    flat_copies: Dict[str, str] = {}
+    include_lines: List[str] = []
+    if flat_includes:
+        flat_copies = _flatten_into(include_files, top_dir)
+        include_lines = ['#include "{}"'.format(name) for name in flat_copies]
+    else:
+        include_lines = ['#include "{}"'.format(_include_path(path, top_dir)) for path in include_files]
+
     lines: List[str] = [
         "; ===================================================================",
         "; CGMD-Engine topology -- generated automatically, do not edit by hand",
         "; Martini 3 force field: {}".format(", ".join(index.roots)),
         "; peptide moleculetype : {} x{}".format(peptide_name, peptide_number),
+        "; includes are {} ({} file(s) copied next to this topology)".format(
+            "flat copies in this directory" if flat_includes else "paths into the force field",
+            len(include_files) if flat_includes else 0,
+        ),
         "; ===================================================================",
         "",
     ]
-    for path in include_files:
-        lines.append('#include "{}"'.format(_include_path(path, top_dir)))
+    lines.extend(include_lines)
     lines += ["", "[ system ]", "; name", system_name, "", "[ molecules ]", "; name  number"]
     for name, count, _info in resolved:
         lines.append("{:<16}{:>8}".format(name, count))
@@ -326,6 +374,9 @@ def build_topology(
         "peptide_atoms_per_copy": peptide_atoms,
         "molecules": [{"name": name, "count": count} for name, count, _info in resolved],
         "includes": include_files,
+        "include_style": "flat" if flat_includes else "forcefield-paths",
+        "flat_includes": sorted(flat_copies),
+        "flat_sources": flat_copies,
         "expected_atoms": expected_atoms,
         "forcefield": index.describe(),
     }

@@ -65,7 +65,7 @@ JOB_HELP = {
     "deskdiag": "file hashes repo-vs-desk, scheduled tasks, served HTML, boot ack, lock state",
     "deskfix": "re-arm the logon trigger, keep the panel alive, launch the boot animation now",
     "shell": "opt-in on the desk side (allow_shell=false by default)",
-    "pipeline": "Martini pipeline, not wired yet - use smoke or gmx",
+    "pipeline": '{"sequence": "...", "production_ns": 100} full Martini 3 chain on the native python + gmx.exe (no WSL)',
 }
 
 # Status files the desk publishes; ``caps`` reads them straight from the tree.
@@ -311,6 +311,19 @@ def parse_peer(entry: str, default_ref: str = DEFAULT_REF) -> Tuple[str, str]:
     return url, ref
 
 
+def list_remote_heads(repo: str, url: str, pattern: str = "refs/heads/arena/*") -> List[str]:
+    """Branch names of *url* matching *pattern* (anonymous, never raises)."""
+    code, out, _ = _run(repo, ["-c", "credential.helper=", "ls-remote", "--heads", url, pattern])
+    if code != 0:
+        return []
+    names: List[str] = []
+    for line in out.decode("utf-8", "replace").splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[1].startswith("refs/heads/"):
+            names.append(parts[1][len("refs/heads/"):])
+    return names
+
+
 def peer_once(desk_repo: str, peers: List[str], handler, ref: str = DEFAULT_REF,
               remote: str = "origin", max_jobs: int = 1,
               worker: str = "peer") -> List[Dict[str, Any]]:
@@ -323,6 +336,11 @@ def peer_once(desk_repo: str, peers: List[str], handler, ref: str = DEFAULT_REF,
     here, and publishes the answer into its own mailbox -- the caller reads it by
     id from the desk repo.
 
+    Besides the branch named in the peer entry (``owner/repo#branch``, default
+    ``hub/mailbox``) every ``arena/*`` branch of that repository is scanned too:
+    an Arena session can only push the branch its own session owns, so a caller
+    that cannot write ``hub/mailbox`` still gets served.
+
     This is the Python twin of ``Invoke-PeerCycle`` in
     ``skills/cgmd-hub/runner/Invoke-CgmdMailbox.ps1``; the tests drive this one.
     """
@@ -334,64 +352,82 @@ def peer_once(desk_repo: str, peers: List[str], handler, ref: str = DEFAULT_REF,
     if tip:
         answered = {os.path.basename(path)[:-5] for path in list_files(desk_repo, tip, "outbox")
                     if path.endswith(".json")}
-    budget = max(0, int(max_jobs))
+    budget = [max(0, int(max_jobs))]
     for index, entry in enumerate(peers, start=1):
-        if budget <= 0:
+        if budget[0] <= 0:
             break
         url, peer_ref = parse_peer(entry, ref)
-        tracking = "refs/remotes/peer-%d/%s" % (index, peer_ref)
-        # anonymous first: the desk's stored credential belongs to one repo only
-        code, _, _ = _run(desk_repo, ["-c", "credential.helper=", "fetch", "--quiet", "--no-tags",
-                                      url, "+refs/heads/%s:%s" % (peer_ref, tracking)])
-        if code != 0:
+        refs = [peer_ref]
+        for name in list_remote_heads(desk_repo, url):
+            if name not in refs:
+                refs.append(name)
+        for position, branch in enumerate(refs, start=1):
+            if budget[0] <= 0:
+                break
+            results.extend(_peer_branch_once(desk_repo, url, branch, index, position, entry,
+                                             answered, budget, handler, worker, ref, remote))
+    return results
+
+
+def _peer_branch_once(desk_repo: str, url: str, peer_ref: str, index: int, position: int,
+                      entry: str, answered: set, budget: List[int], handler, worker: str,
+                      ref: str, remote: str) -> List[Dict[str, Any]]:
+    """Answer the queued jobs of exactly one peer branch (helper of peer_once)."""
+    results: List[Dict[str, Any]] = []
+    tracking = "refs/remotes/peer-%d-%d/%s" % (index, position, peer_ref)
+    # anonymous first: the desk's stored credential belongs to one repo only
+    code, _, _ = _run(desk_repo, ["-c", "credential.helper=", "fetch", "--quiet", "--no-tags",
+                                  url, "+refs/heads/%s:%s" % (peer_ref, tracking)])
+    if code != 0:
+        return results
+    peer_tip = _run(desk_repo, ["rev-parse", tracking])[1].decode("utf-8", "replace").strip()
+    if not peer_tip:
+        return results
+    adds: Dict[str, bytes] = {}
+    for path in sorted(list_files(desk_repo, peer_tip, "inbox")):
+        if not path.endswith(".json") or budget[0] <= 0:
             continue
-        peer_tip = _run(desk_repo, ["rev-parse", tracking])[1].decode("utf-8", "replace").strip()
-        if not peer_tip:
+        job_id = os.path.basename(path)[:-5]
+        if job_id in answered:
             continue
-        adds: Dict[str, bytes] = {}
-        for path in sorted(list_files(desk_repo, peer_tip, "inbox")):
-            if not path.endswith(".json") or budget <= 0:
-                continue
-            job_id = os.path.basename(path)[:-5]
-            if job_id in answered:
-                continue
-            raw = read_file(desk_repo, peer_tip, path)
-            if raw is None:
-                continue
-            try:
-                request = json.loads(raw.decode("utf-8", "replace"))
-            except ValueError:
-                request = {"id": job_id, "kind": "unknown", "args": {}}
-            started = time.time()
-            try:
-                answer = handler(request) or {}
-                status = answer.pop("status", STATUS_OK)
-                summary = answer.pop("summary", "")
-                detail = answer.get("detail", answer)
-            except Exception as exc:  # noqa: BLE001 - published, never raised
-                status, summary, detail = STATUS_ERROR, str(exc)[:300], {}
-            result = {
-                "schema": SCHEMA_RESULT,
-                "id": job_id,
-                "kind": request.get("kind", "unknown"),
-                "status": status,
-                "summary": summary,
-                "detail": detail,
-                "note": request.get("note", ""),
-                "requested_by": request.get("from", "peer"),
-                "peer": entry,
-                "worker": worker,
-                "seconds": round(time.time() - started, 2),
-                "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00", time.gmtime(time.time() + 8 * 3600)),
-            }
-            adds["outbox/%s.json" % job_id] = json.dumps(result, ensure_ascii=False,
-                                                         indent=2).encode("utf-8")
-            answered.add(job_id)
-            results.append(result)
-            budget -= 1
-        if adds:
-            push_files(desk_repo, ref, adds, [],
-                       "mailbox: %d peer answer(s) from %s" % (len(adds), worker), remote=remote)
+        raw = read_file(desk_repo, peer_tip, path)
+        if raw is None:
+            continue
+        try:
+            request = json.loads(raw.decode("utf-8", "replace"))
+        except ValueError:
+            request = {"id": job_id, "kind": "unknown", "args": {}}
+        started = time.time()
+        try:
+            answer = handler(request) or {}
+            status = answer.pop("status", STATUS_OK)
+            summary = answer.pop("summary", "")
+            detail = answer.get("detail", answer)
+        except Exception as exc:  # noqa: BLE001 - published, never raised
+            status, summary, detail = STATUS_ERROR, str(exc)[:300], {}
+        result = {
+            "schema": SCHEMA_RESULT,
+            "id": job_id,
+            "kind": request.get("kind", "unknown"),
+            "status": status,
+            "summary": summary,
+            "detail": detail,
+            "note": request.get("note", ""),
+            "requested_by": request.get("from", "peer"),
+            "peer": entry,
+            "peer_ref": peer_ref,
+            "worker": worker,
+            "seconds": round(time.time() - started, 2),
+            "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00", time.gmtime(time.time() + 8 * 3600)),
+        }
+        adds["outbox/%s.json" % job_id] = json.dumps(result, ensure_ascii=False,
+                                                     indent=2).encode("utf-8")
+        answered.add(job_id)
+        results.append(result)
+        budget[0] -= 1
+    if adds:
+        push_files(desk_repo, ref, adds, [],
+                   "mailbox: %d peer answer(s) from %s" % (len(adds), worker), remote=remote)
     return results
 
 
@@ -514,7 +550,7 @@ def capabilities(repo: str, ref: str = DEFAULT_REF) -> Dict[str, Any]:
     return {
         "schema": "cgmd.hub.capabilities.v1",
         "repo": "hukeying85-ux/0fuye",
-        "branch": "arena/32cd826e-0fuye",
+        "branch": heartbeat.get("branch") or "main",
         "mailbox_ref": ref,
         "entry_command": "python3 -m core.hub_mailbox",
         "desk": {
@@ -552,6 +588,7 @@ def capabilities(repo: str, ref: str = DEFAULT_REF) -> Dict[str, Any]:
         "first_steps": [
             "python3 -m core.hub_mailbox run --kind ping --timeout 300",
             "python3 -m core.hub_mailbox run --kind smoke --json-args '{\"ps\": 100}' --timeout 1800",
+            "python3 -m core.hub_mailbox run --kind pipeline --json-args '{\"sequence\": \"GIGKFLHSAKKFGKAFVGEIMNS\", \"production_ns\": 100, \"equilibration_ns\": 10}' --timeout 5400",
         ],
         "if_broken": [
             "python3 -m core.hub_mailbox run --kind deskdiag --timeout 600",

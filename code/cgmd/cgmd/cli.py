@@ -92,6 +92,28 @@ def build_config(args: argparse.Namespace) -> tuple:
         cfg.production_ns = float(args.production_ns)
     if args.equilibration_ns is not None:
         cfg.equilibration_ns = float(args.equilibration_ns)
+    if getattr(args, "gmx", None):
+        cfg.gmx_binary = args.gmx
+    if getattr(args, "martinize", None):
+        cfg.martinize_binary = args.martinize
+    if getattr(args, "insane", None):
+        cfg.insane_binary = args.insane
+    if getattr(args, "lipids", None):
+        cfg.lipids = _parse_lipids(args.lipids)
+    if getattr(args, "box_xy_nm", None) is not None:
+        cfg.box_xy_nm = float(args.box_xy_nm)
+    if getattr(args, "box_z_nm", None) is not None:
+        cfg.box_z_nm = float(args.box_z_nm)
+    if getattr(args, "salt_m", None) is not None:
+        cfg.salt_m = float(args.salt_m)
+    if getattr(args, "temperature_k", None) is not None:
+        cfg.temperature_k = float(args.temperature_k)
+    if getattr(args, "maxh", None) is not None:
+        cfg.maxh_hours = float(args.maxh)
+    if getattr(args, "segment_ns", None) is not None:
+        cfg.segment_ns = float(args.segment_ns)
+    if getattr(args, "no_fetch_ff", False):
+        cfg.fetch_forcefield = False
     cfg.task_id = cfg.task_id or task_id
     return cfg, task, output
 
@@ -194,6 +216,22 @@ def _num(value: Any) -> str:
     return str(int(number)) if number.is_integer() else str(number)
 
 
+def _parse_lipids(text: str) -> Dict[str, float]:
+    """``"POPE:3,POPG:1"`` -> ``{"POPE": 3.0, "POPG": 1.0}``."""
+    lipids: Dict[str, float] = {}
+    for item in str(text or "").replace(";", ",").split(","):
+        item = item.strip()
+        if not item:
+            continue
+        name, _, ratio = item.partition(":")
+        if not name.strip():
+            continue
+        lipids[name.strip()] = float(ratio) if ratio.strip() else 1.0
+    if not lipids:
+        raise SystemExit("--lipids needs at least one LIPID:RATIO pair, e.g. POPE:3,POPG:1")
+    return lipids
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python -m cgmd.cli",
@@ -212,6 +250,25 @@ def build_parser() -> argparse.ArgumentParser:
         p.add_argument("--gpu-id", dest="gpu_id", type=int, default=None)
         p.add_argument("--ntomp", type=int, default=None)
         p.add_argument("--martini3-dir", dest="martini3_dir", default=None)
+        p.add_argument("--fetch-forcefield", dest="fetch_forcefield", action="store_true", default=None,
+                       help="shallow-clone marrink-lab/martini-forcefields when nothing is found")
+        p.add_argument("--no-fetch-ff", dest="no_fetch_ff", action="store_true",
+                       help="never touch the network for force-field files")
+        p.add_argument("--gmx", dest="gmx", default=None, help="explicit gmx/gmx.exe path")
+        p.add_argument("--martinize", dest="martinize", default=None,
+                       help="explicit martinize2 executable (e.g. <python>\\Scripts\\martinize2.exe)")
+        p.add_argument("--insane", dest="insane", default=None,
+                       help="explicit insane executable")
+        p.add_argument("--lipids", dest="lipids", default=None,
+                       help='lipid mix, e.g. "POPE:3,POPG:1"')
+        p.add_argument("--box-xy-nm", dest="box_xy_nm", type=float, default=None)
+        p.add_argument("--box-z-nm", dest="box_z_nm", type=float, default=None)
+        p.add_argument("--salt-m", dest="salt_m", type=float, default=None)
+        p.add_argument("--temperature-k", dest="temperature_k", type=float, default=None)
+        p.add_argument("--maxh", dest="maxh", type=float, default=None,
+                       help="wall-clock ceiling per mdrun call in hours (0 = unlimited)")
+        p.add_argument("--segment-ns", dest="segment_ns", type=float, default=None,
+                       help="longest single mdrun segment in ns (0 = whole production)")
         p.add_argument("--max-frames", dest="max_frames", type=int, default=400)
         p.add_argument("--dry-run", dest="dry_run", action="store_true", help="print the plan, touch no GPU")
         p.add_argument("--no-resume", dest="no_resume", action="store_true")
