@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T10:39:04+08:00",
+    "generated_at":  "2026-10-30T10:45:04+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T024445-eac0.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -38,17 +38,10 @@
                      "20261029T082308-4946":  1,
                      "20261029T082641-df13":  1,
                      "20261029T082826-2cd0":  1,
-                     "20261030T023304-8ca9":  1
+                     "20261030T023304-8ca9":  1,
+                     "20261030T024445-eac0":  1
                  },
     "log_tail":  [
-                     "2026-10-30 09:57:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:58:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:59:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:00:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:01:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:02:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:03:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:04:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:04:59 [INFO] job kind=ping",
                      "2026-10-30 10:04:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020454-ecd8 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                      "2026-10-30 10:05:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -100,7 +93,15 @@
                      "2026-10-30 10:37:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:38:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:38:57 [INFO] job kind=ping",
-                     "2026-10-30 10:38:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T023846-970d (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                     "2026-10-30 10:38:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T023846-970d (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-30 10:39:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:40:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:41:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:42:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:43:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:44:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 10:44:55 [INFO] job kind=pipeline",
+                     "2026-10-30 10:44:55 [INFO] job 20261030T024445-eac0 (pipeline) -\u003e unsupported: the Martini pipeline job kind is not wired yet; use smoke or gmx"
                  ],
     "call_tail":  [
 
@@ -112,9 +113,9 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/JevHarness",
-                      "status":  "ran",
-                      "ran":  1,
-                      "note":  ""
+                      "status":  "idle",
+                      "ran":  0,
+                      "note":  "11 request(s) seen, all already answered"
                   },
                   {
                       "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
@@ -125,13 +126,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T023846-970d",
-                          "kind":  "ping",
-                          "status":  "ok",
-                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                          "id":  "20261030T024445-eac0",
+                          "kind":  "pipeline",
+                          "status":  "unsupported",
+                          "summary":  "the Martini pipeline job kind is not wired yet; use smoke or gmx"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T024445-eac0",
+                       "kind":  "pipeline",
+                       "status":  "unsupported",
+                       "summary":  "the Martini pipeline job kind is not wired yet; use smoke or gmx",
+                       "finished_at":  "2026-10-30T10:44:55+08:00"
+                   },
                    {
                        "id":  "20261030T023846-970d",
                        "kind":  "ping",
@@ -264,13 +272,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-10-29T16:22:10+08:00"
-                   },
-                   {
-                       "id":  "20261029T081935-f37c",
-                       "kind":  "sync",
-                       "status":  "ok",
-                       "summary":  "sync exit 6 | panel restarted",
-                       "finished_at":  "2026-10-29T16:21:00+08:00"
                    }
                ]
 }
