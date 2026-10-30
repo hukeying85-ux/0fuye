@@ -1,0 +1,134 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T115827-1991",
+    "kind":  "cgmd",
+    "status":  "ok",
+    "summary":  "cgmd search: 2 candidate run(s); newest F:\\Abeta_MD_20261030_01 (0.0 d ago) | sequence ALLLHRC",
+    "detail":  {
+                   "exit_code":  0,
+                   "python":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "mode":  "search",
+                   "ops":  {
+                               "detail":  {
+                                              "candidates":  [
+                                                                 {
+                                                                     "age_days":  0.0,
+                                                                     "dir":  "F:\\Abeta_MD_20261030_01",
+                                                                     "files":  6,
+                                                                     "gro":  [
+                                                                                 "alllhrc_extracted_20261030.gro",
+                                                                                 "fllhttr_extracted_20261030.gro",
+                                                                                 "ylsllqr_extracted_20261030.gro"
+                                                                             ],
+                                                                     "newest":  "2026-10-30T19:57:55",
+                                                                     "sequence":  "ALLLHRC",
+                                                                     "sequence_source":  "alllhrc_extracted_20261030.gro",
+                                                                     "topology":  [
+
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  0.1,
+                                                                     "dir":  "F:\\Abeta_MD_20261030_01\\capability_smoke_bb_only",
+                                                                     "files":  6,
+                                                                     "gro":  [
+                                                                                 "system.gro"
+                                                                             ],
+                                                                     "newest":  "2026-10-30T17:01:56",
+                                                                     "sequence":  "YLSLLQR",
+                                                                     "sequence_source":  "system.gro",
+                                                                     "topology":  [
+                                                                                      "peptide.itp",
+                                                                                      "topol.top"
+                                                                                  ]
+                                                                 }
+                                                             ],
+                                              "cutoff_days_back":  3650.0,
+                                              "dirs_visited":  2,
+                                              "roots":  [
+                                                            "F:\\Abeta_MD_20261030_01"
+                                                        ],
+                                              "walk_truncated":  false,
+                                              "with_sequence":  [
+                                                                    {
+                                                                        "age_days":  0.0,
+                                                                        "dir":  "F:\\Abeta_MD_20261030_01",
+                                                                        "files":  6,
+                                                                        "gro":  [
+                                                                                    "alllhrc_extracted_20261030.gro",
+                                                                                    "fllhttr_extracted_20261030.gro",
+                                                                                    "ylsllqr_extracted_20261030.gro"
+                                                                                ],
+                                                                        "newest":  "2026-10-30T19:57:55",
+                                                                        "sequence":  "ALLLHRC",
+                                                                        "sequence_source":  "alllhrc_extracted_20261030.gro",
+                                                                        "topology":  [
+
+                                                                                     ]
+                                                                    },
+                                                                    {
+                                                                        "age_days":  0.1,
+                                                                        "dir":  "F:\\Abeta_MD_20261030_01\\capability_smoke_bb_only",
+                                                                        "files":  6,
+                                                                        "gro":  [
+                                                                                    "system.gro"
+                                                                                ],
+                                                                        "newest":  "2026-10-30T17:01:56",
+                                                                        "sequence":  "YLSLLQR",
+                                                                        "sequence_source":  "system.gro",
+                                                                        "topology":  [
+                                                                                         "peptide.itp",
+                                                                                         "topol.top"
+                                                                                     ]
+                                                                    }
+                                                                ]
+                                          },
+                               "generated_at":  "2026-10-30T19:58:56",
+                               "host":  "DESKTOP-IEUDGS5",
+                               "mode":  "search",
+                               "python":  "3.12.10",
+                               "schema":  "cgmd.desk_ops.v1",
+                               "seconds":  0.01,
+                               "status":  "ok",
+                               "summary":  "2 candidate run(s); newest F:\\Abeta_MD_20261030_01 (0.0 d ago) | sequence ALLLHRC"
+                           }
+               },
+    "logs_tail":  [
+                      "          \"ylsllqr_extracted_20261030.gro\"",
+                      "        ],",
+                      "        \"topology\": [],",
+                      "        \"files\": 6,",
+                      "        \"sequence\": \"ALLLHRC\",",
+                      "        \"sequence_source\": \"alllhrc_extracted_20261030.gro\"",
+                      "      },",
+                      "      {",
+                      "        \"dir\": \"F:\\\\Abeta_MD_20261030_01\\\\capability_smoke_bb_only\",",
+                      "        \"newest\": \"2026-10-30T17:01:56\",",
+                      "        \"age_days\": 0.1,",
+                      "        \"gro\": [",
+                      "          \"system.gro\"",
+                      "        ],",
+                      "        \"topology\": [",
+                      "          \"peptide.itp\",",
+                      "          \"topol.top\"",
+                      "        ],",
+                      "        \"files\": 6,",
+                      "        \"sequence\": \"YLSLLQR\",",
+                      "        \"sequence_source\": \"system.gro\"",
+                      "      }",
+                      "    ]",
+                      "  },",
+                      "  \"generated_at\": \"2026-10-30T19:58:56\",",
+                      "  \"seconds\": 0.01,",
+                      "  \"python\": \"3.12.10\",",
+                      "  \"host\": \"DESKTOP-IEUDGS5\"",
+                      "}",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "Read-only sequence identification of extracted structures",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T19:58:55+08:00",
+    "finished_at":  "2026-10-30T19:58:56+08:00",
+    "seconds":  0.84,
+    "worker":  "DESKTOP-IEUDGS5"
+}
