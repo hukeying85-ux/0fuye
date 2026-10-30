@@ -1,0 +1,20 @@
+{
+  "args": {
+    "days": 365,
+    "depth": 4,
+    "limit": 10,
+    "mode": "search",
+    "roots": [
+      "F:\\\\0wsh\\\\asd",
+      "F:\\\\0wsh"
+    ]
+  },
+  "created_at": "2026-10-30T08:07:55+0000",
+  "from": "user",
+  "host": "e2b.local",
+  "id": "20261030T080755-8d9a",
+  "kind": "cgmd",
+  "note": "sequence recovery after fix",
+  "schema": "cgmd.mailbox.request.v1",
+  "timeout_s": 600
+}
