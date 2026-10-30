@@ -1,17 +1,21 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T12:19:03+08:00",
+    "generated_at":  "2026-10-30T12:20:04+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  5,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T041746-72fa.json"
+                  "20261030T041911-979f.json",
+                  "20261030T041918-8934.json",
+                  "20261030T041924-6978.json",
+                  "20261030T041939-66b1.json",
+                  "20261030T041946-f2ab.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -64,12 +68,10 @@
                      "20261030T040524-6882":  1,
                      "20261030T040551-363d":  1,
                      "20261030T041741-e427":  1,
-                     "20261030T041746-72fa":  1
+                     "20261030T041746-72fa":  1,
+                     "20261030T041911-979f":  1
                  },
     "log_tail":  [
-                     "2026-10-30 11:29:29 [WARN] mailbox push rejected (attempt 1): git.exe : fatal: Cannot prompt because user interactivity has been disabled.",
-                     "所在位置 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Invoke-CgmdMailbox.ps1:141 字符: 19",
-                     "+         $output = \u0026 git -C $Directory @GitArgs 2\u003e\u00261 | Out-String",
                      "+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
                      "    + CategoryInfo          : NotSpecified: (fatal: Cannot p... been disabled.:String) [], RemoteException",
                      "    + FullyQualifiedErrorId : NativeCommandError",
@@ -126,7 +128,10 @@
                      "2026-10-30 12:17:55 [INFO] job 20261030T041741-e427 (gmx) -\u003e ok: gmx check -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 12:18:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 12:18:54 [INFO] job kind=gmx",
-                     "2026-10-30 12:18:54 [INFO] job 20261030T041746-72fa (gmx) -\u003e ok: gmx traj -h exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 12:18:54 [INFO] job 20261030T041746-72fa (gmx) -\u003e ok: gmx traj -h exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 12:19:54 [INFO] mailbox: 5 queued, running at most 1",
+                     "2026-10-30 12:19:54 [INFO] job kind=gmx",
+                     "2026-10-30 12:19:55 [INFO] job 20261030T041911-979f (gmx) -\u003e ok: gmx distance -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.ndx -select com of group 0 plus com of group 1 -oxyz C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance_xyz.xvg -oall C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.xvg exit 0: CGMD_EXIT_CODE=0 "
                  ],
     "call_tail":  [
 
@@ -151,13 +156,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T041746-72fa",
+                          "id":  "20261030T041911-979f",
                           "kind":  "gmx",
                           "status":  "ok",
-                          "summary":  "gmx traj -h exit 0: CGMD_EXIT_CODE=0 "
+                          "summary":  "gmx distance -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.ndx -select com of group 0 plus com of group 1 -oxyz C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance_xyz.xvg -oall C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.xvg exit 0: CGMD_EXIT_CODE=0 "
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T041911-979f",
+                       "kind":  "gmx",
+                       "status":  "ok",
+                       "summary":  "gmx distance -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.ndx -select com of group 0 plus com of group 1 -oxyz C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance_xyz.xvg -oall C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.xvg exit 0: CGMD_EXIT_CODE=0 ",
+                       "finished_at":  "2026-10-30T12:19:55+08:00"
+                   },
                    {
                        "id":  "20261030T041746-72fa",
                        "kind":  "gmx",
@@ -290,13 +302,6 @@
                        "status":  "fail",
                        "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.tpr -maxwarn 0 exit 1: Fatal error:",
                        "finished_at":  "2026-10-30T11:16:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T031313-ffa4",
-                       "kind":  "pipeline",
-                       "status":  "unsupported",
-                       "summary":  "the Martini pipeline job kind is not wired yet; use smoke or gmx",
-                       "finished_at":  "2026-10-30T11:13:55+08:00"
                    }
                ]
 }
