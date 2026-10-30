@@ -1,17 +1,18 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T16:20:04+08:00",
+    "generated_at":  "2026-10-30T16:21:06+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  2,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T081927-aeb7.json"
+                  "20261030T082012-3637.json",
+                  "20261030T082020-3395.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -92,12 +93,10 @@
                      "20261030T081622-bf3b":  1,
                      "20261030T081718-d49a":  1,
                      "20261030T081840-1204":  1,
-                     "20261030T081927-aeb7":  1
+                     "20261030T081927-aeb7":  1,
+                     "20261030T082012-3637":  1
                  },
     "log_tail":  [
-                     "2026-10-30 15:48:56 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:49:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:50:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:51:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:52:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:53:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -154,7 +153,10 @@
                      "2026-10-30 16:18:55 [INFO] job 20261030T081840-1204 (pipeline) -\u003e unsupported: the Martini pipeline job kind is not wired yet; use smoke or gmx",
                      "2026-10-30 16:19:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:19:54 [INFO] job kind=gmx",
-                     "2026-10-30 16:19:55 [INFO] job 20261030T081927-aeb7 (gmx) -\u003e ok: gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 16:19:55 [INFO] job 20261030T081927-aeb7 (gmx) -\u003e ok: gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 16:20:54 [INFO] mailbox: 2 queued, running at most 1",
+                     "2026-10-30 16:20:54 [INFO] job kind=cgmd",
+                     "2026-10-30 16:20:56 [INFO] job 20261030T082012-3637 (cgmd) -\u003e fail: cgmd all: grompp-eq failed (exit 1) (1711 beads)"
                  ],
     "call_tail":  [
 
@@ -179,13 +181,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T081927-aeb7",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 "
+                          "id":  "20261030T082012-3637",
+                          "kind":  "cgmd",
+                          "status":  "fail",
+                          "summary":  "cgmd all: grompp-eq failed (exit 1) (1711 beads)"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T082012-3637",
+                       "kind":  "cgmd",
+                       "status":  "fail",
+                       "summary":  "cgmd all: grompp-eq failed (exit 1) (1711 beads)",
+                       "finished_at":  "2026-10-30T16:20:56+08:00"
+                   },
                    {
                        "id":  "20261030T081927-aeb7",
                        "kind":  "gmx",
@@ -318,13 +327,6 @@
                        "status":  "ok",
                        "summary":  "gmx mdrun -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -nsteps 25000 -nb gpu -gpu_id 0 -noconfout -noappend exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T15:23:00+08:00"
-                   },
-                   {
-                       "id":  "20261030T072047-4c80",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -s2 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-30T15:20:58+08:00"
                    }
                ]
 }
