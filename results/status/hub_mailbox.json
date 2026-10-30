@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T17:07:34+08:00",
+    "generated_at":  "2026-10-30T17:08:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T090555-664b.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -106,7 +106,6 @@
                      "20261030T090555-664b":  1
                  },
     "log_tail":  [
-                     "    + CategoryInfo          : NotSpecified: (fatal: Cannot p... been disabled.:String) [], RemoteException",
                      "    + FullyQualifiedErrorId : NativeCommandError",
                      " ",
                      "To https://github.com/hukeying85-ux/0fuye.git",
@@ -165,7 +164,8 @@
                      "2026-10-30 17:05:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 17:06:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 17:06:55 [INFO] job kind=selfcheck",
-                     "2026-10-30 17:07:25 [INFO] job 20261030T090555-664b (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
+                     "2026-10-30 17:07:25 [INFO] job 20261030T090555-664b (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail",
+                     "2026-10-30 17:07:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -189,12 +189,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T090555-664b",
-                          "kind":  "selfcheck",
-                          "status":  "fail",
-                          "summary":  "selfcheck: 15 pass / 3 warn / 0 fail"
-                      }
+
                   ],
     "recent":  [
                    {
