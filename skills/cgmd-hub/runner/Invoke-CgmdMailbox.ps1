@@ -1264,6 +1264,61 @@ function Invoke-JobCgmd {
     }
 }
 
+function Invoke-JobAbetaPreflight {
+    # Fixed script and fixed paths only: no arguments, no installer, no shell,
+    # and never a write to the operator's source data.  Read-only by design.
+    $runner = Join-Path $RepoPath 'code\abeta\preflight.py'
+    if (-not (Test-Path -LiteralPath $runner -PathType Leaf)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'A-beta preflight script is not deployed on this checkout' }
+    }
+    $python = Get-DeskPython -JobArgs $null
+    if (-not $python) {
+        return [ordered]@{ status = 'unsupported'; summary = 'no python interpreter found on this workstation' }
+    }
+    $out = Join-Path $script:StateDir ('abeta-preflight-' + [guid]::NewGuid().ToString('N') + '.log')
+    $line = '"' + $python + '" "' + $runner + '"'
+    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds ([math]::Min($MaxJobSeconds, 180)) -WorkingDirectory $RepoPath
+    if ($code -ne 0) {
+        # No tail here: stderr can carry absolute source paths, and the mailbox
+        # ref may be public.  The exit code is enough to route a human to the
+        # machine.
+        return [ordered]@{ status = 'fail'; summary = ('A-beta preflight exit ' + $code); detail = [ordered]@{ exit_code = $code } }
+    }
+    try {
+        $jsonLine = @(Get-Content -LiteralPath $out -Encoding UTF8 | Where-Object { $_ -match '^\{' } | Select-Object -First 1)
+        if (-not $jsonLine) { throw 'no JSON report on stdout' }
+        $report = $jsonLine | ConvertFrom-Json -ErrorAction Stop
+        if ($report.schema -ne 'abeta.preflight.v1') { throw 'unexpected report schema' }
+        # The mailbox ref may be public: publish states and counts only - never
+        # paths, sequences, atom names, file hashes or titles.
+        $states = @()
+        $copies = 0
+        foreach ($prop in $report.inputs.PSObject.Properties) {
+            $states += [string](Get-Property $prop.Value 'status' 'missing')
+            $copies += [int](Get-Property $prop.Value 'copies' 0)
+        }
+        $matched = @($states | Where-Object { $_ -eq 'unique_sequence_match' }).Count
+        $detail = [ordered]@{
+            input_count = $states.Count
+            input_states = $states
+            unique_matches = $matched
+            copies_seen = $copies
+            project_exists = [bool]$report.project.exists
+            drive_free_bytes = $report.drive.free_bytes
+            path_tools_found_count = @($report.executables_on_path.PSObject.Properties | Where-Object { $_.Value }).Count
+        }
+        $status = 'ok'
+        if ($matched -lt $states.Count) { $status = 'warn' }
+        return [ordered]@{
+            status  = $status
+            summary = ('read-only A-beta preflight: ' + $matched + '/' + $states.Count + ' inputs uniquely matched, ' + $copies + ' copies seen')
+            detail  = $detail
+        }
+    } catch {
+        return [ordered]@{ status = 'fail'; summary = ('A-beta preflight result invalid: ' + $_.Exception.Message) }
+    }
+}
+
 function Invoke-Job {
     param($Request)
     $kind = [string](Get-Property $Request 'kind' 'ping')
@@ -1281,6 +1336,7 @@ function Invoke-Job {
         'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
         'cgmd'      { return Invoke-JobCgmd -JobArgs $jobArgs }
+        'abeta_preflight' { return Invoke-JobAbetaPreflight }
         'pipeline'  { return [ordered]@{ status = 'unsupported'
                                          summary = 'the Martini pipeline job kind is not wired yet; use smoke or gmx' } }
         default     { return [ordered]@{ status = 'unsupported'; summary = ('unknown kind: ' + $kind) } }
