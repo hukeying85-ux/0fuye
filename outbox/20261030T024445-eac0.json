@@ -1,0 +1,17 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T024445-eac0",
+    "kind":  "pipeline",
+    "status":  "unsupported",
+    "summary":  "the Martini pipeline job kind is not wired yet; use smoke or gmx",
+    "detail":  null,
+    "logs_tail":  [
+
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T10:44:55+08:00",
+    "finished_at":  "2026-10-30T10:44:55+08:00",
+    "seconds":  0.01,
+    "worker":  "DESKTOP-IEUDGS5"
+}
