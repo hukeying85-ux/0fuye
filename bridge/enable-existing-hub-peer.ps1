@@ -30,8 +30,19 @@ $cfg = $raw | ConvertFrom-Json
 if ([string]$cfg.locked_repo -cne $expectedRepo) {
     throw 'Local hub belongs to a different repository; refusing to edit its config.'
 }
-if (-not [bool]$cfg.mailbox_enabled) {
-    throw 'Existing hub mailbox is disabled; refusing to edit its config.'
+# Match Invoke-CgmdMailbox.ps1: Get-Property 'mailbox_enabled' defaults to
+# $true when the key is absent (older local configs omit this newer option).
+# An explicit JSON false is different: respect it and never turn it on here.
+$mailboxField = $cfg.PSObject.Properties['mailbox_enabled']
+if ($null -eq $mailboxField -or $null -eq $mailboxField.Value) {
+    Write-Host 'INFO: mailbox_enabled is absent/null in this older local config; hub defaults it to true.'
+} else {
+    if ($mailboxField.Value -isnot [bool]) {
+        throw 'mailbox_enabled must be a JSON boolean; refusing to edit an ambiguous hub config.'
+    }
+    if (-not $mailboxField.Value) {
+        throw 'Existing hub mailbox is explicitly disabled (mailbox_enabled: false); nothing was changed.'
+    }
 }
 $ref = [string]$cfg.mailbox_ref
 if ($ref -and $ref -cne 'hub/mailbox') {
@@ -71,7 +82,9 @@ try {
     if (@($check.peer_repos | Where-Object { $_ -ceq $peer }).Count -ne 1) {
         throw 'Temporary config did not contain exactly one copy of the requested peer.'
     }
-    Move-Item -LiteralPath $tmp -Destination $cfgPath -Force -ErrorAction Stop
+    # Both paths are in the same directory: atomic replacement keeps readers
+    # from ever seeing a partially written JSON file. The backup above stays.
+    [IO.File]::Replace($tmp, $cfgPath, $null)
 } finally {
     if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Force }
 }

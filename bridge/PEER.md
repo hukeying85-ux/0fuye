@@ -29,8 +29,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script
 的 `peer_repos` 中**追加** `hukeying85-ux/0fuye#arena/7ed6241a-0fuye`，
 保留原有 peers 与设置，并把原配置备份到该 hub 已忽略的 `state/` 下。
 它不安装服务、不启用 `shell`、不改受监控分支、不提交原始研究数据、
-不运行 CGMD；条件不符会停止。若实际 hub 路径不同可显式指定
-`-HubRepoPath <真实路径>`，不要猜目录、不要将令牌发给 Arena。
+不运行 CGMD；条件不符会停止。旧本机配置可能**没有** `mailbox_enabled` 键：
+现有 hub 的代码把缺省值视为 `true`，接入脚本也遵循此规则；如果该键
+**明确写为 `false`**，脚本仍拒绝修改、不会擅自开启邮箱。
+若实际 hub 路径不同可显式指定 `-HubRepoPath <真实路径>`，
+不要猜目录、不要将令牌发给 Arena。
 
 ## 如何判断真正接通
 

@@ -27,7 +27,12 @@ class PeerBridgeTests(unittest.TestCase):
         text = (ROOT / "bridge" / "enable-existing-hub-peer.ps1").read_text(encoding="utf-8")
         self.assertIn(PEER, text)
         self.assertIn("$cfg.locked_repo", text)
-        self.assertIn("$cfg.mailbox_enabled", text)
+        # Older local configs omit this key. The worker defaults it to true;
+        # a real JSON false must still stop us rather than silently enabling it.
+        self.assertIn("$cfg.PSObject.Properties['mailbox_enabled']", text)
+        self.assertIn("$mailboxField.Value -isnot [bool]", text)
+        self.assertIn("if (-not $mailboxField.Value)", text)
+        self.assertNotIn("$data['mailbox_enabled']", text)
         self.assertIn("$cfg.allow_shell", text)
         self.assertNotRegex(text.lower(), r"\bgit\s+push\b|\bregister-scheduledtask\b")
 
