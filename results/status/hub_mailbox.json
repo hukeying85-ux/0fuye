@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T10:07:33+08:00",
+    "generated_at":  "2026-10-30T10:08:32+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -40,9 +40,6 @@
                      "20261029T082826-2cd0":  1
                  },
     "log_tail":  [
-                     "2026-10-30 09:15:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:16:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:17:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:18:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:19:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:20:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -99,7 +96,10 @@
                      "2026-10-30 10:05:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020458-3bc6 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                      "2026-10-30 10:06:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:06:58 [INFO] job kind=smoke",
-                     "2026-10-30 10:07:27 [INFO] peer hukeying85-ux/JevHarness job 20261030T020515-28cc (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
+                     "2026-10-30 10:07:27 [INFO] peer hukeying85-ux/JevHarness job 20261030T020515-28cc (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
+                     "2026-10-30 10:07:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:07:57 [INFO] job kind=smoke",
+                     "2026-10-30 10:08:26 [INFO] peer hukeying85-ux/JevHarness job 20261030T020623-6973 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
                  ],
     "call_tail":  [
 
@@ -124,13 +124,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T020515-28cc",
+                          "id":  "20261030T020623-6973",
                           "kind":  "smoke",
                           "status":  "ok",
                           "summary":  "gmx 2025.1: 100 ps integrated on gpu"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T020623-6973",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-30T10:08:26+08:00"
+                   },
                    {
                        "id":  "20261030T020515-28cc",
                        "kind":  "smoke",
@@ -263,13 +270,6 @@
                        "status":  "ok",
                        "summary":  "panel up | boot task trigger 1 | launched True",
                        "finished_at":  "2026-10-29T15:07:06+08:00"
-                   },
-                   {
-                       "id":  "20261029T070436-3f40",
-                       "kind":  "sync",
-                       "status":  "ok",
-                       "summary":  "sync exit 6 | panel restarted",
-                       "finished_at":  "2026-10-29T15:06:03+08:00"
                    }
                ]
 }
