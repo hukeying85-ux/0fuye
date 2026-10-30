@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T10:08:32+08:00",
+    "generated_at":  "2026-10-30T10:11:39+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -40,11 +40,6 @@
                      "20261029T082826-2cd0":  1
                  },
     "log_tail":  [
-                     "2026-10-30 09:18:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:19:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:20:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:21:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:22:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:23:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:24:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:25:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -99,7 +94,12 @@
                      "2026-10-30 10:07:27 [INFO] peer hukeying85-ux/JevHarness job 20261030T020515-28cc (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
                      "2026-10-30 10:07:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:07:57 [INFO] job kind=smoke",
-                     "2026-10-30 10:08:26 [INFO] peer hukeying85-ux/JevHarness job 20261030T020623-6973 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
+                     "2026-10-30 10:08:26 [INFO] peer hukeying85-ux/JevHarness job 20261030T020623-6973 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
+                     "2026-10-30 10:08:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:09:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:10:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:10:59 [INFO] job kind=selfcheck",
+                     "2026-10-30 10:11:33 [INFO] peer hukeying85-ux/JevHarness job 20261030T021021-360c (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
                  ],
     "call_tail":  [
 
@@ -124,13 +124,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T020623-6973",
-                          "kind":  "smoke",
-                          "status":  "ok",
-                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
+                          "id":  "20261030T021021-360c",
+                          "kind":  "selfcheck",
+                          "status":  "fail",
+                          "summary":  "selfcheck: 15 pass / 3 warn / 0 fail"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T021021-360c",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-10-30T10:11:33+08:00"
+                   },
                    {
                        "id":  "20261030T020623-6973",
                        "kind":  "smoke",
@@ -263,13 +270,6 @@
                        "status":  "ok",
                        "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
                        "finished_at":  "2026-10-29T15:08:00+08:00"
-                   },
-                   {
-                       "id":  "20261029T070612-9728",
-                       "kind":  "deskfix",
-                       "status":  "ok",
-                       "summary":  "panel up | boot task trigger 1 | launched True",
-                       "finished_at":  "2026-10-29T15:07:06+08:00"
                    }
                ]
 }
