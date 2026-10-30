@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:08:04+08:00",
+    "generated_at":  "2026-10-30T15:11:04+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T071030-88d7.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -71,14 +71,10 @@
                      "20261030T041939-66b1":  1,
                      "20261030T041946-f2ab":  1,
                      "20261030T042317-d463":  1,
-                     "20261030T042918-da58":  1
+                     "20261030T042918-da58":  1,
+                     "20261030T071030-88d7":  1
                  },
     "log_tail":  [
-                     "2026-10-30 14:14:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:15:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:16:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:17:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:18:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:19:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:20:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:21:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -133,7 +129,12 @@
                      "2026-10-30 15:06:57 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:07:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:07:58 [INFO] job kind=gmx",
-                     "2026-10-30 15:07:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T070716-af74 (gmx) -\u003e fail: gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 1: CGMD_EXIT_CODE=1 "
+                     "2026-10-30 15:07:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T070716-af74 (gmx) -\u003e fail: gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 1: CGMD_EXIT_CODE=1 ",
+                     "2026-10-30 15:08:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:09:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:10:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 15:10:55 [INFO] job kind=ping",
+                     "2026-10-30 15:10:55 [INFO] job 20261030T071030-88d7 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
                  ],
     "call_tail":  [
 
@@ -145,9 +146,9 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/JevHarness",
-                      "status":  "ran",
-                      "ran":  1,
-                      "note":  ""
+                      "status":  "idle",
+                      "ran":  0,
+                      "note":  "13 request(s) seen, all already answered"
                   },
                   {
                       "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
@@ -158,13 +159,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T070716-af74",
-                          "kind":  "gmx",
-                          "status":  "fail",
-                          "summary":  "gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 1: CGMD_EXIT_CODE=1 "
+                          "id":  "20261030T071030-88d7",
+                          "kind":  "ping",
+                          "status":  "ok",
+                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T071030-88d7",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T15:10:55+08:00"
+                   },
                    {
                        "id":  "20261030T070716-af74",
                        "kind":  "gmx",
@@ -297,13 +305,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-10-30T11:29:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T032414-2adc",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 -pin on exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-30T11:29:21+08:00"
                    }
                ]
 }
