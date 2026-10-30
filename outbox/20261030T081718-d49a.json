@@ -1,0 +1,190 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T081718-d49a",
+    "kind":  "deskdiag",
+    "status":  "ok",
+    "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
+    "detail":  {
+                   "repo_panel":  "C:\\cgmd\\0fuye\\code\\panel",
+                   "desk_root":  "C:\\0apps\\ArenaDesk",
+                   "files":  {
+                                 "index.html":  {
+                                                    "repo":  "c247ae88f1b9",
+                                                    "desk":  "c247ae88f1b9",
+                                                    "same":  true,
+                                                    "desk_path":  "C:\\0apps\\ArenaDesk\\index.html"
+                                                },
+                                 "app.js":  {
+                                                "repo":  "e0d753dafd47",
+                                                "desk":  "e0d753dafd47",
+                                                "same":  true,
+                                                "desk_path":  "C:\\0apps\\ArenaDesk\\app.js"
+                                            },
+                                 "style.css":  {
+                                                   "repo":  "5fb64af6b7c7",
+                                                   "desk":  "5fb64af6b7c7",
+                                                   "same":  true,
+                                                   "desk_path":  "C:\\0apps\\ArenaDesk\\style.css"
+                                               },
+                                 "server.py":  {
+                                                   "repo":  "7716ef51ac51",
+                                                   "desk":  "7716ef51ac51",
+                                                   "same":  true,
+                                                   "desk_path":  "C:\\0apps\\ArenaDesk\\server.py"
+                                               },
+                                 "desktop_ops.py":  {
+                                                        "repo":  "607e57b0088b",
+                                                        "desk":  "607e57b0088b",
+                                                        "same":  true,
+                                                        "desk_path":  "C:\\0apps\\ArenaDesk\\desktop_ops.py"
+                                                    }
+                             },
+                   "drift":  [
+
+                             ],
+                   "served":  {
+                                  "ok":  true,
+                                  "has_boot_fallback":  true,
+                                  "has_boot_fallback_css":  true,
+                                  "has_app_js_fallback":  true,
+                                  "bytes":  66749,
+                                  "status":  200
+                              },
+                   "clips":  {
+                                 "dsh-boot.mp4":  {
+                                                      "repo":  false,
+                                                      "desk":  false
+                                                  },
+                                 "dsh-bg.mp4":  {
+                                                    "repo":  false,
+                                                    "desk":  false
+                                                },
+                                 "boot-mascot.jpg":  {
+                                                         "repo":  true,
+                                                         "desk":  true
+                                                     },
+                                 "wallpaper-anime.jpg":  {
+                                                             "repo":  true,
+                                                             "desk":  true
+                                                         }
+                             },
+                   "tasks":  [
+                                 {
+                                     "name":  "arena-desk-boot-demo",
+                                     "exists":  true,
+                                     "state":  "Running",
+                                     "last_result":  "267009",
+                                     "last_run":  "2026-10-29 16:27:27",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe --boot"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-open",
+                                     "exists":  true,
+                                     "state":  "Disabled",
+                                     "last_result":  "4294967295",
+                                     "last_run":  "2026-10-29 11:23:23",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-open-manual",
+                                     "exists":  true,
+                                     "state":  "Ready",
+                                     "last_result":  "267011",
+                                     "last_run":  "",
+                                     "triggers":  [
+                                                      "?"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\0apps\\ArenaDesk\\ArenaDesk.exe"
+                                                 ]
+                                 },
+                                 {
+                                     "name":  "arena-desk-panel",
+                                     "exists":  true,
+                                     "state":  "Running",
+                                     "last_result":  "267009",
+                                     "last_run":  "2026-10-29 16:24:24",
+                                     "triggers":  [
+                                                      "MSFT_TaskLogonTrigger"
+                                                  ],
+                                     "actions":  [
+                                                     "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\pythonw.exe \"C:\\0apps\\ArenaDesk\\server.py\""
+                                                 ]
+                                 }
+                             ],
+                   "appearance":  {
+                                      "appearance_schema_v":  25,
+                                      "theme":  "sakura-mist",
+                                      "builtin_wallpaper":  "dsh-bg.mp4",
+                                      "boot_video":  "dsh-boot.mp4",
+                                      "custom_media_id":  "",
+                                      "surface_opacity":  0.14,
+                                      "veil_opacity":  0.1,
+                                      "glass_blur":  4,
+                                      "motion_enabled":  true,
+                                      "boot_enabled":  true,
+                                      "boot_sound":  true,
+                                      "boot_fade_ms":  950,
+                                      "whale_enabled":  true,
+                                      "whale_snap":  true,
+                                      "whale_sound":  true,
+                                      "whale_scale":  1.0,
+                                      "whale_quotes":  [
+                                                           "论文终稿要排版？切到「论文一键改格式」，1.5 秒输出硕士规范定稿 + 红蓝对比稿！",
+                                                           "已换装 dsh-video-skin 原版开机动画与高透动态壁纸，点右下角圆钮可随时微调透明度～",
+                                                           "三账号已物理分舱监控：mqgg 主控舱 · shaohua 超算舱 · hukeying85 模拟舱互不串号！",
+                                                           "切到「💖 爱情与心意」即可直达云盘 18 项恋爱短片、纪念画册与本机 JevChat 情感军师～"
+                                                       ]
+                                  },
+                   "boot_ack":  {
+                                    "ok":  true,
+                                    "dismissed_at":  "2026-10-29T08:28:34.268874+00:00",
+                                    "mode":  "dsh_video_bg_autoforward",
+                                    "active_tab":  "overview",
+                                    "overlay_hidden":  true
+                                },
+                   "session":  {
+                                   "user":  "BNI",
+                                   "session_id":  1,
+                                   "locked":  false,
+                                   "logonui":  false
+                               },
+                   "peer_repos":  [
+                                      "hukeying85-ux/JevHarness",
+                                      "hukeying85-ux/0fuye#arena/7ed6241a-0fuye"
+                                  ],
+                   "peers":  [
+                                 {
+                                     "peer":  "hukeying85-ux/JevHarness",
+                                     "status":  "idle",
+                                     "ran":  0,
+                                     "note":  "18 request(s) seen, all already answered"
+                                 },
+                                 {
+                                     "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
+                                     "status":  "idle",
+                                     "ran":  0,
+                                     "note":  "1 request(s) seen, all already answered"
+                                 }
+                             ]
+               },
+    "logs_tail":  [
+
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T16:17:55+08:00",
+    "finished_at":  "2026-10-30T16:17:59+08:00",
+    "seconds":  4.09,
+    "worker":  "DESKTOP-IEUDGS5"
+}
