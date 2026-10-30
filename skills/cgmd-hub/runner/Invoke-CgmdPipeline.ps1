@@ -14,10 +14,10 @@
     insane -> flat Martini 3 topology -> index -> EM -> NPT equilibration ->
     production -> analysis -> summary_metrics.json + SVG figures.
 
-    Everything heavy (top/gro/tpr/xtc/edr/cpt) stays under
-    ``skills/cgmd-hub/state/cgmd-runs/<task>`` which .gitignore excludes; only
-    the < 1 MB metrics + SVG figures land in ``results/cgmd/<task>`` inside the
-    clone, where the poller publishes them.
+    Heavy artefacts default to config run_root/<task> (F:\cgmd\runs on the
+    reference workstation) and small metrics plus SVG figures to config
+    result_root/<task> (F:\cgmd\results).  The mailbox passes both paths
+    explicitly and rejects paths outside those roots.
 
 .PARAMETER Sequence
     One-letter peptide sequence, e.g. GIGKFLHSAKKFGKAFVGEIMNS.
@@ -187,6 +187,35 @@ function Get-Tail {
     } catch { return @() }
 }
 
+function Get-SmallSvgArtifacts {
+    param([string]$BaseDir, $Figures)
+    $artifacts = [ordered]@{}
+    $totalBytes = [int64]0
+    foreach ($figure in @($Figures)) {
+        $relative = [string]$figure
+        if (-not $relative -or -not $relative.ToLowerInvariant().EndsWith('.svg')) { continue }
+        $candidate = $relative
+        if (-not [System.IO.Path]::IsPathRooted($candidate)) {
+            $candidate = Join-Path $BaseDir ($relative -replace '/', '\')
+        }
+        if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { continue }
+        $length = [int64](Get-Item -LiteralPath $candidate).Length
+        if ($length -gt 262144 -or ($totalBytes + $length) -gt 786432) { continue }
+        try {
+            $artifacts[$relative] = [System.IO.File]::ReadAllText($candidate, [System.Text.Encoding]::UTF8)
+            $totalBytes += $length
+        } catch { }
+    }
+    return $artifacts
+}
+
+function Get-FileSha256 {
+    param([string]$Path)
+    if (-not $Path -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) { return '' }
+    try { return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
+    catch { return '' }
+}
+
 function Get-PythonVersion {
     param([string]$Exe)
     if (-not $Exe -or -not (Test-Path -LiteralPath $Exe)) { return $null }
@@ -326,15 +355,27 @@ try {
     if (-not $TaskId) {
         $TaskId = 'cgmd-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + ([guid]::NewGuid().ToString('N').Substring(0, 4))
     }
+    $runRoot = [string](Get-Property $cfg 'run_root' '')
+    $resultRoot = [string](Get-Property $cfg 'result_root' '')
     if (-not $WorkDir) {
-        $WorkDir = Join-Path $script:StateDir ('cgmd-runs\' + $TaskId)
+        if ($runRoot) {
+            $WorkDir = Join-Path $runRoot $TaskId
+        } else {
+            $WorkDir = Join-Path $script:StateDir ('cgmd-runs\' + $TaskId)
+        }
     }
     if (-not $OutDir) {
-        $OutDir = Join-Path $RepoPath ('results\cgmd\' + $TaskId)
+        if ($resultRoot) {
+            $OutDir = Join-Path $resultRoot $TaskId
+        } else {
+            $OutDir = Join-Path $RepoPath ('results\cgmd\' + $TaskId)
+        }
     }
     foreach ($dir in @($WorkDir, $OutDir)) {
         if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
     }
+    $logFile = Join-Path $OutDir ('pipeline-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.out')
+    $script:DefaultResultFile = Join-Path $OutDir 'pipeline-result.json'
 
     $pythonInfo = Resolve-Python -Explicit $Python
     if ($null -eq $pythonInfo) {
@@ -452,6 +493,11 @@ try {
         $pore = Get-Property $metrics 'pore' $null
         $system = Get-Property $metrics 'system' $null
         $figures = @(Get-Property $metrics 'figures' @())
+        $metricsBytes = [int64](Get-Item -LiteralPath $metricsPath).Length
+        $metricsText = ''
+        if ($metricsBytes -le 1048576) {
+            $metricsText = [System.IO.File]::ReadAllText($metricsPath, [System.Text.Encoding]::UTF8)
+        }
         $completed = [bool](Get-Property $production 'completed' $false)
         $diverged = [bool](Get-Property $simulation 'diverged' $false)
         $status = 'ok'
@@ -478,7 +524,12 @@ try {
             workdir        = $WorkDir
             output         = $OutDir
             metrics        = $metricsPath
+            metrics_bytes  = $metricsBytes
+            metrics_sha256 = Get-FileSha256 -Path $metricsPath
+            summary_metrics = $metrics
+            summary_metrics_json = $metricsText
             figures        = $figures
+            svg_artifacts  = Get-SmallSvgArtifacts -BaseDir $OutDir -Figures $figures
             completed_ns   = (Get-Property $production 'completed_ns' $null)
             target_ns      = (Get-Property $production 'target_ns' $null)
             completed      = $completed
@@ -512,7 +563,11 @@ $result['seconds'] = [math]::Round(((Get-Date) - $script:StartedAt).TotalSeconds
 $result['worker'] = $env:COMPUTERNAME
 
 if (-not $ResultFile) {
-    $ResultFile = Join-Path $script:StateDir ('pipeline-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.json')
+    if ($script:DefaultResultFile) {
+        $ResultFile = $script:DefaultResultFile
+    } else {
+        $ResultFile = Join-Path $script:StateDir ('pipeline-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.json')
+    }
 }
 try { Write-JsonFile -Path $ResultFile -Data $result } catch { }
 if (-not $Quiet) { Write-Output ($result | ConvertTo-Json -Depth 12) }
