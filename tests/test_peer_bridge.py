@@ -34,6 +34,11 @@ class PeerBridgeTests(unittest.TestCase):
         self.assertIn("if (-not $mailboxField.Value)", text)
         self.assertNotIn("$data['mailbox_enabled']", text)
         self.assertIn("$cfg.allow_shell", text)
+        # In Windows PowerShell 5.1 a bare $null binds as an empty String
+        # to .NET File.Replace and fails *before* the local config is changed.
+        self.assertIn("[System.Management.Automation.Language.NullString]::Value", text)
+        self.assertNotIn("[IO.File]::Replace($tmp, $cfgPath, $null)", text)
+        self.assertIn("$installed.peer_repos", text)
         self.assertNotRegex(text.lower(), r"\bgit\s+push\b|\bregister-scheduledtask\b")
 
 

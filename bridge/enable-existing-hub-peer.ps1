@@ -84,7 +84,14 @@ try {
     }
     # Both paths are in the same directory: atomic replacement keeps readers
     # from ever seeing a partially written JSON file. The backup above stays.
-    [IO.File]::Replace($tmp, $cfgPath, $null)
+    # Windows PowerShell 5.1 coerces a plain $null to an *empty string* when
+    # binding this .NET string parameter; File.Replace then rejects that path.
+    # NullString.Value passes a genuine CLR null for the optional backup path.
+    [IO.File]::Replace($tmp, $cfgPath, [System.Management.Automation.Language.NullString]::Value)
+    $installed = Get-Content -LiteralPath $cfgPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (@($installed.peer_repos | Where-Object { $_ -ceq $peer }).Count -ne 1) {
+        throw ('Hub config was replaced but peer verification failed; backup: ' + $backup)
+    }
 } finally {
     if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Force }
 }
