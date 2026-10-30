@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:28:07+08:00",
+    "generated_at":  "2026-10-30T15:47:06+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T074626-9153.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -76,30 +76,10 @@
                      "20261030T071529-f003":  1,
                      "20261030T071636-eb87":  1,
                      "20261030T071719-b39b":  1,
-                     "20261030T071928-c462":  1
+                     "20261030T071928-c462":  1,
+                     "20261030T074626-9153":  1
                  },
     "log_tail":  [
-                     "2026-10-30 14:53:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:54:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:55:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:56:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:57:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:58:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:59:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:00:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:01:56 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:02:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:02:59 [INFO] job kind=ping",
-                     "2026-10-30 15:03:00 [INFO] peer hukeying85-ux/JevHarness job 20261030T070202-f454 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
-                     "2026-10-30 15:03:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:04:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:05:00 [WARN] peer hukeying85-ux/0fuye#arena/7ed6241a-0fuye unreachable: git.exe : fatal: unable to access \u0027https://github.com/hukeying85-ux/0fuye.git/\u0027: schannel: next InitializeSecurityConte",
-                     "xt failed: SEC_E_ILLEGAL_MESSAGE (0x80090326) - This error usually occurs when ",
-                     "2026-10-30 15:05:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:06:57 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:07:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:07:58 [INFO] job kind=gmx",
-                     "2026-10-30 15:07:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T070716-af74 (gmx) -\u003e fail: gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 1: CGMD_EXIT_CODE=1 ",
                      "2026-10-30 15:08:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:09:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:10:55 [INFO] mailbox: 1 queued, running at most 1",
@@ -138,7 +118,28 @@
                      "2026-10-30 15:26:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:27:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:27:59 [INFO] job kind=gmx",
-                     "2026-10-30 15:27:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T072726-9c39 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 "
+                     "2026-10-30 15:27:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T072726-9c39 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 ",
+                     "2026-10-30 15:28:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:29:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:30:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:31:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:32:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:33:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:34:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:35:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:36:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:37:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:38:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:39:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:40:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:41:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:42:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:43:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:44:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:45:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:46:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 15:46:56 [INFO] job kind=files",
+                     "2026-10-30 15:46:56 [INFO] job 20261030T074626-9153 (files) -\u003e unsupported: unknown kind: files"
                  ],
     "call_tail":  [
 
@@ -150,9 +151,9 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/JevHarness",
-                      "status":  "ran",
-                      "ran":  1,
-                      "note":  ""
+                      "status":  "idle",
+                      "ran":  0,
+                      "note":  "18 request(s) seen, all already answered"
                   },
                   {
                       "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
@@ -163,13 +164,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T072726-9c39",
-                          "kind":  "gmx",
-                          "status":  "fail",
-                          "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 "
+                          "id":  "20261030T074626-9153",
+                          "kind":  "files",
+                          "status":  "unsupported",
+                          "summary":  "unknown kind: files"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T074626-9153",
+                       "kind":  "files",
+                       "status":  "unsupported",
+                       "summary":  "unknown kind: files",
+                       "finished_at":  "2026-10-30T15:46:56+08:00"
+                   },
                    {
                        "id":  "20261030T072726-9c39",
                        "kind":  "gmx",
@@ -302,13 +310,6 @@
                        "status":  "ok",
                        "summary":  "gmx distance -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.ndx -select com of group 0 plus com of group 1 -oxyz C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance_xyz.xvg -oall C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\distance.xvg exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T12:19:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T041746-72fa",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx traj -h exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-30T12:18:54+08:00"
                    }
                ]
 }
