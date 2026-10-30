@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T16:14:00+08:00",
+    "generated_at":  "2026-10-30T16:17:06+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T081622-bf3b.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -88,14 +88,10 @@
                      "20261030T080341-974c":  1,
                      "20261030T080755-8d9a":  1,
                      "20261030T080933-a2cf":  1,
-                     "20261030T081239-0ace":  1
+                     "20261030T081239-0ace":  1,
+                     "20261030T081622-bf3b":  1
                  },
     "log_tail":  [
-                     "2026-10-30 15:38:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:39:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:40:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:41:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:42:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:43:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:44:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:45:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -150,7 +146,12 @@
                      "2026-10-30 16:12:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:12:55 [INFO] job kind=cgmd",
                      "2026-10-30 16:12:57 [INFO] job 20261030T081239-0ace (cgmd) -\u003e fail: cgmd all: grompp-em failed (exit 1) (1711 beads)",
-                     "2026-10-30 16:13:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-30 16:13:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:14:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:15:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:16:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 16:16:55 [INFO] job kind=ping",
+                     "2026-10-30 16:16:56 [INFO] job 20261030T081622-bf3b (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
                  ],
     "call_tail":  [
 
@@ -174,9 +175,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261030T081622-bf3b",
+                          "kind":  "ping",
+                          "status":  "ok",
+                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T081622-bf3b",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T16:16:56+08:00"
+                   },
                    {
                        "id":  "20261030T081239-0ace",
                        "kind":  "cgmd",
@@ -309,13 +322,6 @@
                        "status":  "fail",
                        "summary":  "gmx solvate -cs spc216.gro -box 2.0 -o F:\\cgmd\\runs\\probe-dir-check.gro exit 1: CGMD_EXIT_CODE=1 ",
                        "finished_at":  "2026-10-30T15:17:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T071636-eb87",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-30T15:16:55+08:00"
                    }
                ]
 }
