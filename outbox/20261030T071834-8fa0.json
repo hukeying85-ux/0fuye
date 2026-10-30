@@ -1,0 +1,35 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T071834-8fa0",
+    "kind":  "gmx",
+    "status":  "ok",
+    "summary":  "gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 ",
+    "detail":  {
+                   "exit_code":  0,
+                   "argv":  [
+                                "check",
+                                "-s1",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-151857",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx check, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-151857",
+                      "Command line:",
+                      "  gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr",
+                      "Please give me TWO run input (.tpr) files",
+                      "GROMACS reminds you: \"Uh-oh .... Right Again\" (Laurie Anderson)",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "peer":  "hukeying85-ux/JevHarness",
+    "worker":  "DESKTOP-IEUDGS5",
+    "started_at":  "2026-10-30T15:18:57+08:00",
+    "finished_at":  "2026-10-30T15:18:58+08:00",
+    "seconds":  0.22
+}
