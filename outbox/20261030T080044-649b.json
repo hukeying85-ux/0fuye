@@ -1,0 +1,136 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T080044-649b",
+    "kind":  "cgmd",
+    "status":  "ok",
+    "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 missing",
+    "detail":  {
+                   "exit_code":  0,
+                   "python":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "mode":  "probe",
+                   "ops":  {
+                               "detail":  {
+                                              "cwd":  "C:\\cgmd\\0fuye",
+                                              "drives":  [
+                                                             "C:\\",
+                                                             "F:\\"
+                                                         ],
+                                              "ff_molecules":  [
+
+                                                               ],
+                                              "gmx":  {
+                                                          "cuda_runtime":  "12.80",
+                                                          "gpu_support":  "CUDA",
+                                                          "how":  "PATH",
+                                                          "path":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                                                          "version":  "2025.1"
+                                                      },
+                                              "host":  "DESKTOP-IEUDGS5",
+                                              "martini":  {
+                                                              "dir":  null,
+                                                              "file":  null,
+                                                              "how":  "missing"
+                                                          },
+                                              "platform":  "Windows-10-10.0.19045-SP0",
+                                              "pythons":  [
+                                                              {
+                                                                  "args":  [
+
+                                                                           ],
+                                                                  "exe":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                                                                  "how":  "running",
+                                                                  "pip":  true,
+                                                                  "version":  "3.12.10"
+                                                              },
+                                                              {
+                                                                  "args":  [
+                                                                               "-3"
+                                                                           ],
+                                                                  "exe":  "C:\\WINDOWS\\py.exe",
+                                                                  "how":  "py-launcher",
+                                                                  "pip":  true,
+                                                                  "version":  "3.12.10"
+                                                              },
+                                                              {
+                                                                  "args":  [
+
+                                                                           ],
+                                                                  "exe":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python37\\python.exe",
+                                                                  "how":  "glob",
+                                                                  "pip":  true,
+                                                                  "version":  "3.7.3"
+                                                              },
+                                                              {
+                                                                  "args":  [
+
+                                                                           ],
+                                                                  "exe":  "C:\\Python32\\python.exe",
+                                                                  "how":  "PATH",
+                                                                  "pip":  false,
+                                                                  "version":  "3.2.2"
+                                                              }
+                                                          ],
+                                              "roots_checked":  [
+                                                                    {
+                                                                        "exists":  true,
+                                                                        "root":  "F:\\\\0wsh\\\\asd"
+                                                                    },
+                                                                    {
+                                                                        "exists":  true,
+                                                                        "root":  "F:\\\\0wsh"
+                                                                    },
+                                                                    {
+                                                                        "exists":  true,
+                                                                        "root":  "F:\\\\"
+                                                                    }
+                                                                ]
+                                          },
+                               "generated_at":  "2026-10-30T16:02:00",
+                               "host":  "DESKTOP-IEUDGS5",
+                               "mode":  "probe",
+                               "python":  "3.12.10",
+                               "schema":  "cgmd.desk_ops.v1",
+                               "seconds":  3.17,
+                               "status":  "ok",
+                               "summary":  "gmx 2025.1 | python 3.12.10 | martini3 missing"
+                           }
+               },
+    "logs_tail":  [
+                      "        \"pip\": false",
+                      "      }",
+                      "    ],",
+                      "    \"martini\": {",
+                      "      \"dir\": null,",
+                      "      \"file\": null,",
+                      "      \"how\": \"missing\"",
+                      "    },",
+                      "    \"ff_molecules\": [],",
+                      "    \"roots_checked\": [",
+                      "      {",
+                      "        \"root\": \"F:\\\\\\\\0wsh\\\\\\\\asd\",",
+                      "        \"exists\": true",
+                      "      },",
+                      "      {",
+                      "        \"root\": \"F:\\\\\\\\0wsh\",",
+                      "        \"exists\": true",
+                      "      },",
+                      "      {",
+                      "        \"root\": \"F:\\\\\\\\\",",
+                      "        \"exists\": true",
+                      "      }",
+                      "    ]",
+                      "  },",
+                      "  \"generated_at\": \"2026-10-30T16:02:00\",",
+                      "  \"seconds\": 3.17,",
+                      "  \"python\": \"3.12.10\",",
+                      "  \"host\": \"DESKTOP-IEUDGS5\"",
+                      "}",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "env inventory retry",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T16:01:55+08:00",
+    "finished_at":  "2026-10-30T16:02:00+08:00",
+    "seconds":  4.42,
+    "worker":  "DESKTOP-IEUDGS5"
+}
