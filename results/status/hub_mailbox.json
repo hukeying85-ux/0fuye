@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T17:21:05+08:00",
+    "generated_at":  "2026-10-30T17:22:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T091926-7a1a.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -110,7 +110,6 @@
                      "20261030T091926-7a1a":  1
                  },
     "log_tail":  [
-                     "2026-10-30 16:59:10 [WARN] mailbox push rejected (attempt 1): git.exe : fatal: Cannot prompt because user interactivity has been disabled.",
                      "所在位置 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Invoke-CgmdMailbox.ps1:141 字符: 19",
                      "+         $output = \u0026 git -C $Directory @GitArgs 2\u003e\u00261 | Out-String",
                      "+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
@@ -169,7 +168,8 @@
                      "2026-10-30 17:19:56 [INFO] job 20261030T091926-3727 (gmx) -\u003e ok: gmx check -c F:\\0wsh\\asd\\gromacs_md\\md_fllhttr\\complex.gro exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 17:20:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 17:20:54 [INFO] job kind=gmx",
-                     "2026-10-30 17:20:56 [INFO] job 20261030T091926-7a1a (gmx) -\u003e ok: gmx check -c F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\complex.gro exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 17:20:56 [INFO] job 20261030T091926-7a1a (gmx) -\u003e ok: gmx check -c F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\complex.gro exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 17:21:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -193,12 +193,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T091926-7a1a",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx check -c F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\complex.gro exit 0: CGMD_EXIT_CODE=0 "
-                      }
+
                   ],
     "recent":  [
                    {
