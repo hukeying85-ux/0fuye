@@ -1,0 +1,17 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T080316-230e",
+    "kind":  "files",
+    "status":  "unsupported",
+    "summary":  "unknown kind: files",
+    "detail":  null,
+    "logs_tail":  [
+
+                  ],
+    "note":  "probe whether desktop worker has files kind",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T16:03:55+08:00",
+    "finished_at":  "2026-10-30T16:03:55+08:00",
+    "seconds":  0.02,
+    "worker":  "DESKTOP-IEUDGS5"
+}
