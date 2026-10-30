@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T10:11:39+08:00",
+    "generated_at":  "2026-10-30T10:15:30+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -40,12 +40,6 @@
                      "20261029T082826-2cd0":  1
                  },
     "log_tail":  [
-                     "2026-10-30 09:23:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:24:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:25:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:26:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:27:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:28:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:29:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:30:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:31:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -99,7 +93,13 @@
                      "2026-10-30 10:09:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:10:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:10:59 [INFO] job kind=selfcheck",
-                     "2026-10-30 10:11:33 [INFO] peer hukeying85-ux/JevHarness job 20261030T021021-360c (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
+                     "2026-10-30 10:11:33 [INFO] peer hukeying85-ux/JevHarness job 20261030T021021-360c (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail",
+                     "2026-10-30 10:11:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:12:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:13:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:14:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:14:57 [INFO] job kind=selfcheck",
+                     "2026-10-30 10:15:24 [INFO] peer hukeying85-ux/JevHarness job 20261030T021444-ab6b (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
                  ],
     "call_tail":  [
 
@@ -124,13 +124,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T021021-360c",
+                          "id":  "20261030T021444-ab6b",
                           "kind":  "selfcheck",
                           "status":  "fail",
                           "summary":  "selfcheck: 15 pass / 3 warn / 0 fail"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T021444-ab6b",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-10-30T10:15:23+08:00"
+                   },
                    {
                        "id":  "20261030T021021-360c",
                        "kind":  "selfcheck",
@@ -263,13 +270,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-10-29T15:30:57+08:00"
-                   },
-                   {
-                       "id":  "20261029T070717-3684",
-                       "kind":  "deskdiag",
-                       "status":  "ok",
-                       "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
-                       "finished_at":  "2026-10-29T15:08:00+08:00"
                    }
                ]
 }
