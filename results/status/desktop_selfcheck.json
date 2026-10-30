@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-30T12:04:21+08:00",
+    "checked_at":  "2026-10-30T15:20:22+08:00",
     "overall":  "warn",
     "exit_code":  6,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
@@ -37,7 +37,7 @@
                     "passed":  15,
                     "warnings":  3,
                     "failed":  0,
-                    "seconds":  25.9
+                    "seconds":  26.2
                 },
     "checks":  [
                    {
@@ -58,8 +58,8 @@
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ 9fcd101 (ahead 0, behind 0)",
-                       "seconds":  1.45
+                       "detail":  "arena/32cd826e-0fuye @ c5522b9 (ahead 0, behind 0)",
+                       "seconds":  1.46
                    },
                    {
                        "id":  "creds",
@@ -73,7 +73,7 @@
                        "title":  "WSL2 distro",
                        "status":  "pass",
                        "detail":  "Ubuntu-18.04 | Ubuntu 18.04.6 LTS | 48 cores | 31.2 GB RAM",
-                       "seconds":  17.3
+                       "seconds":  17.58
                    },
                    {
                        "id":  "gpu",
@@ -156,7 +156,7 @@
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/30/2026 12:03:03 | result 0",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/30/2026 15:19:19 | result 0",
                        "seconds":  0
                    },
                    {
@@ -164,7 +164,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  2.12
+                       "seconds":  2.15
                    }
                ]
 }

@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:19:04+08:00",
+    "generated_at":  "2026-10-30T15:20:32+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T071928-c462.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -75,12 +75,10 @@
                      "20261030T071030-88d7":  1,
                      "20261030T071529-f003":  1,
                      "20261030T071636-eb87":  1,
-                     "20261030T071719-b39b":  1
+                     "20261030T071719-b39b":  1,
+                     "20261030T071928-c462":  1
                  },
     "log_tail":  [
-                     "2026-10-30 14:35:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:36:57 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:37:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:38:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:39:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:40:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -137,7 +135,10 @@
                      "2026-10-30 15:17:55 [INFO] job 20261030T071719-b39b (gmx) -\u003e fail: gmx solvate -cs spc216.gro -box 2.0 -o F:\\cgmd\\runs\\probe-dir-check.gro exit 1: CGMD_EXIT_CODE=1 ",
                      "2026-10-30 15:18:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:18:57 [INFO] job kind=gmx",
-                     "2026-10-30 15:18:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T071834-8fa0 (gmx) -\u003e ok: gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 15:18:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T071834-8fa0 (gmx) -\u003e ok: gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 15:19:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 15:19:55 [INFO] job kind=selfcheck",
+                     "2026-10-30 15:20:23 [INFO] job 20261030T071928-c462 (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
                  ],
     "call_tail":  [
 
@@ -149,9 +150,9 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/JevHarness",
-                      "status":  "ran",
-                      "ran":  1,
-                      "note":  ""
+                      "status":  "idle",
+                      "ran":  0,
+                      "note":  "14 request(s) seen, all already answered"
                   },
                   {
                       "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
@@ -162,13 +163,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T071834-8fa0",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 "
+                          "id":  "20261030T071928-c462",
+                          "kind":  "selfcheck",
+                          "status":  "fail",
+                          "summary":  "selfcheck: 15 pass / 3 warn / 0 fail"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T071928-c462",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-10-30T15:20:23+08:00"
+                   },
                    {
                        "id":  "20261030T071834-8fa0",
                        "kind":  "gmx",
@@ -301,13 +309,6 @@
                        "status":  "ok",
                        "summary":  "gmx check -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T12:04:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T033257-5c2a",
-                       "kind":  "selfcheck",
-                       "status":  "fail",
-                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
-                       "finished_at":  "2026-10-30T12:04:22+08:00"
                    }
                ]
 }
