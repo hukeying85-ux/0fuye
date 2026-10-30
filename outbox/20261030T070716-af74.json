@@ -1,0 +1,43 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T070716-af74",
+    "kind":  "gmx",
+    "status":  "fail",
+    "summary":  "gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 1: CGMD_EXIT_CODE=1 ",
+    "detail":  {
+                   "exit_code":  1,
+                   "argv":  [
+                                "check",
+                                "-s",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-150758",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx check, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-150758",
+                      "Command line:",
+                      "  gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr",
+                      "-------------------------------------------------------",
+                      "Program:     gmx check, version 2025.1",
+                      "Source file: src\\gromacs\\commandline\\cmdlineparser.cpp (line 271)",
+                      "Function:    void __cdecl gmx::CommandLineParser::parse(int *,char *[])",
+                      "Error in user input:",
+                      "Invalid command-line options",
+                      "    Unknown command-line option -s",
+                      "For more information and tips for troubleshooting, please check the GROMACS",
+                      "website at https://manual.gromacs.org/current/user-guide/run-time-errors.html",
+                      "-------------------------------------------------------",
+                      "CGMD_EXIT_CODE=1 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "peer":  "hukeying85-ux/JevHarness",
+    "worker":  "DESKTOP-IEUDGS5",
+    "started_at":  "2026-10-30T15:07:58+08:00",
+    "finished_at":  "2026-10-30T15:07:58+08:00",
+    "seconds":  0.23
+}
