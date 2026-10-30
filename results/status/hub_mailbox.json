@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:58:07+08:00",
+    "generated_at":  "2026-10-30T15:59:01+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T075711-e36a.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -83,7 +83,6 @@
                      "20261030T075711-e36a":  1
                  },
     "log_tail":  [
-                     "2026-10-30 15:17:55 [INFO] job 20261030T071719-b39b (gmx) -\u003e fail: gmx solvate -cs spc216.gro -box 2.0 -o F:\\cgmd\\runs\\probe-dir-check.gro exit 1: CGMD_EXIT_CODE=1 ",
                      "2026-10-30 15:18:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:18:57 [INFO] job kind=gmx",
                      "2026-10-30 15:18:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T071834-8fa0 (gmx) -\u003e ok: gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 ",
@@ -142,7 +141,8 @@
                      "2026-10-30 15:56:57 [INFO] job 20261030T075645-e045 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                      "2026-10-30 15:57:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 15:57:56 [INFO] job kind=cgmd",
-                     "2026-10-30 15:57:58 [INFO] job 20261030T075711-e36a (cgmd) -\u003e error: cgmd probe: AttributeError: \u0027module\u0027 object has no attribute \u0027which\u0027"
+                     "2026-10-30 15:57:58 [INFO] job 20261030T075711-e36a (cgmd) -\u003e error: cgmd probe: AttributeError: \u0027module\u0027 object has no attribute \u0027which\u0027",
+                     "2026-10-30 15:58:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -166,12 +166,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T075711-e36a",
-                          "kind":  "cgmd",
-                          "status":  "error",
-                          "summary":  "cgmd probe: AttributeError: \u0027module\u0027 object has no attribute \u0027which\u0027"
-                      }
+
                   ],
     "recent":  [
                    {
