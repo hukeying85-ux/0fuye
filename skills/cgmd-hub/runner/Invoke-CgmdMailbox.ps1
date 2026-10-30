@@ -1184,10 +1184,42 @@ function Get-DeskPython {
             $list += $hit.FullName
         }
     }
+    # First-existing is not good enough: this box has a Python 3.2 on PATH, and
+    # handing the dispatcher to it fails before the inventory can even start.
+    # Ask every candidate for its version and keep the newest usable one.
+    $first = ''
+    $best = ''
+    $bestCode = -1
     foreach ($candidate in @($list | Select-Object -Unique)) {
-        if ($candidate -and (Test-Path -LiteralPath $candidate)) { return $candidate }
+        if (-not $candidate) { continue }
+        if (-not (Test-Path -LiteralPath $candidate)) { continue }
+        if (-not $first) { $first = $candidate }
+        $code = Get-PythonCode -Exe $candidate
+        if ($code -ge 306 -and $code -gt $bestCode) {
+            $best = $candidate
+            $bestCode = $code
+        }
     }
-    return ''
+    if ($best) { return $best }
+    return $first
+}
+
+function Get-PythonCode {
+    # 3.11 -> 311, 3.2 -> 302.  0 means 'could not run it'.
+    param([string]$Exe)
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $out = & $Exe -c "import sys;sys.stdout.write('%d%02d' % (sys.version_info[0], sys.version_info[1]))" 2>$null
+        if ($null -eq $out) { return 0 }
+        $text = ([string]$out).Trim()
+        if ($text -match '^[0-9]{2,3}$') { return [int]$text }
+        return 0
+    } catch {
+        return 0
+    } finally {
+        $ErrorActionPreference = $previous
+    }
 }
 
 function Invoke-JobCgmd {

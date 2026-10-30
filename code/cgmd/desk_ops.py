@@ -97,6 +97,37 @@ def now() -> str:
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
+def which(name):
+    """``shutil.which`` is Python 3.3+.
+
+    This box has a 3.2 interpreter on PATH, and the worker used to hand the
+    dispatcher to it, where ``shutil.which`` raises AttributeError before the
+    inventory can even say which interpreters exist.  A local PATH/PATHEXT walk
+    works everywhere, so a probe is diagnostic on any python instead of fatal.
+    """
+    finder = getattr(shutil, "which", None)
+    if finder is not None:
+        try:
+            return finder(name)
+        except Exception:
+            pass
+    if os.path.isabs(name) and os.path.isfile(name):
+        return name
+    exts = [""]
+    if os.name == "nt":
+        exts = [ext for ext in os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD").split(";") if ext]
+        if not any(name.lower().endswith(ext.lower()) for ext in exts):
+            exts = exts + [""]
+    for folder in os.environ.get("PATH", "").split(os.pathsep):
+        if not folder:
+            continue
+        for ext in exts:
+            candidate = os.path.join(folder, name + ext)
+            if os.path.isfile(candidate):
+                return candidate
+    return None
+
+
 def run_cmd(cmd, cwd=None, timeout=600, stdin_text=None, env=None):
     """Run ``cmd`` (a list) and return a JSON-friendly record."""
     started = time.time()
@@ -107,11 +138,14 @@ def run_cmd(cmd, cwd=None, timeout=600, stdin_text=None, env=None):
         "stdout_tail": [],
         "stderr_tail": [],
     }
+    devnull = getattr(subprocess, "DEVNULL", None)
+    if devnull is None:                      # python 3.2 has no DEVNULL
+        devnull = open(os.devnull, "wb")
     try:
         proc = subprocess.Popen(
             cmd,
             cwd=cwd,
-            stdin=subprocess.PIPE if stdin_text is not None else subprocess.DEVNULL,
+            stdin=subprocess.PIPE if stdin_text is not None else devnull,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -122,9 +156,15 @@ def run_cmd(cmd, cwd=None, timeout=600, stdin_text=None, env=None):
         record["stderr_tail"] = [str(exc)[:400]]
         record["seconds"] = round(time.time() - started, 2)
         return record
+    timeout_exc = getattr(subprocess, "TimeoutExpired", None)
     try:
-        out, err = proc.communicate(stdin_text, timeout=timeout)
-    except subprocess.TimeoutExpired:
+        if timeout_exc is None:              # python 3.2: communicate has no timeout
+            out, err = proc.communicate(stdin_text)
+        else:
+            out, err = proc.communicate(stdin_text, timeout=timeout)
+    except Exception as exc:                 # noqa: BLE001 - re-raised unless it is the timeout
+        if timeout_exc is None or not isinstance(exc, timeout_exc):
+            raise
         proc.kill()
         out, err = proc.communicate()
         record["returncode"] = 124
@@ -174,7 +214,7 @@ def find_gmx(explicit=None, deep=True):
     if env and os.path.isfile(env):
         return env, "CGMD_GMX"
     for name in ("gmx.exe", "gmx", "gmx_mpi.exe", "gmx_mpi"):
-        found = shutil.which(name)
+        found = which(name)
         if found:
             return found, "PATH"
     for candidate in GMX_HINTS:
@@ -218,11 +258,11 @@ def find_pythons():
 
     add(sys.executable, "running")
     for name in ("python.exe", "python", "python3.exe", "python3"):
-        found = shutil.which(name)
+        found = which(name)
         if found:
             add(found, "PATH")
     for prefix in ("py",):
-        found = shutil.which(prefix + ".exe") or shutil.which(prefix)
+        found = which(prefix + ".exe") or which(prefix)
         if found:
             add(found, "py-launcher", ["-3"])
     for pattern in (
