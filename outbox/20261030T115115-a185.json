@@ -1,0 +1,46 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T115115-a185",
+    "kind":  "gmx",
+    "status":  "ok",
+    "summary":  "gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro -select atomnr 8000 to 9000 and resnr 1 to 7 -on F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx exit 0: CGMD_EXIT_CODE=0 ",
+    "detail":  {
+                   "exit_code":  0,
+                   "argv":  [
+                                "select",
+                                "-s",
+                                "F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro",
+                                "-select",
+                                "atomnr 8000 to 9000 and resnr 1 to 7",
+                                "-on",
+                                "F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-195155",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx select, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-195155",
+                      "Command line:",
+                      "  gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro -select \u0027atomnr 8000 to 9000 and resnr 1 to 7\u0027 -on F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx",
+                      "Analyzed topology coordinates",
+                      "GROMACS reminds you: \"Ubiquitin\u0027s just a rock\" (Berk Hess)",
+                      "WARNING: Masses and atomic (Van der Waals) radii will be guessed",
+                      "         based on residue and atom names, since they could not be",
+                      "         definitively assigned from the information in your input",
+                      "         files. These guessed numbers might deviate from the mass",
+                      "         and radius of the atom type. Please check the output",
+                      "         files if necessary. Note, that this functionality may",
+                      "         be removed in a future GROMACS version. Please, consider",
+                      "         using another file format for your input.",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T19:51:55+08:00",
+    "finished_at":  "2026-10-30T19:51:55+08:00",
+    "seconds":  0.26,
+    "worker":  "DESKTOP-IEUDGS5"
+}
