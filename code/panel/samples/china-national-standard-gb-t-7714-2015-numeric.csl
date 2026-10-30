@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" demote-non-dropping-particle="never" initialize-with=" " initialize-with-hyphen="false" page-range-format="expanded" default-locale="zh-CN">
+  <info>
+    <title>China National Standard GB/T 7714-2015 (numeric, 中文)</title>
+    <id>http://www.zotero.org/styles/china-national-standard-gb-t-7714-2015-numeric</id>
+    <link href="http://www.zotero.org/styles/china-national-standard-gb-t-7714-2015-numeric" rel="self"/>
+    <link href="http://std.samr.gov.cn/gb/search/gbDetailed?id=71F772D8055ED3A7E05397BE0A0AB82A" rel="documentation"/>
+    <author>
+      <name>牛耕田</name>
+      <email>buffalo_d@163.com</email>
+    </author>
+    <contributor>
+      <name>Zeping Lee</name>
+      <email>zepinglee@gmail.com</email>
+    </contributor>
+    <category citation-format="numeric"/>
+    <category field="generic-base"/>
+    <summary>The Chinese GB/T 7714-2015 numeric style</summary>
+    <updated>2022-01-20T00:00:00+08:00</updated>
+    <rights license="http://creativecommons.org/licenses/by-sa/3.0/">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License</rights>
+  </info>
+  <locale xml:lang="zh-CN">
+    <date form="text">
+      <date-part name="year" suffix="年" range-delimiter="—"/>
+      <date-part name="month" form="numeric" suffix="月" range-delimiter="—"/>
+      <date-part name="day" suffix="日" range-delimiter="—"/>
+    </date>
+    <terms>
+      <term name="edition" form="short">版</term>
+      <term name="open-quote">“</term>
+      <term name="close-quote">”</term>
+      <term name="open-inner-quote">‘</term>
+      <term name="close-inner-quote">’</term>
+    </terms>
+  </locale>
+  <locale>
+    <date form="numeric">
+      <date-part name="year" range-delimiter="/"/>
+      <date-part name="month" form="numeric-leading-zeros" prefix="-" range-delimiter="/"/>
+      <date-part name="day" form="numeric-leading-zeros" prefix="-" range-delimiter="/"/>
+    </date>
+    <terms>
+      <term name="page-range-delimiter">-</term>
+    </terms>
+  </locale>
+  <macro name="accessed-date">
+    <date variable="accessed" form="numeric" prefix="[" suffix="]"/>
+  </macro>
+  <macro name="author">
+    <names variable="author">
+      <name>
+        <name-part name="family" text-case="uppercase"/>
+        <name-part name="given"/>
+      </name>
+      <substitute>
+        <names variable="composer"/>
+        <names variable="illustrator"/>
+        <names variable="director"/>
+        <choose>
+          <if variable="container-title" match="none">
+            <names variable="editor"/>
+          </if>
+        </choose>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="container-contributors">
+    <names variable="editor">
+      <name>
+        <name-part name="family" text-case="uppercase"/>
+        <name-part name="given"/>
+      </name>
+      <substitute>
+        <names variable="editorial-director"/>
+        <names variable="compiler"/>
+      </substitute>
+    </names>
+  </macro>
+  <macro name="title">
+    <group delimiter=", ">
+      <group delimiter=": ">
+        <text variable="title"/>
+        <group delimiter=" ">
+          <choose>
+            <if variable="container-title" type="chapter entry-dictionary entry-encyclopedia paper-conference" match="none">
+              <text variable="volume"/>
+              <text variable="volume-title"/>
+            </if>
+          </choose>
+          <choose>
+            <if type="article article-journal" match="none">
+              <text variable="number"/>
+            </if>
+          </choose>
+          <choose>
+            <if type="collection">
+              <text variable="collection-number"/>
+            </if>
+          </choose>
+        </group>
+      </group>
+      <choose>
+        <if variable="container-title" type="paper-conference" match="none">
+          <choose>
+            <if variable="event-date">
+              <text variable="event-place"/>
+              <date variable="event-date" form="text"/>
+            </if>
+          </choose>
+        </if>
+      </choose>
+    </group>
+    <choose>
+      <if type="bill legal_case legislation patent standard" match="any">
+        <text variable="section" prefix=": "/>
+      </if>
+    </choose>
+    <text macro="type-code" prefix="[" suffix="]"/>
+  </macro>
+  <macro name="type-code">
+    <group delimiter="/">
+      <choose>
+        <if type="article">
+          <text value="M"/>
+        </if>
+        <if type="article-journal article-magazine" match="any">
+          <text value="J"/>
+        </if>
+        <if type="article-newspaper">
+          <text value="N"/>
+        </if>
+        <if type="bill legal_case legislation" match="any">
+          <text value="A"/>
+        </if>
+        <if type="book chapter" match="any">
+          <text value="M"/>
+        </if>
+        <if type="dataset">
+          <text value="DS"/>
+        </if>
+        <if type="map">
+          <text value="CM"/>
+        </if>
+        <if type="paper-conference">
+          <text value="C"/>
+        </if>
+        <if type="patent">
+          <text value="P"/>
+        </if>
+        <if type="post post-weblog webpage" match="any">
+          <text value="EB"/>
+        </if>
+        <if type="report">
+          <text value="R"/>
+        </if>
+        <if type="standard">
+          <text value="S"/>
+        </if>
+        <if type="thesis">
+          <text value="D"/>
+        </if>
+        <else>
+          <text value="Z"/>
+        </else>
+      </choose>
+      <choose>
+        <if variable="URL DOI" match="any">
+          <text value="OL"/>
+        </if>
+      </choose>
+    </group>
+  </macro>
+  <macro name="container-booklike">
+    <group delimiter=": ">
+      <text variable="container-title"/>
+      <text variable="volume-title"/>
+    </group>
+  </macro>
+  <macro name="container-periodical">
+    <group delimiter=": ">
+      <text variable="container-title"/>
+      <text variable="volume-title"/>
+    </group>
+    <text variable="volume" prefix=", "/>
+    <text variable="issue" prefix="(" suffix=")"/>
+  </macro>
+  <macro name="publisher">
+    <group delimiter=": ">
+      <text variable="publisher-place"/>
+      <group delimiter=", ">
+        <text variable="publisher"/>
+        <text macro="issued-year"/>
+      </group>
+    </group>
+    <text variable="page" prefix=": "/>
+  </macro>
+  <macro name="issued-year">
+    <choose>
+      <if variable="issued">
+        <date variable="issued" date-parts="year" form="numeric"/>
+      </if>
+      <else-if type="article-newspaper">
+        <date variable="issued" form="numeric"/>
+      </else-if>
+      <else>
+        <text term="anonymous" form="short"/>
+      </else>
+    </choose>
+  </macro>
+  <macro name="secondary-contributors">
+    <names variable="translator">
+      <name>
+        <name-part name="family" text-case="uppercase"/>
+        <name-part name="given"/>
+      </name>
+      <label form="short" prefix=", "/>
+    </names>
+  </macro>
+  <macro name="access">
+    <choose>
+      <if variable="URL">
+        <text variable="URL"/>
+      </if>
+      <else-if variable="DOI">
+        <text variable="DOI" prefix="https://doi.org/"/>
+      </else-if>
+    </choose>
+  </macro>
+  <macro name="entry-layout">
+    <group delimiter=". ">
+      <text macro="author"/>
+      <text macro="title"/>
+      <text macro="secondary-contributors"/>
+      <choose>
+        <if type="article-journal article-magazine article-newspaper" match="any">
+          <group delimiter=", ">
+            <text macro="container-periodical"/>
+            <text macro="issued-year"/>
+            <text variable="page" prefix=": "/>
+          </group>
+        </if>
+        <if type="chapter paper-conference entry-dictionary entry-encyclopedia" match="any">
+          <group delimiter="//">
+            <group delimiter=". ">
+              <text macro="container-contributors"/>
+              <text macro="container-booklike"/>
+            </group>
+          </group>
+          <text macro="publisher"/>
+        </if>
+        <else>
+          <text macro="publisher"/>
+        </else>
+      </choose>
+      <text macro="access"/>
+    </group>
+  </macro>
+  <citation collapse="citation-number" after-collapse-delimiter=",">
+    <sort>
+      <key variable="citation-number"/>
+    </sort>
+    <layout vertical-align="sup" prefix="[" suffix="]" delimiter=",">
+      <text variable="citation-number"/>
+      <text variable="locator" prefix=":"/>
+    </layout>
+  </citation>
+  <bibliography entry-spacing="0" et-al-min="4" et-al-use-first="3" line-spacing="1" second-field-align="flush">
+    <layout suffix=".">
+      <text variable="citation-number" prefix="[" suffix="]"/>
+      <text macro="entry-layout"/>
+    </layout>
+  </bibliography>
+</style>

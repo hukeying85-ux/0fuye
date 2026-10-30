@@ -1,0 +1,275 @@
+{
+    "schema":  "cgmd.mailbox.worker.v1",
+    "generated_at":  "2026-10-30T10:31:04+08:00",
+    "host":  "DESKTOP-IEUDGS5",
+    "ref":  "hub/mailbox",
+    "state":  "ran",
+    "branch_created":  false,
+    "init_note":  "",
+    "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
+    "queued":  0,
+    "max_jobs":  1,
+    "allow_shell":  false,
+    "inbox":  [
+
+              ],
+    "attempts":  {
+                     "20261029T063704-9a27":  1,
+                     "20261029T063955-a9b5":  1,
+                     "20261029T064433-5331":  1,
+                     "20261029T064657-a850":  1,
+                     "20261029T064849-5f39":  1,
+                     "20261029T065021-c6ea":  1,
+                     "20261029T065241-deb3":  1,
+                     "20261029T065614-93ef":  1,
+                     "20261029T065816-bd45":  1,
+                     "20261029T065938-0f13":  1,
+                     "20261029T070048-e9db":  1,
+                     "20261029T070210-d9c0":  1,
+                     "20261029T070349-c42e":  1,
+                     "20261029T070436-3f40":  1,
+                     "20261029T070612-9728":  1,
+                     "20261029T070717-3684":  1,
+                     "20261029T073039-b78f":  1,
+                     "20261029T073120-60bd":  1,
+                     "20261029T075318-79cd":  1,
+                     "20261029T081935-f37c":  1,
+                     "20261029T082117-c8b5":  1,
+                     "20261029T082308-4946":  1,
+                     "20261029T082641-df13":  1,
+                     "20261029T082826-2cd0":  1
+                 },
+    "log_tail":  [
+                     "2026-10-30 09:45:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:46:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:47:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:48:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:49:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:50:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:51:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:52:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:53:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:54:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:55:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:56:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:57:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:58:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 09:59:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:00:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:01:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:02:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:03:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:04:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:04:59 [INFO] job kind=ping",
+                     "2026-10-30 10:04:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020454-ecd8 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-30 10:05:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:05:58 [INFO] job kind=ping",
+                     "2026-10-30 10:05:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020458-3bc6 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-30 10:06:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:06:58 [INFO] job kind=smoke",
+                     "2026-10-30 10:07:27 [INFO] peer hukeying85-ux/JevHarness job 20261030T020515-28cc (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
+                     "2026-10-30 10:07:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:07:57 [INFO] job kind=smoke",
+                     "2026-10-30 10:08:26 [INFO] peer hukeying85-ux/JevHarness job 20261030T020623-6973 (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu",
+                     "2026-10-30 10:08:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:09:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:10:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:10:59 [INFO] job kind=selfcheck",
+                     "2026-10-30 10:11:33 [INFO] peer hukeying85-ux/JevHarness job 20261030T021021-360c (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail",
+                     "2026-10-30 10:11:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:12:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:13:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:14:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:14:57 [INFO] job kind=selfcheck",
+                     "2026-10-30 10:15:24 [INFO] peer hukeying85-ux/JevHarness job 20261030T021444-ab6b (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail",
+                     "2026-10-30 10:15:53 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:16:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:17:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:18:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:19:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:20:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:21:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:22:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:23:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:24:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:25:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:26:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:27:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:28:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:29:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:30:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:30:57 [INFO] job kind=ping",
+                     "2026-10-30 10:30:58 [INFO] peer hukeying85-ux/JevHarness job 20261030T023016-2543 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                 ],
+    "call_tail":  [
+
+                  ],
+    "peer_repos":  [
+                       "hukeying85-ux/JevHarness",
+                       "hukeying85-ux/0fuye#arena/7ed6241a-0fuye"
+                   ],
+    "peers":  [
+                  {
+                      "peer":  "hukeying85-ux/JevHarness",
+                      "status":  "ran",
+                      "ran":  1,
+                      "note":  ""
+                  },
+                  {
+                      "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
+                      "status":  "idle",
+                      "ran":  0,
+                      "note":  "1 request(s) seen, all already answered"
+                  }
+              ],
+    "processed":  [
+                      {
+                          "id":  "20261030T023016-2543",
+                          "kind":  "ping",
+                          "status":  "ok",
+                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                      }
+                  ],
+    "recent":  [
+                   {
+                       "id":  "20261030T023016-2543",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T10:30:58+08:00"
+                   },
+                   {
+                       "id":  "20261030T021444-ab6b",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-10-30T10:15:23+08:00"
+                   },
+                   {
+                       "id":  "20261030T021021-360c",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-10-30T10:11:33+08:00"
+                   },
+                   {
+                       "id":  "20261030T020623-6973",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-30T10:08:26+08:00"
+                   },
+                   {
+                       "id":  "20261030T020515-28cc",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-30T10:07:27+08:00"
+                   },
+                   {
+                       "id":  "20261030T020458-3bc6",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T10:05:59+08:00"
+                   },
+                   {
+                       "id":  "20261030T020454-ecd8",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T10:04:59+08:00"
+                   },
+                   {
+                       "id":  "20261030T012629-1b00ad",
+                       "kind":  "gmx",
+                       "status":  "ok",
+                       "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 ",
+                       "finished_at":  "2026-10-30T09:42:00+08:00"
+                   },
+                   {
+                       "id":  "20261029T115358-772d",
+                       "kind":  "shell",
+                       "status":  "unsupported",
+                       "summary":  "shell jobs are disabled; start Invoke-CgmdMailbox.ps1 with -AllowShell",
+                       "finished_at":  "2026-10-29T19:55:00+08:00"
+                   },
+                   {
+                       "id":  "20261029T112517-a5d4",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-29T19:26:29+08:00"
+                   },
+                   {
+                       "id":  "20261029T112426-ff69",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-29T19:25:01+08:00"
+                   },
+                   {
+                       "id":  "20261029T082826-2cd0",
+                       "kind":  "deskdiag",
+                       "status":  "ok",
+                       "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
+                       "finished_at":  "2026-10-29T16:28:59+08:00"
+                   },
+                   {
+                       "id":  "20261029T082641-df13",
+                       "kind":  "deskfix",
+                       "status":  "ok",
+                       "summary":  "panel up | boot task trigger 1 | launched True",
+                       "finished_at":  "2026-10-29T16:27:08+08:00"
+                   },
+                   {
+                       "id":  "20261029T082516-de56",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-29T16:26:29+08:00"
+                   },
+                   {
+                       "id":  "20261029T082308-4946",
+                       "kind":  "sync",
+                       "status":  "ok",
+                       "summary":  "sync exit 6 | panel restarted",
+                       "finished_at":  "2026-10-29T16:25:01+08:00"
+                   },
+                   {
+                       "id":  "20261029T082117-c8b5",
+                       "kind":  "deskfix",
+                       "status":  "ok",
+                       "summary":  "panel up | boot task trigger 1 | launched True",
+                       "finished_at":  "2026-10-29T16:22:08+08:00"
+                   },
+                   {
+                       "id":  "20261029T082113-2617",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-29T16:22:10+08:00"
+                   },
+                   {
+                       "id":  "20261029T081935-f37c",
+                       "kind":  "sync",
+                       "status":  "ok",
+                       "summary":  "sync exit 6 | panel restarted",
+                       "finished_at":  "2026-10-29T16:21:00+08:00"
+                   },
+                   {
+                       "id":  "20261029T075318-79cd",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-29T15:53:57+08:00"
+                   },
+                   {
+                       "id":  "20261029T073120-60bd",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-29T15:32:29+08:00"
+                   }
+               ]
+}

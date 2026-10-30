@@ -1,0 +1,597 @@
+{
+  "version": "2.5.0",
+  "updated_at": "2026-10-28",
+  "privacy_policy": "最高等级隐私保护：所有真实姓名、学校名称、身份证号、手机号、微信号、住址、OAuth Token 均禁止在仓库或界面明文出现；本人档案与朋友代管归档严格物理隔离，本机私密纪念目录仅检测状态绝不上传原文。",
+  "quick_links": [
+    {
+      "id": "notion-personal-hub",
+      "title": "Notion · 个人事务与多会话作战室总控台",
+      "subtitle": "求职投递 · 考公事业编 · 脱敏身份卡 · 纪念里程碑 · 免付费手机直连与反重力额度攻略",
+      "url": "https://www.notion.so/407186af12d381eea0d7c43e5cae8ab9",
+      "badge": "Notion Hub"
+    },
+    {
+      "id": "drive-love-space",
+      "title": "Google Drive · 💖 03_爱情纪念与媒体素材总库",
+      "subtitle": "一二和布布爱情短片 · 朝朝与暮暮恋爱记录 · 纪念日偏好档案 v4 · 情头聊天背景工坊",
+      "url": "https://drive.google.com/drive/folders/1xbJivKsZEmVOnJCRBNkhfOlDHW9L8NWH",
+      "badge": "Love Archive"
+    },
+    {
+      "id": "drive-master-index",
+      "title": "Google Drive · 00_Google云盘归档总索引",
+      "subtitle": "五大分类目录（01 求职 / 02 科研 / 03 爱情纪念 / 04 AI智能体 / 05 电商视觉）全量无损台账",
+      "url": "https://docs.google.com/document/d/1laSOzO-cYvkLydtp0DiUJNNAXGrz0CgW-zlpm83gWAU/edit",
+      "badge": "Drive Master Doc"
+    },
+    {
+      "id": "mobile-beacon-pwa",
+      "title": "JobBeacon 算力信标 · 手机伴侣 App (/mobile)",
+      "subtitle": "扫码添加到手机主屏幕 · Slurm 作业与 GROMACS 动力学完工响铃提醒",
+      "url": "/mobile",
+      "badge": "Mobile App"
+    }
+  ],
+  "love_hub": {
+    "headline": "💖 爱情与心意专属空间 · Google 云盘实盘 + 本机 JevChat 情感军师",
+    "subtitle": "完整串联 Google Drive「03_个人纪念与媒体素材」下的 4 大系列 18 项真实视频/画册/偏好档案/情头背景，并与本机离线恋爱军师 JevChat 协同守护（全程严格隐私脱敏，私密原文零外传）。",
+    "drive_root_url": "https://drive.google.com/drive/folders/1xbJivKsZEmVOnJCRBNkhfOlDHW9L8NWH",
+    "media_bundle_url": "https://drive.google.com/drive/folders/1ShaDdHi1sMmWvHnT7fkWxRi1aR1apDot",
+    "collections": [
+      {
+        "id": "love-videos",
+        "icon": "🎬",
+        "title": "一二和布布 · 爱情动画短片与动态情头",
+        "badge": "5 部实盘 MP4 视频",
+        "folder_url": "https://drive.google.com/drive/folders/1JYJyDDXt4M3N3DBdtr7o_aZi5OWN6jGu",
+        "description": "云盘实存 BGM 动画短片与循环情侣头像视频，支持一键在云端直接播放或下载至手机。",
+        "items": [
+          {
+            "name": "把甜甜的都分给你_一二和布布_BGM.mp4",
+            "kind": "MP4 视频",
+            "updated": "2026-10-20",
+            "note": "一二和布布高甜日常配乐成片",
+            "url": "https://drive.google.com/file/d/1fBP021v_kB5HwP-yKFwtbZtzCt2RKOIs/view"
+          },
+          {
+            "name": "陪你等天晴_一二和布布_BGM.mp4",
+            "kind": "MP4 视频",
+            "updated": "2026-10-20",
+            "note": "陪伴治愈系双人动画短片（含暖心 BGM）",
+            "url": "https://drive.google.com/file/d/1ZLM7A9QKoQQ3iO1-JjVKDOYor2jA1t7z/view"
+          },
+          {
+            "name": "海风把我们吹到一起_一二布布_BGM.mp4",
+            "kind": "MP4 视频",
+            "updated": "2026-10-20",
+            "note": "海边浪漫主题高清版 BGM 短片",
+            "url": "https://drive.google.com/file/d/1BzDxzTNXSZ6YpChrihUJkptn3c5S4AqN/view"
+          },
+          {
+            "name": "海风把我们吹到一起_手机兼容.mp4",
+            "kind": "MP4 手机版",
+            "updated": "2026-10-20",
+            "note": "专为微信/抖音手机端直发转码优化版本",
+            "url": "https://drive.google.com/file/d/1kkfeae6IE_c36DhRaECzpJtQO0vO1DOh/view"
+          },
+          {
+            "name": "黑白猫咪_6秒循环情头.mp4",
+            "kind": "动态情头",
+            "updated": "2026-10-19",
+            "note": "6 秒无缝循环双人猫咪动态头像素材",
+            "url": "https://drive.google.com/file/d/19sZjInDbUSBQ7e7ZZj_69iW6NLMMf7z2/view"
+          }
+        ]
+      },
+      {
+        "id": "love-memories",
+        "icon": "📖",
+        "title": "朝朝与暮暮 · 恋爱记录画册与情侣游戏回忆",
+        "badge": "PPTX + 图文纪念册",
+        "folder_url": "https://drive.google.com/drive/folders/11QAb7IINS_sxHoOq7YXNOdtyP57bUA4k",
+        "description": "收录双人游戏点滴、真实照片排版画册与恋爱记录演示文稿。",
+        "items": [
+          {
+            "name": "朝朝暮暮·恋爱记录.pptx",
+            "kind": "演示画册",
+            "updated": "2026-10-19",
+            "note": "时间轴式双人故事纪念幻灯片（Google Slides 在线可看）",
+            "url": "https://docs.google.com/presentation/d/1jjZsHQogtO_Ixl2ftAYZBzYp5IkYpAgS/edit"
+          },
+          {
+            "name": "情侣记忆案例册-图文版v2 (真实照片版).pdf",
+            "kind": "PDF 纪念册",
+            "updated": "2026-10-19",
+            "note": "精排图文纪念画册定稿 PDF",
+            "url": "https://drive.google.com/file/d/1az1lvQszGERLhEXv7_mCADP4fwNfXpvA/view"
+          },
+          {
+            "name": "朝朝与暮暮｜情侣游戏回忆（素材夹）",
+            "kind": "云盘目录",
+            "updated": "2026-10-18",
+            "note": "双人联机截图、通关时刻与语音/影像合集",
+            "url": "https://drive.google.com/drive/folders/11QAb7IINS_sxHoOq7YXNOdtyP57bUA4k"
+          },
+          {
+            "name": "恋爱记录与照片设计调研方案.md",
+            "kind": "设计方案",
+            "updated": "2026-10-19",
+            "note": "纪念相册视觉版式与叙事结构规划",
+            "url": "https://drive.google.com/file/d/1TDjhSqY5nzrcFKUei-MsMbIM3dZl_pUt/view"
+          }
+        ]
+      },
+      {
+        "id": "love-care-playbook",
+        "icon": "💌",
+        "title": "纪念日与偏好档案 · 关系疗愈与沟通锦囊",
+        "badge": "v4 修正版 + 冲突决策树",
+        "folder_url": "https://drive.google.com/drive/folders/1RsYnKRQCq6HZyqSdlpJ5IJF1jjxf9s9_",
+        "description": "重要纪念日、饮食喜好雷区备忘，以及情绪低谷陪伴与冲突降温决策树。",
+        "items": [
+          {
+            "name": "纪念日与偏好档案_修正版v4_20261020.md",
+            "kind": "核心档案 v4",
+            "updated": "2026-10-20",
+            "note": "最新修订的纪念日节点、口味偏好、礼物心愿单与细节备忘",
+            "url": "https://drive.google.com/file/d/1gH2OHSYaxanoSrkQyzlUyeFwvTNG5nc4/view"
+          },
+          {
+            "name": "带她走出来-SKILL（升级版·含冲突决策树）.md",
+            "kind": "情绪锦囊",
+            "updated": "2026-10-19",
+            "note": "分场景情绪承接、倾听回应与矛盾降温行动指南",
+            "url": "https://drive.google.com/file/d/1BmZKCV7EPRbuPpjbb8FodAF3xsG7EDtA/view"
+          },
+          {
+            "name": "带她走出来_疗愈方案_20261019.docx",
+            "kind": "Word 方案",
+            "updated": "2026-10-19",
+            "note": "阶段性温暖陪伴与减压活动具体安排",
+            "url": "https://docs.google.com/document/d/1sAUG_4xCKeLP-ybTsfgTLImf-ls-T1Oq/edit"
+          },
+          {
+            "name": "聊天关系分析报告_完整版_20261019.pdf",
+            "kind": "PDF 深度报告",
+            "updated": "2026-10-19",
+            "note": "互动频率、情感温度曲线与沟通盲区复盘报告",
+            "url": "https://drive.google.com/file/d/1SfWa-fMz0gGpxAQf1o93p633gIj0zEDy/view"
+          },
+          {
+            "name": "聊天记录总结.md",
+            "kind": "重点纪要",
+            "updated": "2026-10-20",
+            "note": "关键约定事项与近期高频话题提炼",
+            "url": "https://drive.google.com/file/d/1TIGWvljhB1UxuVhTMCysKx3HJR9_wUjK/view"
+          }
+        ]
+      },
+      {
+        "id": "love-wallpapers",
+        "icon": "🎨",
+        "title": "专属情头与抖音/微信聊天背景定制工坊",
+        "badge": "1290×2796 高清成品 + Skill",
+        "folder_url": "https://drive.google.com/drive/folders/1Losk8a3gKLRarxZ-_W4EaD36VTh0kN6z",
+        "description": "小字大爱心定制聊天背景、情头快速更换指南与可复用生成 Skill 包。",
+        "items": [
+          {
+            "name": "专属抖音聊天背景（成品目录）",
+            "kind": "云盘目录",
+            "updated": "2026-10-17",
+            "note": "适配手机全屏比例的双人专属聊天背景合集",
+            "url": "https://drive.google.com/drive/folders/1Losk8a3gKLRarxZ-_W4EaD36VTh0kN6z"
+          },
+          {
+            "name": "案例参考_最终小字大爱心版_1290x2796.png",
+            "kind": "高清壁纸",
+            "updated": "2026-10-19",
+            "note": "1290×2796 竖屏高清大爱心排版成品图",
+            "url": "https://drive.google.com/file/d/1foyJiujuohmJhQnsPJNsH7Ei8VSRD66Y/view"
+          },
+          {
+            "name": "00_使用说明_下次换情头.md",
+            "kind": "操作速查",
+            "updated": "2026-10-19",
+            "note": "下次快速裁切与成对更换情头/背景三步法",
+            "url": "https://drive.google.com/file/d/1oMSPG5I56TRckYYFN7UTrX2mk7-MBsNR/view"
+          },
+          {
+            "name": "couple-chat-wallpaper-v1.zip (情头背景 Skill 包)",
+            "kind": "Skill 压缩包",
+            "updated": "2026-10-19",
+            "note": "一键复刻专属情侣聊天壁纸的完整模板与脚本",
+            "url": "https://drive.google.com/file/d/1-3hFMKZQH8hYvhKJFfEwWt4r1wekpwLr/view"
+          }
+        ]
+      }
+    ],
+    "playbooks": [
+      {
+        "stage": "01 · 情绪优先承接",
+        "title": "先共情接住情绪，不急于讲道理或辩解对错",
+        "tip": "当对方表达委屈或疲惫时，第一时间确认感受（「换作是我也会很难受，抱抱你」），待情绪平复后再讨论具体事情。"
+      },
+      {
+        "stage": "02 · 冲突降温 15 分钟法则",
+        "title": "语速放缓 · 避免冷暴力 · 给出明确在场信号",
+        "tip": "线上文字出现误解时及时切语音或柔和表情包（如一二布布），绝不长时间已读不回，必要时诚恳说明「我在认真想怎么让你舒服一点」。"
+      },
+      {
+        "stage": "03 · 偏好与纪念日提前量",
+        "title": "提前 7 天核对『纪念日与偏好档案 v4』",
+        "tip": "将关键纪念日、生理期暖饮关怀、忌口与随口提过的小心愿提前设入提醒，用日常确定性的小惊喜累积安全感。"
+      },
+      {
+        "stage": "04 · 本机 JevChat 离线军师护航",
+        "title": "100% 本地大模型推理 · 零云端泄露辅助复盘",
+        "tip": "本机 E:\\0apps\\jev-chat-windows 静默运行本地分析任务，在不上传任何私密对话的前提下辅助复盘语气温度与表达方式。"
+      }
+    ]
+  },
+  "drive_folders": [
+    {
+      "code": "00",
+      "name": "00_Google云盘归档总索引 (Master Doc)",
+      "folder_id": "1laSOzO-cYvkLydtp0DiUJNNAXGrz0CgW-zlpm83gWAU",
+      "url": "https://docs.google.com/document/d/1laSOzO-cYvkLydtp0DiUJNNAXGrz0CgW-zlpm83gWAU/edit",
+      "items_count": 25,
+      "summary": "云盘根目录总账文档：完整登记 01~05 五大分区原始 File ID、无损归档路径与一键切回脚本",
+      "concrete_items": [
+        {
+          "name": "00_Google云盘归档总索引 (自动整理台账)",
+          "kind": "Google Doc",
+          "updated": "2026-10-28",
+          "url": "https://docs.google.com/document/d/1laSOzO-cYvkLydtp0DiUJNNAXGrz0CgW-zlpm83gWAU/edit"
+        },
+        {
+          "name": "双击一键切回并升级_ArenaDesk_v2.4.bat",
+          "kind": "应急脚本",
+          "updated": "2026-10-28",
+          "url": "https://drive.google.com/file/d/1TSUO9k7LI-vXvBg7oWVTRZLWirXCaJSA/view"
+        }
+      ]
+    },
+    {
+      "code": "01",
+      "name": "01_求职与考公档案（本人主线 + 01A朋友隔离区）",
+      "folder_id": "1SmNwWbZ7kEJExxuu9fxBeLhofebCRHBo",
+      "url": "https://drive.google.com/drive/folders/1SmNwWbZ7kEJExxuu9fxBeLhofebCRHBo",
+      "items_count": 8,
+      "summary": "本人秋招/选调/省考/生信研发岗备战台账；外部朋友代管求职材料已严格物理隔离于 01A 折叠区",
+      "concrete_items": [
+        {
+          "name": "Notion · 秋季专场双选会 & 抗菌肽/分子模拟研发岗追踪卡",
+          "kind": "本人主线",
+          "updated": "2026-10-28",
+          "url": "https://www.notion.so/407186af12d381a8ab89d72fb36c7db3"
+        },
+        {
+          "name": "Notion · 2027 国考 / 省考 / 选调生报考核验与时间表",
+          "kind": "本人考公",
+          "updated": "2026-10-28",
+          "url": "https://www.notion.so/407186af12d381eea0d7c43e5cae8ab9"
+        },
+        {
+          "name": "01_求职与考公档案（云盘主目录）",
+          "kind": "云盘目录",
+          "updated": "2026-10-28",
+          "url": "https://drive.google.com/drive/folders/1SmNwWbZ7kEJExxuu9fxBeLhofebCRHBo"
+        }
+      ],
+      "isolated_friend_items": [
+        {
+          "name": "01A_朋友求职参考归档_隔离区（6份逐字稿与简历模板）",
+          "kind": "隔离目录",
+          "updated": "2026-10-28",
+          "url": "https://drive.google.com/drive/folders/1zBZOTpblp51lNBuzvXglLOnbe8lzT9_O"
+        },
+        {
+          "name": "福州 2027 · 求职 / 租房 / 应届身份（朋友代存专题包）",
+          "kind": "隔离目录",
+          "updated": "2026-10-27",
+          "url": "https://drive.google.com/drive/folders/1ty2VWc50at_UrFQ0PjY8zUJRidLvZsG_"
+        },
+        {
+          "name": "02 目标单位投递追踪表（10大岗位全量数据 · 朋友代存）",
+          "kind": "Google Sheet",
+          "updated": "2026-10-27",
+          "url": "https://docs.google.com/spreadsheets/d/17iaSpXaliAv88Zikd_CH4Jokh_cH1Iu2aCVvgLgaA5w/edit"
+        }
+      ]
+    },
+    {
+      "code": "02",
+      "name": "02_科研与学术论文（0amp抗菌肽 · Aβ · 宏基因组）",
+      "folder_id": "1t0ALWeRlE2iO0_Z4abrJlxaLsQRZm7wu",
+      "url": "https://drive.google.com/drive/folders/1t0ALWeRlE2iO0_Z4abrJlxaLsQRZm7wu",
+      "items_count": 14,
+      "summary": "硕士核心课题实盘成果：0amp R180~R211 候选肽全量结果、Aβ 促聚集机制、cFMD2500 发酵宏基因组与分子对接包",
+      "concrete_items": [
+        {
+          "name": "09_R209-R211_执行归档_2026-10-27（最新受体盘点与整合图6）",
+          "kind": "最新批次",
+          "updated": "2026-10-27",
+          "url": "https://drive.google.com/drive/folders/1BqWwC_cWDNaO_G6w3jclkecd-5M77wWJ"
+        },
+        {
+          "name": "08_R203-R208_执行归档_2026-10-26（候选肽深度筛选）",
+          "kind": "实验归档",
+          "updated": "2026-10-26",
+          "url": "https://drive.google.com/drive/folders/1G82ui38B9mBhvT6MndgT19Rxm8DejNmZ"
+        },
+        {
+          "name": "07_R191-R202_全量总结_2026-10-26",
+          "kind": "阶段总结",
+          "updated": "2026-10-26",
+          "url": "https://drive.google.com/drive/folders/1MFSsmo5SwhOVf-wLv77ij6VXFnfCS0Cl"
+        },
+        {
+          "name": "06_R183-R185_修复与论文总表_2026-10-21",
+          "kind": "论文总表",
+          "updated": "2026-10-21",
+          "url": "https://drive.google.com/drive/folders/1Y92aBWSAAo1SrLKzm4OsGLTQCTy-nzRa"
+        },
+        {
+          "name": "0amp_Gemini独立分析与候选清单_2026-10-16",
+          "kind": "候选肽库",
+          "updated": "2026-10-16",
+          "url": "https://drive.google.com/drive/folders/1MRfNcJ7GS8SOxafqR2ohiZZm7L9nTuwy"
+        },
+        {
+          "name": "Aβ促聚集_AChE-PAS_PC12_机制与深度学习补充_v2.1",
+          "kind": "AD 机制专题",
+          "updated": "2026-10-17",
+          "url": "https://drive.google.com/drive/folders/1M0gJuXroZnAmzx2ITtY37tPHyMwYaJWt"
+        },
+        {
+          "name": "PMID39214080_cFMD2500食品宏基因组_益生菌MAG分析结果",
+          "kind": "MAG 生信",
+          "updated": "2026-10-20",
+          "url": "https://drive.google.com/drive/folders/1GvkDfBolok6qcgriwx9avhdGhgnxXrQy"
+        },
+        {
+          "name": "docking_spark_bundle & peptide-ml-main（分子对接与代码包）",
+          "kind": "对接/ML源码",
+          "updated": "2026-08-26",
+          "url": "https://drive.google.com/drive/folders/1j0rqjF8Yt-YLUKl7IW0x81DezBvvftEO"
+        }
+      ]
+    },
+    {
+      "code": "03",
+      "name": "03_个人纪念与爱情媒体素材（💖 联动爱情专属模块）",
+      "folder_id": "1xbJivKsZEmVOnJCRBNkhfOlDHW9L8NWH",
+      "url": "https://drive.google.com/drive/folders/1xbJivKsZEmVOnJCRBNkhfOlDHW9L8NWH",
+      "items_count": 18,
+      "summary": "一二和布布爱情短片、朝朝暮暮恋爱画册、纪念日偏好档案 v4、疗愈方案与专属情头聊天背景（点击左侧『💖 爱情与心意』看完整视图）",
+      "concrete_items": [
+        {
+          "name": "爱情动画短片测试（把甜甜的都分给你 / 陪你等天晴 / 海风把我们吹到一起）",
+          "kind": "4部 MP4 短片",
+          "updated": "2026-10-20",
+          "url": "https://drive.google.com/drive/folders/1JYJyDDXt4M3N3DBdtr7o_aZi5OWN6jGu"
+        },
+        {
+          "name": "朝朝暮暮·恋爱记录.pptx & 情侣记忆案例册 v2.pdf",
+          "kind": "恋爱画册",
+          "updated": "2026-10-19",
+          "url": "https://docs.google.com/presentation/d/1jjZsHQogtO_Ixl2ftAYZBzYp5IkYpAgS/edit"
+        },
+        {
+          "name": "纪念日与偏好档案_修正版v4_20261020.md",
+          "kind": "偏好档案 v4",
+          "updated": "2026-10-20",
+          "url": "https://drive.google.com/file/d/1gH2OHSYaxanoSrkQyzlUyeFwvTNG5nc4/view"
+        },
+        {
+          "name": "带她走出来-SKILL（含冲突决策树）& 聊天关系分析报告完整版.pdf",
+          "kind": "关系锦囊",
+          "updated": "2026-10-19",
+          "url": "https://drive.google.com/file/d/1SfWa-fMz0gGpxAQf1o93p633gIj0zEDy/view"
+        },
+        {
+          "name": "专属抖音聊天背景 & 最终小字大爱心版_1290x2796.png",
+          "kind": "情头与壁纸",
+          "updated": "2026-10-19",
+          "url": "https://drive.google.com/drive/folders/1Losk8a3gKLRarxZ-_W4EaD36VTh0kN6z"
+        }
+      ]
+    },
+    {
+      "code": "04",
+      "name": "04_AI智能体与教程资料（AccioWork · FDE · GitSyncHub）",
+      "folder_id": "1fUVTdrZwv6_tOzfUUAr1kzM_i81WTPR5",
+      "url": "https://drive.google.com/drive/folders/1fUVTdrZwv6_tOzfUUAr1kzM_i81WTPR5",
+      "items_count": 12,
+      "summary": "AccioWork FDE 手搓 Skills 实战教程、小客专家创建图文包、GitSyncHub v4 中文图解与 1688 商家 Skills 全案",
+      "concrete_items": [
+        {
+          "name": "20261024_AccioWork_FDE工程师手搓Skills基站_小客实例标注版",
+          "kind": "FDE 实战包",
+          "updated": "2026-10-24",
+          "url": "https://drive.google.com/drive/folders/1tknxPed1A_J56R014Ob7rwcMrd_nJrxK"
+        },
+        {
+          "name": "20261024_AccioWork_FDE基站_中文截图教程_标注PDF与Skill",
+          "kind": "PDF + Skill",
+          "updated": "2026-10-24",
+          "url": "https://drive.google.com/drive/folders/1RO7jwZJ8TP7tlqXvzz1mMz0Okei42HmD"
+        },
+        {
+          "name": "20261024_AccioWork_小客专家创建中文教程_截图版",
+          "kind": "图文教程",
+          "updated": "2026-10-24",
+          "url": "https://drive.google.com/drive/folders/10TfV8cnMaGTyKre1kjVcu1JBq-c1PuKQ"
+        },
+        {
+          "name": "20261024_1620_Arena_GitSyncHubv4_中文图解与FDE使用教程",
+          "kind": "基座教程",
+          "updated": "2026-10-24",
+          "url": "https://drive.google.com/drive/folders/11qCBaBxJXzXgzwwaOlo08OJB8OQUyCgg"
+        },
+        {
+          "name": "20261021_0904_Arena_AWB交付汇总（含 1688 商家手搓 Skills 全案 V2）",
+          "kind": "AWB 全案",
+          "updated": "2026-10-21",
+          "url": "https://drive.google.com/drive/folders/18cr4cjlKonxf_K0sNuGjrGzNjtE-wglu"
+        },
+        {
+          "name": "Arena 工作区与自定义 Skills 仓库（含情头壁纸/电商文案 Skill）",
+          "kind": "Skills 库",
+          "updated": "2026-10-19",
+          "url": "https://drive.google.com/drive/folders/1qsYhfCyNsZusueTAsxPQC0w46ufmgsbh"
+        }
+      ]
+    },
+    {
+      "code": "05",
+      "name": "05_电商视觉与潮玩设计归档（POP MART DIMOO · 1688）",
+      "folder_id": "1ij_V-6EkpIwUPQX283-6NLDhR5e7PobL",
+      "url": "https://drive.google.com/drive/folders/1ij_V-6EkpIwUPQX283-6NLDhR5e7PobL",
+      "items_count": 6,
+      "summary": "POP MART DIMOO 盲盒手办详情长图、云眠系列视觉套件 v1~v3 与 99 REA · 1688 商品图包成品库",
+      "concrete_items": [
+        {
+          "name": "DIMOO 长图 官方素材版 2026-10-22",
+          "kind": "官方长图",
+          "updated": "2026-10-22",
+          "url": "https://drive.google.com/drive/folders/1hjO8T9BpTtMyNFCS1CgKh7bF3YPi3wiN"
+        },
+        {
+          "name": "DIMOO 盲盒手办 商品视觉套件 2026-10-22（含 JevHarness 决策记录）",
+          "kind": "视觉套件",
+          "updated": "2026-10-22",
+          "url": "https://drive.google.com/drive/folders/1mp7uU2XE_UBRBUCrLvV7KNkB9TjZoN6o"
+        },
+        {
+          "name": "POP MART DIMOO 视觉包 v3（细节在图上·纯拼接）",
+          "kind": "视觉包 v3",
+          "updated": "2026-10-22",
+          "url": "https://drive.google.com/drive/folders/1wpOhMbTEx9-dMNA7EtqrQjKbmqhugH-e"
+        },
+        {
+          "name": "POP MART DIMOO 电商视觉包 v2（图片拼接版）",
+          "kind": "视觉包 v2",
+          "updated": "2026-10-22",
+          "url": "https://drive.google.com/drive/folders/1nQOwK2G1QhuhEES8eNxoRPqY3eD8EjrY"
+        },
+        {
+          "name": "DIMOO 云眠系列 · 电商视觉包 v1.0（2026-10-22）",
+          "kind": "云眠 v1.0",
+          "updated": "2026-10-22",
+          "url": "https://drive.google.com/drive/folders/12WXOLeRCcwP_3Y9wCc0Kb4UN5OYUgFo1"
+        },
+        {
+          "name": "99 REA 交付 · 1688 图包",
+          "kind": "1688 交付",
+          "updated": "2026-10-15",
+          "url": "https://drive.google.com/drive/folders/1r98UzF1iUw6a8J3aO_Qse0w9XMX90On0"
+        }
+      ]
+    }
+  ],
+  "career_tracks": [
+    {
+      "person": "本人主线（0710 生物学学术硕士 · 生信与分子模拟方向）",
+      "scope": "owner",
+      "background": "0710 生物学学术型硕士 · 深度学习抗菌肽挖掘 (0amp) / 476 样本宏基因组组装 / GROMACS 分子动力学",
+      "targets": "秋季校园双选会、选调生/省考/国考/事业编、生物医药 AI 算法与计算结构生物学研发岗",
+      "local_dir": "本地职业规划目录 (离线私密保护 · 已关联 Notion 双选会卡片)",
+      "status": "本人主线推进中"
+    },
+    {
+      "person": "AI 智能体与潮玩电商视觉工程线（FDE / Skills / 多账号研发）",
+      "scope": "collab",
+      "background": "AccioWork FDE 手搓 Skills、1688/POP MART 电商视觉长图流水线、JobBeacon 算力信标开源项目 (Apache-2.0)",
+      "targets": "云盘 04/05 实盘交付包沉淀、多模型额度自动消化、三账号隔离研发",
+      "local_dir": "Google Drive 04 & 05 分区 · Host github-hukeying (:443)",
+      "status": "18 套成品已归档"
+    },
+    {
+      "person": "朋友代管求职归档（已严格物理隔离）",
+      "scope": "friend_isolated",
+      "background": "外部朋友个人求职参考材料（仅代存云盘 01/01A 隔离目录，与本人求职简历与统计完全物理隔离）",
+      "targets": "独立封存于云盘 01A 折叠隔离区，绝不混入本人投递台账与简历生成",
+      "local_dir": "Google Drive -> 01/01A_朋友求职参考归档_隔离区",
+      "status": "已隔离折叠"
+    }
+  ],
+  "exam_milestones": [
+    {
+      "date": "2026-11-05",
+      "title": "2027 届秋季校园双选会专场 & 本人生信/抗菌肽研发岗简历核验",
+      "category": "秋季校招",
+      "calendar_synced": true
+    },
+    {
+      "date": "2026-11-29",
+      "title": "2027 国家公务员考试（国考）公共科目笔试冲刺（行测 + 申论）",
+      "category": "国考笔试",
+      "calendar_synced": true
+    },
+    {
+      "date": "2026-12-13",
+      "title": "2027 选调生 / 省级公务员考试笔试冲刺提醒",
+      "category": "选调/省考",
+      "calendar_synced": true
+    },
+    {
+      "date": "2027-01-10",
+      "title": "硕士学位论文初稿合龙 & Lark-Formatter 34 模块一键排版核验",
+      "category": "学位论文",
+      "calendar_synced": true
+    },
+    {
+      "date": "2027-03-14",
+      "title": "2027 春季事业单位统考笔试 & 硕士论文盲审定稿窗口",
+      "category": "事业编/盲审",
+      "calendar_synced": true
+    }
+  ],
+  "identity_cards_redacted": [
+    {
+      "holder": "本人学术与算力主档（已隐藏学校与姓名）",
+      "category": "学籍与超算算力脱敏索引",
+      "masked_summary": "0710 生物学硕士 · 超算 mu01 (cu 64核 / fat1 96核1T) · 主控号与学术号双通道在线",
+      "storage_hint": "身份证/手机号/学号/学校原件仅存本机离线目录，仓库与面板 100% 零明文"
+    },
+    {
+      "holder": "三账号分舱隔离凭据域",
+      "category": "mqgg5630 · shaohuawen03 · hukeying85",
+      "masked_summary": "DPAPI 静默凭据助手 + SSH 443 独立密钥映射，按机按仓物理分舱监控，零串号零弹窗",
+      "storage_hint": "OAuth 令牌由本机 Windows DPAPI Keyring 托管，不落盘、不串号"
+    },
+    {
+      "holder": "考公 / 选调 / 事业编通用核验包",
+      "category": "本人报考材料核对清单",
+      "masked_summary": "学信网学籍在线验证报告 · 毕业生就业推荐表 · 蓝白底证件照(358x441) · 成绩单盖章件",
+      "storage_hint": "报名截止前 72 小时核验学信网验证码有效期"
+    },
+    {
+      "holder": "朋友代管档案（隔离区）",
+      "category": "外部独立隔离索引",
+      "masked_summary": "已完全移入云盘 01/01A 隔离目录并默认折叠，姓名与院校信息在面板中全部隐去",
+      "storage_hint": "遵循隐私最小化原则，不与本人数据交叉"
+    }
+  ],
+  "commemorations": [
+    {
+      "tag": "💖 LOVE · 朝朝与暮暮",
+      "title": "爱情动画短片 · 恋爱画册 · 纪念日偏好档案 v4 实盘归档",
+      "detail": "云盘 03 分区 18 项纪念影像与关系锦囊 + 本机离线 JevChat 情感军师与私密目录只读守护",
+      "protection": "LOVE_PRIVACY_GUARDED"
+    },
+    {
+      "tag": "🧬 RESEARCH · 0amp R211",
+      "title": "抗菌肽深度学习挖掘与分子动力学课题里程碑",
+      "detail": "476 样本肠道宏基因组组装 -> R180~R211 候选肽库 -> mu01 全原子 MD & 台式机 Martini 3 粗粒化 -> 论文一键排版",
+      "protection": "ACADEMIC_MILESTONE"
+    },
+    {
+      "tag": "🚀 SYSTEM · Arena Desk v2.5",
+      "title": "dsh-video-skin 原生视频开机动画 + 三账号分舱监控 + 手机扫码装 App 贯通",
+      "detail": "零闪窗静默守护 · 高透动态壁纸 · 爱情模块实盘直连 · 手机端局域网/Cloudflare 扫码即装",
+      "protection": "SYSTEM_MILESTONE"
+    }
+  ]
+}

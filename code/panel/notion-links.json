@@ -1,0 +1,18 @@
+{
+  "home": "https://app.notion.com/p/407186af12d381cf97eeebf4ec37f0c9",
+  "personal_hub": "https://www.notion.so/407186af12d381eea0d7c43e5cae8ab9",
+  "coord_spec": "https://www.notion.so/407186af12d381dc8034ed7730a9716d",
+  "drive_index": "https://docs.google.com/document/d/1laSOzO-cYvkLydtp0DiUJNNAXGrz0CgW-zlpm83gWAU/edit",
+  "job_sheet": "https://docs.google.com/spreadsheets/d/17iaSpXaliAv88Zikd_CH4Jokh_cH1Iu2aCVvgLgaA5w/edit",
+  "sessions": {"database_id":"1081c7cf-56a2-4e2b-af33-9246e1287015","data_source_id":"e4026a06-acca-459f-8815-4872db45a53b"},
+  "tasks": {"database_id":"fa87edb9-fd76-45b4-826c-5929d802b0ee","data_source_id":"b581817d-d6ae-4bab-ad11-debcf0775587"},
+  "software": {"database_id":"ccd877d3-ac92-41da-bfd5-f443402d24e1","data_source_id":"5cb367d1-620b-4b49-ac93-16485908a34c"},
+  "personal_databases": {
+    "jobs_ds": "f2be9e34-b52d-49bf-b52d-7fa4a84d8251",
+    "exams_ds": "865489e1-2bc3-4b11-a9a8-304de2de7320",
+    "identity_ds": "c51171b4-d889-47bd-acd4-58dee4f51d50",
+    "memories_ds": "ecf547f7-404e-4672-a232-e89352595a60"
+  },
+  "linear_issues": ["SDL-5", "SDL-6"],
+  "mode": "on-demand-connector-only"
+}

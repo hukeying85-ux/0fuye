@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="24" y1="16" x2="232" y2="244" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10272B"/>
+      <stop offset="0.52" stop-color="#0B1B22"/>
+      <stop offset="1" stop-color="#071018"/>
+    </linearGradient>
+    <radialGradient id="aur1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(86 72) scale(120)">
+      <stop offset="0" stop-color="#227B68" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#227B68" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="aur2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(178 176) scale(115)">
+      <stop offset="0" stop-color="#1E5C93" stop-opacity="0.52"/>
+      <stop offset="1" stop-color="#1E5C93" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="56" y1="64" x2="200" y2="196" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#D2F898"/>
+      <stop offset="0.5" stop-color="#52ECBE"/>
+      <stop offset="1" stop-color="#5ED0FF"/>
+    </linearGradient>
+    <linearGradient id="prism" x1="128" y1="74" x2="128" y2="172" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E6FFB8"/>
+      <stop offset="0.55" stop-color="#6AF2C8"/>
+      <stop offset="1" stop-color="#62D2FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="14" y="14" width="228" height="228" rx="54" fill="url(#bg)"/>
+  <rect x="14" y="14" width="228" height="228" rx="54" fill="url(#aur1)"/>
+  <rect x="14" y="14" width="228" height="228" rx="54" fill="url(#aur2)"/>
+  <rect x="15.5" y="15.5" width="225" height="225" rx="52.5" stroke="#9EF5DC" stroke-opacity="0.26" stroke-width="3"/>
+  <circle cx="128" cy="128" r="66" stroke="url(#ring)" stroke-width="6.5" stroke-opacity="0.86"/>
+  <path d="M128 83L90 159M128 83L166 159M103 136H153" stroke="url(#prism)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="124" r="9.5" fill="#FFFFFF"/>
+  <circle cx="128" cy="62" r="9.5" fill="#D2F898"/>
+  <circle cx="128" cy="62" r="4" fill="#FFFFFF"/>
+  <circle cx="71" cy="161" r="8.5" fill="#52ECBE"/>
+  <circle cx="71" cy="161" r="3.6" fill="#FFFFFF"/>
+  <circle cx="185" cy="161" r="8.5" fill="#5ED0FF"/>
+  <circle cx="185" cy="161" r="3.6" fill="#FFFFFF"/>
+</svg>

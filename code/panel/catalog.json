@@ -1,0 +1,387 @@
+{
+  "software_catalog": [
+    {
+      "id": "lark-formatter",
+      "name": "Lark-Formatter 毕业论文无头排版引擎",
+      "category": "科研与生信",
+      "badge": "国标规范 · 一键改格式",
+      "version_hint": "0.21.1 (shaohuawen03-cyber)",
+      "method": "builtin-lark",
+      "spec": "shaohuawen03-cyber/Lark-Formatter@v0.21.1",
+      "summary": "基于 python-docx + lxml 的 34 模块无头排版流水线，支持学术型硕士学位论文标准规范与任意母版样式克隆，一键输出终稿、红蓝修订对比稿与审计报告。",
+      "probes": [
+        "E:/0writing/Lark-Formatter/src/engine/pipeline.py",
+        "E:/Miniforge3/envs/lark/python.exe"
+      ],
+      "cli": ""
+    },
+    {
+      "id": "pymol-open-source",
+      "name": "PyMOL 分子三维可视化（开源完整版）",
+      "category": "科研与生信",
+      "badge": "推荐 · 免商业授权",
+      "version_hint": "3.1.0 (conda-forge)",
+      "method": "conda",
+      "spec": "conda-forge::pymol-open-source",
+      "winget_fallback": "Schrodinger.PyMOL",
+      "summary": "结构生物学与多肽/蛋白分子对接首选工具。通过 Conda-Forge 安装开源版（含完整光线追踪、Python API 与桌面快捷方式），无需付费 License。",
+      "probes": [
+        "E:/0apps/PyMOL/Library/bin/pymol.exe",
+        "E:/0apps/PyMOL/Scripts/pymol.exe",
+        "D:/Pymol/PyMOLWin.exe",
+        "D:/Pymol/pymol.exe",
+        "E:/Pymol/PyMOLWin.exe",
+        "E:/Miniforge3/envs/pymol/Library/bin/pymol.exe",
+        "E:/Miniforge3/envs/pymol/Scripts/pymol.exe",
+        "E:/miniconda3/envs/pymol/Library/bin/pymol.exe"
+      ],
+      "cli": "pymol"
+    },
+    {
+      "id": "gh-cli",
+      "name": "GitHub CLI (gh) · 三账号桥接",
+      "category": "开发与同步",
+      "badge": "mqgg + shaohua + hukeying",
+      "version_hint": "2.x",
+      "method": "winget",
+      "spec": "GitHub.cli",
+      "summary": "GitHub 官方命令行与 URL 级免弹窗凭据助手，支持 mqgg5630-cyber、shaohuawen03-cyber 与 hukeying85-ux 三账号零冲突并存。",
+      "probes": [
+        "C:/Program Files/GitHub CLI/gh.exe",
+        "E:/0apps/GitHubCLI/bin/gh.exe"
+      ],
+      "cli": "gh"
+    },
+    {
+      "id": "miniforge3",
+      "name": "Miniforge3 (Conda + Mamba)",
+      "category": "科研与生信",
+      "badge": "生信环境底座",
+      "version_hint": "24.x",
+      "method": "winget",
+      "spec": "CondaForge.Miniforge3",
+      "summary": "预置 Conda-Forge 源与极速 C++ 解算器 Mamba，用于一键部署 PyMOL、Lark-Formatter (lark 环境)、BioPython 等。",
+      "probes": [
+        "E:/Miniforge3/Scripts/mamba.exe",
+        "E:/Miniforge3/Scripts/conda.exe",
+        "E:/miniconda3/Scripts/conda.exe",
+        "E:/spider/Scripts/conda.exe"
+      ],
+      "cli": "conda"
+    },
+    {
+      "id": "uv",
+      "name": "uv 极速 Python 包与环境管理",
+      "category": "开发与同步",
+      "badge": "Rust 加速",
+      "version_hint": "0.5+",
+      "method": "winget",
+      "spec": "astral-sh.uv",
+      "summary": "比传统 pip 快 10-100 倍的并行下载与虚拟环境工具，在代理波动环境下也能稳定校验 SHA256。",
+      "probes": [
+        "E:/0apps/jev-chat-windows/uv/uv.exe"
+      ],
+      "cli": "uv"
+    },
+    {
+      "id": "tailscale",
+      "name": "Tailscale 异地组网",
+      "category": "远程与组网",
+      "badge": "跨电脑直连",
+      "version_hint": "1.7x+",
+      "method": "winget",
+      "spec": "Tailscale.Tailscale",
+      "summary": "零配置 WireGuard 虚拟局域网，用于笔记本与实验室台式机（desktop-ieudgs5）跨网段 SSH/RDP 互联。",
+      "probes": [
+        "E:/Tailscale/tailscale.exe",
+        "C:/Program Files/Tailscale/tailscale.exe"
+      ],
+      "cli": "tailscale"
+    },
+    {
+      "id": "git",
+      "name": "Git for Windows",
+      "category": "开发与同步",
+      "badge": "基座核心",
+      "version_hint": "2.4x+",
+      "method": "winget",
+      "spec": "Git.Git",
+      "summary": "内置 Git Bash、OpenSSH (Port 443 隧道) 与 URL 作用域凭据路由，支撑 git-sync-hub 15 秒无弹窗轮询。",
+      "probes": [
+        "E:/hermes/git/cmd/git.exe",
+        "C:/Program Files/Git/cmd/git.exe"
+      ],
+      "cli": "git"
+    },
+    {
+      "id": "nodejs",
+      "name": "Node.js LTS",
+      "category": "开发与同步",
+      "badge": "前端与工具链",
+      "version_hint": "22.x",
+      "method": "winget",
+      "spec": "OpenJS.NodeJS.LTS",
+      "summary": "JavaScript 运行时，支持 skills CLI、MCP 工具检查及前端构建。",
+      "probes": [
+        "E:/hermes/node/node.exe",
+        "C:/Program Files/nodejs/node.exe"
+      ],
+      "cli": "node"
+    },
+    {
+      "id": "chimerax",
+      "name": "UCSF ChimeraX / 结构分析套件",
+      "category": "科研与生信",
+      "badge": "冷冻电镜 / AlphaFold",
+      "version_hint": "1.8+",
+      "method": "conda",
+      "spec": "conda-forge::openbabel",
+      "winget_fallback": "RBVI.ChimeraX",
+      "summary": "蛋白结构与配体格式转换及三维可视化辅助工具链（OpenBabel / ChimeraX 检测与安装）。",
+      "probes": [
+        "C:/Program Files/ChimeraX/bin/ChimeraX.exe",
+        "E:/0apps/ChimeraX/bin/ChimeraX.exe",
+        "D:/ChimeraX/bin/ChimeraX.exe"
+      ],
+      "cli": "chimerax"
+    },
+    {
+      "id": "zotero",
+      "name": "Zotero 7 文献管理",
+      "category": "科研与生信",
+      "badge": "论文写作",
+      "version_hint": "7.0+",
+      "method": "winget",
+      "spec": "DigitalScholar.Zotero",
+      "summary": "开源学术文献与 PDF 批注管理工具，可配合 cnki-skills 与 Notion 科研模板归档。",
+      "probes": [
+        "C:/Program Files/Zotero/zotero.exe",
+        "E:/Zotero/zotero.exe",
+        "D:/Zotero/zotero.exe"
+      ],
+      "cli": "zotero"
+    },
+    {
+      "id": "vscode",
+      "name": "Visual Studio Code",
+      "category": "开发与同步",
+      "badge": "代码编辑器",
+      "version_hint": "1.9x+",
+      "method": "winget",
+      "spec": "Microsoft.VisualStudioCode",
+      "summary": "轻量代码与远程 SSH 开发环境（支持直连 WSL 与 HPC mu01）。",
+      "probes": [
+        "C:/Users/Public/Programs/Microsoft VS Code/Code.exe",
+        "E:/Microsoft VS Code/Code.exe"
+      ],
+      "cli": "code"
+    },
+    {
+      "id": "7zip",
+      "name": "7-Zip 压缩工具",
+      "category": "系统工具",
+      "badge": "轻量必备",
+      "version_hint": "24.x",
+      "method": "winget",
+      "spec": "7zip.7zip",
+      "summary": "高压缩率归档解压工具，支持 .7z / .tar.gz / .xz 科研数据集高速解压。",
+      "probes": [
+        "C:/Program Files/7-Zip/7z.exe",
+        "E:/7-Zip/7z.exe"
+      ],
+      "cli": "7z"
+    },
+    {
+      "id": "desktop-pet",
+      "name": "独立桌面宠物 (dsh-pet WebM 无聊天版)",
+      "category": "桌面美化",
+      "badge": "SHA256 已校验",
+      "version_hint": "4.4.0",
+      "method": "builtin-pet",
+      "spec": "MerZlin/dsh-pet-indesktop@v4.4.0",
+      "summary": "脱离 DeepSeek 运行时的纯本地高清 WebM 桌面陪伴宠物，支持 Ctrl+Alt+H 与面板一键隐藏/显示。",
+      "probes": [
+        "E:/0apps/DSHPet/dsh-pet-standalone-webm.exe"
+      ],
+      "cli": ""
+    },
+    {
+      "id": "notion-desktop",
+      "name": "Notion 桌面客户端",
+      "category": "效率与生态",
+      "badge": "实例台账",
+      "version_hint": "7.41+",
+      "method": "winget",
+      "spec": "Notion.Notion",
+      "summary": "本机 Notion 客户端（数据目录独立在 E 盘），承载基座台账与求职/考公/身份/纪念四大数据库。",
+      "probes": [
+        "E:/Notion/Notion.exe"
+      ],
+      "cli": ""
+    }
+  ],
+  "connectors": [
+    {
+      "slug": "github",
+      "name": "GitHub · 三账号桥接",
+      "icon": "GH",
+      "accent": "#58a6ff",
+      "arena_status": "native",
+      "status_label": "原生已打通 (3 账号)",
+      "account_hint": "mqgg5630-cyber (默认) · shaohuawen03-cyber · hukeying85-ux",
+      "capabilities": [
+        "Arena 沙盒直推 mqgg5630-cyber/0fuye 私人仓，git-sync-hub 每 15s 自动同步",
+        "URL 作用域 git-credential + Port 443 SSH Host 别名（零切换支持三账号并存）",
+        "内置 Chrome Profile 1 ('keying') 一键完成 hukeying85-ux OAuth 授权与公钥上传"
+      ],
+      "url": "https://github.com/mqgg5630-cyber/0fuye",
+      "setup_guide": "在「GitHub 认证」标签页可实时查看三账号状态，或一键唤起 Chrome Profile 1 绑定第三协作账号。",
+      "prompt_template": "检查 mqgg5630-cyber、shaohuawen03-cyber 与 hukeying85-ux 三账号 Git/SSH 状态并验证 0fuye 同步。"
+    },
+    {
+      "slug": "notion",
+      "name": "Notion",
+      "icon": "NT",
+      "accent": "#f59e0b",
+      "arena_status": "enabled",
+      "status_label": "已连接 · 7 张库在线",
+      "account_hint": "基座控制台 + 个人事务总控台（求职12 / 考公8 / 脱敏身份5 / 纪念6）",
+      "capabilities": [
+        "已建成《个人事务与多会话协作总控台》(4 张内联数据库共 31 条结构化记录)",
+        "已写入《多会话零冲突协作协议与技术规范》专页",
+        "与会话台账、运行任务记录、软件安装记录按同步键幂等联动"
+      ],
+      "url": "https://www.notion.so/407186af12d381eea0d7c43e5cae8ab9",
+      "setup_guide": "已开启并完成结构化建库，点击「打开链接」即可直达总控台。",
+      "prompt_template": "在 Notion 个人事务总控台更新最新秋招投递进展与考公复习打卡状态。"
+    },
+    {
+      "slug": "google_drive",
+      "name": "Google Drive",
+      "icon": "GD",
+      "accent": "#34d399",
+      "arena_status": "enabled",
+      "status_label": "已归档 · 01..05 整洁根目录",
+      "account_hint": "根目录 23 个散落文件已无损归入 01..05 五大分类文件夹（100% 保留 File ID）",
+      "capabilities": [
+        "00_Google云盘归档总索引 + 01求职考公 / 02个人纪念 / 03身份财务 / 04科研生信 / 05AI配置",
+        "原位移动保留全部历史分享链接与 File ID，零误删、零重复副本",
+        "朋友代管求职参考材料已单独物理隔离于 01/01A 子目录"
+      ],
+      "url": "https://drive.google.com/drive/my-drive",
+      "setup_guide": "已完成全量无损归档整理，可在「生涯与云归档」页按目录一键直达。",
+      "prompt_template": "查看 Google Drive 00_Google云盘归档总索引，并将新生成的论文终稿归档至 04_科研论文与生信项目。"
+    },
+    {
+      "slug": "google_docs",
+      "name": "Google Docs",
+      "icon": "DC",
+      "accent": "#60a5fa",
+      "arena_status": "enabled",
+      "status_label": "已连接并启用",
+      "account_hint": "已创建《00_Google云盘归档总索引》及备战策略文档",
+      "capabilities": [
+        "原生创建与精细编辑云端索引文档、个人简历草稿与跨机器部署手册",
+        "支持与本地 Lark-Formatter 毕业论文排版流水线联动"
+      ],
+      "url": "https://docs.google.com/document/d/1laSOzO-cYvkLydtp0DiUJNNAXGrz0CgW-zlpm83gWAU/edit",
+      "setup_guide": "已连接启用，可直接点击打开《00_Google云盘归档总索引》。",
+      "prompt_template": "读取 Google Docs 中的备战策略文档，提炼下周重点岗位清单同步至 Notion。"
+    },
+    {
+      "slug": "google_sheets",
+      "name": "Google Sheets",
+      "icon": "GS",
+      "accent": "#10b981",
+      "arena_status": "enabled",
+      "status_label": "已连接 · 投递表已更新",
+      "account_hint": "《2027 校招/选调/医院/药企投递追踪总表》已写入 10 岗明细",
+      "capabilities": [
+        "结构化维护目标单位、岗位代码、报名截止日、笔面试状态与薪资区间",
+        "支持自动列宽对齐、条件格式与 SQL 风格聚合查询"
+      ],
+      "url": "https://docs.google.com/spreadsheets/d/17iaSpXaliAv88Zikd_CH4Jokh_cH1Iu2aCVvgLgaA5w/edit",
+      "setup_guide": "已连接并完成投递追踪表数据回填。",
+      "prompt_template": "查询 Google Sheets 投递追踪总表中近期截止的目标岗位并生成提醒。"
+    },
+    {
+      "slug": "google_calendar",
+      "name": "Google Calendar",
+      "icon": "CL",
+      "accent": "#2dd4bf",
+      "arena_status": "enabled",
+      "status_label": "已连接 · 5 大里程碑已排程",
+      "account_hint": "已写入双选会(11/05)、国考(11/29)、选调核验(12/01)、论文初稿(01/10)、盲审(03/25)",
+      "capabilities": [
+        "自动同步秋招双选会、2027 国考笔试、省考报名与硕士论文关键截稿日",
+        "支持空闲时段智能推荐与多日历冲突检测"
+      ],
+      "url": "https://calendar.google.com",
+      "setup_guide": "已连接启用并写入 5 个关键日程节点。",
+      "prompt_template": "查看我 11 月的 Google Calendar 关键考试与秋招日程，规划每周复习与科研时间块。"
+    },
+    {
+      "slug": "linear",
+      "name": "Linear",
+      "icon": "LN",
+      "accent": "#818cf8",
+      "arena_status": "enabled",
+      "status_label": "已连接 · SDL-5 / SDL-6 在线",
+      "account_hint": "Team SDL · 已跟踪多会话协作架构(SDL-5)与毕业论文一键排版(SDL-6)",
+      "capabilities": [
+        "工程化追踪 Arena Desk v2.1、多会话租约锁与 Lark-Formatter 集成研发进度",
+        "与 GitHub 分支提交及 Notion 任务记录双向对应"
+      ],
+      "url": "https://linear.app",
+      "setup_guide": "已连接启用并创建 SDL-5、SDL-6 核心研发任务。",
+      "prompt_template": "更新 Linear 中 SDL-5 与 SDL-6 的验收结果，并创建下一阶段功能迭代 Issue。"
+    },
+    {
+      "slug": "gmail",
+      "name": "Gmail",
+      "icon": "GM",
+      "accent": "#f87171",
+      "arena_status": "enabled",
+      "status_label": "已连接 · 隐私邮箱已脱敏保护",
+      "account_hint": "已核验邮箱连通性 · 支持笔面试通知与审稿邮件检索",
+      "capabilities": [
+        "快速检索校招笔试/面试通知、导师邮件与期刊审稿信",
+        "支持一键生成回信草稿（发送前人工确认，安全可控）"
+      ],
+      "url": "https://mail.google.com",
+      "setup_guide": "已连接启用。",
+      "prompt_template": "检索 Gmail 中最近 14 天包含笔试、面试或 Offer 关键词的邮件并汇总。"
+    },
+    {
+      "slug": "google_slides",
+      "name": "Google Slides",
+      "icon": "SL",
+      "accent": "#fbbf24",
+      "arena_status": "enabled",
+      "status_label": "已连接并启用",
+      "account_hint": "支持组会汇报、中期考核与答辩 PPT 自动生成",
+      "capabilities": [
+        "基于论文大纲与实验图表快速生成结构化答辩/组会演示文稿",
+        "支持嵌入 Google Sheets 图表与高清机制示意图"
+      ],
+      "url": "https://slides.google.com",
+      "setup_guide": "已连接启用。",
+      "prompt_template": "根据我的硕士论文研究框架创建一份 10 页组会进展汇报 Google Slides。"
+    },
+    {
+      "slug": "dropbox",
+      "name": "Dropbox",
+      "icon": "DB",
+      "accent": "#38bdf8",
+      "arena_status": "enabled",
+      "status_label": "已连接 · 备用云盘就绪",
+      "account_hint": "已核验连通（当前根目录为空，可作为跨国协作冷备仓）",
+      "capabilities": [
+        "提供独立于 Google 生态的第二云端冷备与外部共享链接通道"
+      ],
+      "url": "https://www.dropbox.com",
+      "setup_guide": "已连接启用。",
+      "prompt_template": "在 Dropbox 创建 /ArenaDesk-Backup 目录并归档关键配置文件。"
+    }
+  ]
+}

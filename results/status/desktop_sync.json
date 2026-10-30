@@ -1,0 +1,27 @@
+{
+    "schema":  "cgmd.desksync.v1",
+    "synced_at":  "2026-10-29T16:24:46+08:00",
+    "host":  "DESKTOP-IEUDGS5",
+    "repo":  "C:\\cgmd\\0fuye",
+    "branch":  "arena/32cd826e-0fuye",
+    "from_sha":  "ce937176990797ffa266de4a8b987ed0578aa5de",
+    "to_sha":  "ce937176990797ffa266de4a8b987ed0578aa5de",
+    "incoming":  0,
+    "desk":  {
+                 "requested":  true,
+                 "skipped":  false,
+                 "ok":  true,
+                 "version":  "2.8.0",
+                 "exe":  "C:\\0apps\\ArenaDesk\\ArenaDesk.exe",
+                 "tasks":  {
+
+                           }
+             },
+    "selfcheck":  {
+                      "ran":  true,
+                      "overall":  "warn",
+                      "exit_code":  6,
+                      "summary":  "15 pass / 3 warn / 0 fail"
+                  },
+    "seconds":  47.7
+}

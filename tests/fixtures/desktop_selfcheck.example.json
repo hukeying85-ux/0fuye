@@ -1,0 +1,167 @@
+{
+  "schema": "cgmd.selfcheck.v1",
+  "checked_at": "2026-10-29T09:15:42+08:00",
+  "overall": "warn",
+  "exit_code": 6,
+  "config": "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
+  "host": {
+    "computer": "DESKTOP-CGMD",
+    "user": "cgmd",
+    "powershell": "5.1.22621.4391",
+    "os": "Microsoft Windows 11 Pro",
+    "repo": "C:\\cgmd\\0fuye",
+    "branch": "arena/32cd826e-0fuye",
+    "wsl_distro": "Ubuntu",
+    "gpu_id": 0
+  },
+  "versions": {
+    "gromacs": "2024.3",
+    "nvidia": "NVIDIA GeForce RTX 4090, 24564 MiB",
+    "python": "3.11.9",
+    "vermouth": "0.15.1",
+    "mdanalysis": "2.8.0",
+    "matplotlib": "3.9.2",
+    "martini3": "/home/cgmd/martini3"
+  },
+  "summary": {
+    "checks": 18,
+    "passed": 17,
+    "warnings": 1,
+    "failed": 0,
+    "seconds": 18.4
+  },
+  "checks": [
+    {
+      "id": "repo",
+      "title": "repository clone",
+      "status": "pass",
+      "detail": "C:\\cgmd\\0fuye",
+      "seconds": 0.01
+    },
+    {
+      "id": "origin",
+      "title": "origin lock",
+      "status": "pass",
+      "detail": "https://github.com/hukeying85-ux/0fuye.git",
+      "seconds": 0.09
+    },
+    {
+      "id": "branch",
+      "title": "branch synchronisation",
+      "status": "pass",
+      "detail": "arena/32cd826e-0fuye @ d7f9a18 (ahead 0, behind 0)",
+      "seconds": 1.7
+    },
+    {
+      "id": "creds",
+      "title": "git credentials",
+      "status": "pass",
+      "detail": "CGMD-Engine / store",
+      "seconds": 0.05
+    },
+    {
+      "id": "wsl",
+      "title": "WSL2 distro",
+      "status": "pass",
+      "detail": "Ubuntu | Ubuntu 24.04.1 LTS | 16 cores | 62.6 GB RAM",
+      "seconds": 2.3
+    },
+    {
+      "id": "gpu",
+      "title": "CUDA device",
+      "status": "pass",
+      "detail": "NVIDIA GeForce RTX 4090, 24564 MiB",
+      "seconds": 0.0
+    },
+    {
+      "id": "gromacs",
+      "title": "GROMACS + CUDA",
+      "status": "pass",
+      "detail": "GROMACS 2024.3 (GPU support: CUDA)",
+      "seconds": 0.0
+    },
+    {
+      "id": "martini3",
+      "title": "Martini 3 force field",
+      "status": "pass",
+      "detail": "/home/cgmd/martini3",
+      "seconds": 0.0
+    },
+    {
+      "id": "python",
+      "title": "python packages",
+      "status": "pass",
+      "detail": "python 3.11.9 | vermouth 0.15.1 | MDAnalysis 2.8.0 | matplotlib 3.9.2",
+      "seconds": 0.0
+    },
+    {
+      "id": "tools",
+      "title": "martinize2 + insane",
+      "status": "pass",
+      "detail": "/home/cgmd/.local/bin/martinize2 | /home/cgmd/.local/bin/insane",
+      "seconds": 0.0
+    },
+    {
+      "id": "disk",
+      "title": "free space",
+      "status": "warn",
+      "detail": "24.8 GB free in WSL home, a 1 us campaign wants 20 GB+",
+      "seconds": 0.0
+    },
+    {
+      "id": "launcher",
+      "title": "silent launcher",
+      "status": "pass",
+      "detail": "CGMDHub.exe 113664 bytes",
+      "seconds": 0.02
+    },
+    {
+      "id": "task",
+      "title": "poll task",
+      "status": "pass",
+      "detail": "CGMD-Hub-Poll | state Ready | last run 2026-10-29 09:14:00 | result 0",
+      "seconds": 0.31
+    },
+    {
+      "id": "beacon",
+      "title": "phone beacon",
+      "status": "pass",
+      "detail": "POST https://ntfy.sh/arena-beacon-95bc796a66",
+      "seconds": 0.62
+    },
+    {
+      "id": "desk-src",
+      "title": "Arena Desk source",
+      "status": "pass",
+      "detail": "C:\\cgmd\\0fuye\\code\\panel (12 core files)",
+      "seconds": 0.02
+    },
+    {
+      "id": "desk-app",
+      "title": "Arena Desk deployed",
+      "status": "pass",
+      "detail": "E:\\0apps\\ArenaDesk | version 2.8.0",
+      "seconds": 0.03
+    },
+    {
+      "id": "desk-http",
+      "title": "Arena Desk panel",
+      "status": "pass",
+      "detail": "127.0.0.1:18765 | version 2.8.0 | 6 tasks",
+      "seconds": 0.41
+    },
+    {
+      "id": "gmxrun",
+      "title": "last 100 ps mdrun",
+      "status": "pass",
+      "detail": "ok | gmx 2024.3 | 100.0 ps | 2026-10-29T09:40:00+08:00",
+      "seconds": 0.01
+    }
+  ],
+  "desk": {
+    "panel_dir": "C:\\cgmd\\0fuye\\code\\panel",
+    "root": "E:\\0apps\\ArenaDesk",
+    "version": "2.8.0",
+    "http": "up"
+  }
+}

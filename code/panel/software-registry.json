@@ -1,0 +1,5 @@
+[
+ {"name":"Notion","status":"installed","at":"2026-10-27","detail":"7.41.0 · E:\\Notion；数据 E:\\NotionData。此前启动验证通过，非实时进程检查。"},
+ {"name":"Hermes Agent（已有）","status":"needs-check","at":"2026-10-28","detail":"已发现 E:\\hermes\\hermes-agent\\.venv\\Scripts\\hermes.exe；未修改其配置，也未做模型调用测试。"},
+ {"name":"Arena Desk","status":"installed","at":"2026-10-28","detail":"E:\\0apps\\ArenaDesk · 本机 HTTP 已验证；基座只读保护，Notion 按需归档。"}
+]

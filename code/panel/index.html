@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Arena Desk v2.6 · 全域科研算力、爱情空间与安卓伴侣控制中心</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/style.css?v=2.6.0">
+</head>
+<body data-theme="sakura-mist">
+  <!-- Genuine dsh-video-skin (MIT) Ultra-Transparent Dynamic Backdrop Stage -->
+  <div id="skin-stage" aria-hidden="true">
+    <video id="skin-video" src="/assets/dsh-bg.mp4?v=2.5.0" poster="/assets/wallpaper-anime.jpg?v=2.5.0" autoplay loop muted playsinline preload="auto"></video>
+    <img id="skin-image" src="/assets/wallpaper-anime.jpg?v=2.5.0" alt="" hidden>
+    <canvas id="skin-canvas"></canvas>
+    <div id="skin-vignette"></div>
+  </div>
+
+  <!-- Genuine Something11235/dsh-video-skin (MIT) Full-Bleed Video Boot Surface -->
+  <div id="boot-overlay" class="dsvs-boot boot-hide" hidden role="dialog" aria-label="DSH 原版视频开机启动动画">
+    <video id="boot-video" class="dsvs-boot-video" src="/assets/dsh-boot.mp4?v=2.5.0"
+           poster="/assets/boot-mascot.jpg?v=2.5.0" playsinline preload="auto"></video>
+    <!--
+      dsh-boot.mp4 is the original dsh-video-skin clip and is not distributed in
+      this repository, so on a fresh install the <video> 404s.  This layer keeps
+      the boot screen alive (mascot, glow, progress) instead of showing black
+      for the whole watchdog window.
+    -->
+    <div id="boot-fallback" class="dsvs-boot-fallback" hidden aria-hidden="true">
+      <img src="/assets/boot-mascot.jpg?v=2.5.0" alt="" class="dsvs-boot-fallback-art">
+      <div class="dsvs-boot-fallback-glow"></div>
+      <div class="dsvs-boot-fallback-copy">
+        <strong>Arena Desk</strong>
+        <span>CRYSTAL SUITE v2.8</span>
+      </div>
+    </div>
+    <button type="button" id="boot-sound-btn" class="dsvs-boot-sound" hidden>🔇 开启声音</button>
+    <div class="dsvs-boot-ui">
+      <div class="dsvs-boot-meta">
+        <span id="boot-stage" class="dsvs-boot-hint">正在进入 Arena Desk v2.5…</span>
+        <button type="button" id="boot-skip" class="dsvs-boot-skip">▶ 点击画面跳过</button>
+      </div>
+      <div class="dsvs-boot-bar"><i id="boot-fill"></i></div>
+    </div>
+  </div>
+
+  <!-- Native Desktop App Shell -->
+  <div class="app-shell">
+    <!-- Left Crystal-Glass Navigation Rail -->
+    <aside class="sidebar">
+      <a class="brand" href="#overview" id="brand-link">
+        <img src="/assets/icon.svg" alt="Arena Desk" class="brand-icon">
+        <div>
+          <span class="brand-name">Arena Desk</span>
+          <small class="brand-sub">CRYSTAL SUITE v2.8</small>
+        </div>
+      </a>
+
+      <div class="repo-chip" title="已接入私人仓库 hukeying85-ux/0fuye · 零闪窗静默同步">
+        <span class="lock-dot">🔒</span>
+        <div>
+          <b>hukeying85-ux/0fuye</b>
+          <small id="branch-label">arena/89735ee7-0fuye</small>
+        </div>
+      </div>
+
+      <nav aria-label="主导航">
+        <button class="active" data-tab="overview"><i>◈</i><span>运行总览</span><em class="nav-badge">内嵌对话</em></button>
+        <button data-tab="gh"><i>💬</i><span>三号对话与监控</span><em class="nav-badge">直发台</em></button>
+        <button data-tab="love"><i>💖</i><span>爱情与心意空间</span><em class="nav-badge">18项</em></button>
+        <button data-tab="beacon"><i>📱</i><span>手机App·算力信标</span><em class="nav-badge">扫码装</em></button>
+        <button data-tab="personal"><i>🗂️</i><span>生涯·考公·云归档</span><em class="nav-badge">37文件</em></button>
+        <button data-tab="thesis"><i>🎓</i><span>论文一键改格式</span><em class="nav-badge">Lark</em></button>
+        <button data-tab="mediacua"><i>🎬</i><span>媒体下载·操控台</span><em class="nav-badge">抖红微</em></button>
+        <button data-tab="quota"><i>⚡</i><span>Gemini·反重力额度</span><em class="nav-badge">0浪费</em></button>
+        <button data-tab="coord"><i>🤖</i><span>作战室·多会话</span><em class="nav-badge">GrokBot</em></button>
+        <button data-tab="software"><i>▦</i><span>软件与安装</span></button>
+        <button data-tab="remote"><i>⇄</i><span>远程控制 (HPC)</span></button>
+        <button data-tab="scripts"><i>⚡</i><span>多机一键脚本</span></button>
+        <button data-tab="connectors"><i>∞</i><span>生态连接器 (10)</span></button>
+        <button data-tab="studio"><i>✦</i><span>外观·开机·任务启停</span></button>
+      </nav>
+
+      <div class="side-bottom">
+        <div class="hub-mini">
+          <span class="pulse-dot" id="side-hub-dot"></span>
+          <span id="side-hub-text">git-sync-hub · 零闪窗守护</span>
+        </div>
+        <p>已内建 <code>dsh-video-skin</code> 原版视频开机动画与高透动态壁纸，三账号独立分舱监控。</p>
+        <div class="side-links">
+          <a id="notion-side" target="_blank" rel="noreferrer">Notion 总控 ↗</a>
+          <button type="button" id="replay-boot" class="link-btn">🎬 重播开机动画</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Desktop Workspace -->
+    <main class="workspace-main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="crumb">
+          <span class="win-pill">ARENA DESK v2.8</span>
+          <span>工作空间</span>
+          <i>/</i>
+          <b id="section-name">运行总览</b>
+        </div>
+        <div class="topbar-right">
+          <span id="mode-badge" class="status-chip">连接中…</span>
+          <span id="clock" class="clock-text">--:--:--</span>
+          <button type="button" data-autoheal-4step="1" class="primary-btn small">🚀 一键四步自愈双机同步</button>
+          <button type="button" data-watcher-toggle="ALL" data-watcher-enable="1" class="ghost-btn small">▶ 开启值守</button>
+          <button type="button" data-watcher-toggle="ALL" data-watcher-enable="0" class="ghost-btn small">⏸ 暂停值守</button>
+          <button type="button" data-goto="gh" class="ghost-btn">💬 三号内嵌对话</button>
+          <button type="button" data-goto="love" class="ghost-btn">💖 爱情空间</button>
+          <button type="button" data-goto="beacon" class="ghost-btn">📱 手机装 App</button>
+          <button type="button" id="top-boot-btn" class="ghost-btn">🎬 开机动画</button>
+          <button type="button" id="skin-quick-btn" class="ghost-btn">✦ 透明度</button>
+          <button type="button" id="refresh" class="ghost-btn">↻ 刷新</button>
+          <a id="notion" class="primary-btn" target="_blank" rel="noreferrer">Notion 台账 ↗</a>
+        </div>
+      </header>
+
+      <div id="warning" class="banner-warn" hidden></div>
+
+      <section class="hero-bar">
+        <div>
+          <div class="eyebrow" id="eyebrow">DSH VIDEO SKIN · 3-ACCOUNT COCKPIT · LOVE ARCHIVE · MOBILE PWA INSTALLER</div>
+          <h1 id="heading">工作站全景高透控制面板</h1>
+          <p id="subtitle">三账号物理分舱监控、谷歌云盘爱情空间与 00-05 具体文件直达、手机扫码一键装 App、论文无头排版尽在一屏。</p>
+        </div>
+        <div class="live-pill">
+          <span class="pulse-dot"></span>
+          <span id="sample-age">实时采样</span>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 1: OVERVIEW ==================== -->
+      <section id="overview" class="tab active">
+        <div class="metrics">
+          <article class="metric-card">
+            <span>静默守护基座</span>
+            <strong id="hub-state">在线守护中</strong>
+            <small id="hub-meta">git-sync-hub · 零弹窗静默轮询</small>
+          </article>
+          <article class="metric-card">
+            <span>💖 爱情与云盘归档</span>
+            <strong id="ov-love-state">18 项珍藏</strong>
+            <small id="ov-love-meta">7部短片 · 纪念画册 · 喜好档案v4</small>
+          </article>
+          <article class="metric-card">
+            <span>Lark 论文无头排版</span>
+            <strong id="ov-thesis-state">v0.21.1 就绪</strong>
+            <small id="ov-thesis-meta">34 模块秒级修订 + 红蓝对比稿</small>
+          </article>
+          <article class="metric-card">
+            <span>三账号分舱 / 连接器</span>
+            <strong id="conn-ready-count">3 舱 · 10 连接器</strong>
+            <small id="sw-installed-sub">mqgg · shaohua · hukeying85</small>
+          </article>
+        </div>
+
+        <!-- Watcher 1-Click Start/Stop Switchboard + Desktop Default Hub Sync -->
+        <article class="card highlight-banner" style="margin-bottom:14px;padding:14px 18px">
+          <div class="banner-flex">
+            <div>
+              <span class="pill" id="ov-watcher-pill">WATCHER SWITCHBOARD · 3 ACCOUNTS SYNCED</span>
+              <h3 style="margin:6px 0 4px">🛡️ 一键开启 / 停止会话与后台值守总开关 · 台式机默认基座同步</h3>
+              <p class="small muted" id="ov-desktop-sync-note" style="margin:0">已将 hukeying85-ux/0fuye (arena/32cd826e-0fuye) 免合并接入面板，并武装台式机开机自动推送默认零闪窗值守基座！</p>
+            </div>
+            <div class="actions" style="margin:0;flex-wrap:wrap">
+              <button type="button" data-autoheal-4step="1" class="primary-btn small">🚀 一键执行四步自愈与双机同步</button>
+              <button type="button" data-watcher-toggle="ALL" data-watcher-enable="1" class="ghost-btn small">▶ 开启全部值守</button>
+              <button type="button" data-watcher-toggle="ALL" data-watcher-enable="0" class="ghost-btn small">⏸ 暂停全部值守</button>
+              <button type="button" data-sync-desktop-hub="1" class="ghost-btn small">🖥️ 立即同步默认基座到台式机</button>
+            </div>
+          </div>
+          <div id="ov-4step-checklist" style="margin-top:10px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px"></div>
+          <div id="ov-watcher-slots" class="tri-account-grid" style="margin-top:12px"></div>
+        </article>
+
+        <!-- Embedded 3-Account Direct Chat & Execution Console right inside Arena Desk -->
+        <article class="card" style="margin-bottom:14px">
+          <div class="cardtop">
+            <h2>💬 三账号软件内嵌对话直发总台（无需跳出软件 · 直接发话开启值守 / 下单粗粒化 / 查超算）</h2>
+            <div class="actions" style="margin:0">
+              <button type="button" data-goto="gh" class="ghost-btn small">展开大屏三舱对话 ↗</button>
+            </div>
+          </div>
+          <div id="ov-tri-chat-console" class="tri-account-grid"></div>
+        </article>
+
+        <!-- Android Companion Live Strip + 3-Part Account Overview Strip right on Overview -->
+        <article class="card highlight-banner" style="margin-bottom:14px;padding:14px 18px">
+          <div class="banner-flex" id="ov-android-banner">
+            <div>
+              <span class="pill">ANDROID &amp; IPHONE LIVE COMPANION · HTTPS WEBAPK + LAN 18766</span>
+              <h3 style="margin:6px 0 4px">📱 安卓手机实测直连通道已就绪（支持 Chrome/Edge 原生安装桌面 App + 震动响铃）</h3>
+              <p class="small muted" id="ov-android-urls" style="margin:0">正在读取本机局域网与 Cloudflare HTTPS 免费公网隧道地址…</p>
+            </div>
+            <div class="actions" style="margin:0;flex-wrap:wrap">
+              <button type="button" data-goto="beacon" class="primary-btn small">📷 打开安卓扫码安装台</button>
+              <button type="button" data-test-android-push="1" class="ghost-btn small">📳 发送手机震动响铃实测</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>⚿ 三账号独立分舱实时监控总览（一舱一号 · 算力与凭据物理隔离）</h2>
+            <button type="button" data-goto="gh" class="ghost-btn small">进入三账号详细监控舱 ↗</button>
+          </div>
+          <div id="ov-three-accounts" class="tri-account-grid"></div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>🧭 全栈 14 大模块实时就绪度矩阵（点击任意模块直接进入对应工作台）</h2>
+            <span class="pill">14 / 14 MODULES LIVE</span>
+          </div>
+          <div id="ov-all14-matrix" class="module-matrix-14"></div>
+        </article>
+
+        <div class="grid-two">
+          <article class="card accent-card">
+            <div class="cardtop">
+              <h2>核心高频模块直达（每个模块均已绑定真实具体文件与可执行工具）</h2>
+              <span class="pill">ALL MODULES POPULATED</span>
+            </div>
+            <div class="quick-grid">
+              <button type="button" class="quick-tile" data-goto="love">
+                <strong>💖 爱情与心意空间（云盘 03 专区）</strong>
+                <span>7部恋爱短片 · 纪念画册PPT/PDF · 喜好档案v4 · JevChat军师</span>
+              </button>
+              <button type="button" class="quick-tile" data-goto="beacon">
+                <strong>📱 手机扫码安装「好了吗」App</strong>
+                <span>局域网即扫即装 + Cloudflare 免费公网 + 锁屏秒级推送</span>
+              </button>
+              <button type="button" class="quick-tile" data-goto="gh">
+                <strong>⚿ 三账号分三部分独立监控</strong>
+                <span>主控笔记本舱 · 超算课题舱 · 台式机粗粒化模拟舱</span>
+              </button>
+              <button type="button" class="quick-tile" data-goto="personal">
+                <strong>🗂️ 谷歌云盘 00–05 全量具体文件库</strong>
+                <span>37 份真实云盘文件一键直开 · 朋友材料折叠物理隔离</span>
+              </button>
+              <button type="button" class="quick-tile" data-goto="thesis">
+                <strong>🎓 硕士学位论文一键改格式</strong>
+                <span>Lark-Formatter 34模块 · 1.5s 出定稿 + 红蓝对比稿</span>
+              </button>
+              <button type="button" class="quick-tile" id="quick-boot-demo">
+                <strong>🎬 播放 dsh-video-skin 原版开机动画</strong>
+                <span>全屏原版视频 + 原生音轨渐隐 + 底部极细进度条</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>永久守护基座状态与本机静默闭环</h2>
+              <span class="pill pale">ZERO CONSOLE FLASH</span>
+            </div>
+            <div class="orbit-row">
+              <div class="orbit-ring"><img src="/assets/icon.svg" alt=""></div>
+              <div>
+                <h3>Git Sync Hub · 私人仓 0fuye</h3>
+                <dl id="hub-detail" class="kv-dl"></dl>
+              </div>
+            </div>
+            <div class="pipeline">
+              <span>私人仓 0fuye</span><i>→</i><span>winexe 零弹窗拉取</span><i>→</i><span>租约隔离执行</span><i>→</i><span>回执推回分支</span>
+            </div>
+            <div class="bridge-callout">
+              <div class="cmd-inline">
+                <code id="unlock-oneliner">powershell -NoProfile -ExecutionPolicy Bypass -File "E:\0apps\ArenaDesk\deploy.ps1" -LaunchBootDemo</code>
+                <button type="button" id="copy-unlock-btn" class="primary-btn small">复制重播命令</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>最近同步会话与任务执行记录（共 <span id="session-count">—</span> 个会话目录）</h2>
+            <button type="button" data-goto="coord" class="ghost-btn small">打开多会话作战室 ↗</button>
+          </div>
+          <div class="table-wrap">
+            <table class="clean-table">
+              <thead><tr><th>会话标题 / ID</th><th>仓库与分支</th><th>状态</th><th>同步时间</th><th>一键启停</th></tr></thead>
+              <tbody id="recent"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- ==================== TAB 2: DEDICATED LOVE & RELATIONSHIP SPACE (#love) ==================== -->
+      <section id="love" class="tab">
+        <article class="card highlight-banner love-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">GOOGLE DRIVE 03_纪念与个人文化 · 18 CONCRETE ITEMS · JEVCHAT GUARD</span>
+              <h2>💖 爱情与心意数字空间（云盘恋爱珍藏直连 + 本机情感军师）</h2>
+              <p>已完整对接您 Google Drive 中的 <b>恋爱纪实短片（7部 MP4）</b>、<b>恋爱纪念画册（PPTX 可编辑母版 + PDF 高清画册）</b>、<b>专属喜好与心意档案（升级版 v4）</b>、<b>高情商沟通决策树</b> 与 <b>专属手机锁屏壁纸（4张 1290×2796）</b>，并联动本机 <code>E:\0apps\jev-chat-windows</code> 零弹窗静默守护。</p>
+            </div>
+            <div class="banner-controls" id="love-top-actions">
+              <a href="https://drive.google.com/drive/folders/1xbJivKsZEmVOnJCRBNkhfOlDHW9L8NWH" target="_blank" rel="noopener" class="primary-btn">☁️ 打开云盘爱情总目录 ↗</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Live Local JevChat & Privacy Vault Status -->
+        <div id="love-status-metrics" class="metrics"></div>
+
+        <!-- Interactive Daily Care & Date Inspiration Card Generator -->
+        <article class="card accent-card" style="margin-bottom:14px">
+          <div class="cardtop">
+            <h2>💝 今日心意微行动与约会灵感抽卡台（基于云盘《喜好档案 v4》定制）</h2>
+            <div class="filter-pills" id="love-scene-tabs">
+              <button type="button" class="active" data-love-scene="daily">🌅 日常暖心问候</button>
+              <button type="button" data-love-scene="comfort">🫂 情绪共情安抚</button>
+              <button type="button" data-love-scene="date">🎡 周末约会灵感</button>
+              <button type="button" data-love-scene="anniv">🎁 纪念日仪式感</button>
+            </div>
+          </div>
+          <div id="love-care-generator"></div>
+        </article>
+
+        <!-- Search & Filter Bar for 18 Real Google Drive Love Items -->
+        <div class="toolbar" style="margin-bottom:12px">
+          <input id="love-search-input" placeholder="在 18 项爱情云盘原件中搜索（如：短片、画册、喜好、沟通、壁纸）…">
+          <div class="filter-pills" id="love-cat-filters"></div>
+        </div>
+
+        <!-- 4 Concrete Google Drive Love Collections (18 Real Files!) -->
+        <div id="love-collections-container"></div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>🧭 恋爱高情商行动锦囊（结合云盘档案 v4 与沟通决策树提炼）</h2>
+              <span class="pill">ACTIONABLE SOP</span>
+            </div>
+            <div id="love-playbooks-box" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>🛡️ 本机「狗头军师 JevChat」与私人纪念库铁律</h2>
+              <span class="pill pale">DRAFT-ONLY · ZERO UPLOAD</span>
+            </div>
+            <div id="love-jev-box" class="task-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: MOBILE APP INSTALLER & JOBBEACON (#beacon) ==================== -->
+      <section id="beacon" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">SCAN QR TO INSTALL · ANDROID &amp; IPHONE PWA · APACHE-2.0 CLEAN-ROOM</span>
+              <h2>📱 手机如何安装「好了吗 · Arena Mobile」伴侣 App + 长任务完工信标</h2>
+              <p>无需去应用商店付费或下载山寨软件！本机已自动开启 <b>局域网只读伴侣通道 (<code>0.0.0.0:18766/mobile</code>)</b> 并支持 <b>一键开启 Cloudflare 免费公网 HTTPS 隧道</b>：手机扫码打开后按下方 3 步添加到桌面，即可获得无地址栏的全屏原生体验 App，实时查看三账号任务进度、爱情心意快捷卡与超算完工提醒。</p>
+            </div>
+            <div class="banner-controls">
+              <a href="/mobile" target="_blank" class="primary-btn">📱 电脑端预览手机 App (/mobile) ↗</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- Step-by-Step QR + Android / iOS App Installation Center -->
+        <div class="grid-two">
+          <article class="card accent-card">
+            <div class="cardtop">
+              <h2>📷 第一步：手机相机 / 浏览器扫下方二维码直达</h2>
+              <span class="pill" id="mobile-bridge-pill">局域网伴侣端口已就绪</span>
+            </div>
+            <div id="mobile-qr-stage" class="qr-dual-stage"></div>
+            <div class="actions" style="margin-top:12px;flex-wrap:wrap">
+              <button type="button" id="start-cf-tunnel-btn" class="primary-btn small">☁️ 开启/刷新安卓 HTTPS 免费公网直装码</button>
+              <button type="button" data-test-android-push="1" class="ghost-btn small">📳 向安卓手机发送震动+响铃实测</button>
+              <button type="button" id="refresh-qr-btn" class="ghost-btn small">↻ 刷新二维码</button>
+              <button type="button" id="copy-mobile-url-btn" class="ghost-btn small">📋 复制安卓安装链接</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>📲 第二步：30 秒安装为独立桌面 App（安卓 &amp; 苹果分步指引）</h2>
+              <span class="pill pale">ZERO APP STORE FEE</span>
+            </div>
+            <div class="install-steps-grid">
+              <div class="subcard">
+                <div class="row-between">
+                  <strong>🤖 安卓手机（Edge / Chrome / 系统浏览器）</strong>
+                  <span class="pill ok">推荐</span>
+                </div>
+                <ol class="step-list">
+                  <li>手机连接与笔记本<b>同一 Wi-Fi / 手机热点</b>（异地则点左侧「一键开启免费公网隧道」），用浏览器扫码打开页面；</li>
+                  <li>点击手机页面顶部的 <b>「📲 一键安装到手机桌面」</b> 按钮（或点浏览器右上角 <code>⋮</code> → <b>「安装应用 / 添加到主屏幕」</b>）；</li>
+                  <li>确认后桌面即生成独立图标 <b>「好了吗」</b>，点开即为全屏原生 App！</li>
+                </ol>
+              </div>
+              <div class="subcard">
+                <div class="row-between">
+                  <strong>🍎 苹果 iPhone / iPad（必须用 Safari 打开）</strong>
+                  <span class="pill ok">iOS 原生支持</span>
+                </div>
+                <ol class="step-list">
+                  <li>用 iPhone 原生相机扫码，在 <b>Safari 浏览器</b> 中打开页面；</li>
+                  <li>轻触屏幕底部正中间的 <b>「分享 ⬆️」图标</b>；</li>
+                  <li>向下滑动菜单找到 <b>「添加到主屏幕 (Add to Home Screen)」</b> → 点击右上角 <b>「添加」</b>，即生成全屏独立 iOS App！</li>
+                </ol>
+              </div>
+              <div class="subcard">
+                <div class="row-between">
+                  <strong>🔔 附加神技：锁屏息屏 1 秒弹完工通知（ntfy 免费开源 App）</strong>
+                  <span class="badge-soft">双层内网穿透保底</span>
+                </div>
+                <p class="small muted" style="margin:4px 0">若希望手机锁屏放在口袋里也能在超算 Slurm / 分子动力学跑完瞬间响铃震动：安卓可在 F-Droid/GitHub、苹果可在 App Store 免费装开源 <b>ntfy</b>，扫左侧第 2 个订阅码即可秒收推送！</p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>🧬 长耗时任务实时盯梢（按三账号标注归属 · 含速率与剩余时间）</h2>
+              <span class="pill" id="jb-running-pill">实时监控中</span>
+            </div>
+            <div id="jb-watches-box" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>🖥️ 台式机 (`hukeying85-ux`) Martini 3 粗粒化动力学一键脚本器</h2>
+              <span class="pill pale">1~3 μs/day GPU SCREENING</span>
+            </div>
+            <form id="cgmd-form" class="compact-form">
+              <div class="form-row">
+                <label>候选抗菌肽代号
+                  <input id="cgmd-name" value="AMP_Cand01" maxlength="40" required>
+                </label>
+                <label>模拟时长 (μs, dt=20 fs)
+                  <input id="cgmd-us" type="number" step="0.5" min="0.5" max="20" value="2.0" required>
+                </label>
+              </div>
+              <div class="form-row">
+                <label>拟膜体系选择
+                  <select id="cgmd-membrane">
+                    <option value="bacterial_inner">革兰氏阴性菌拟内膜 (POPE:POPG = 3:1 · 抗菌打孔初筛)</option>
+                    <option value="mammalian_rbc">哺乳动物红细胞对照膜 (POPC:CHOL = 4:1 · 溶血毒性评估)</option>
+                  </select>
+                </label>
+                <label>候选氨基酸序列 (来自 shaohuawen03 课题库)
+                  <input id="cgmd-seq" value="GIGKFLHSAKKFGKAFVGEIMNS" maxlength="120" required>
+                </label>
+              </div>
+              <div class="actions">
+                <button type="submit" class="primary-btn small">⚡ 生成 Martini 3 粗粒化 + 完工秒推脚本</button>
+                <button type="button" id="cgmd-copy-btn" class="ghost-btn small">📋 复制全套运行脚本</button>
+              </div>
+            </form>
+            <pre id="cgmd-preview" class="terminal-pre" style="min-height:140px;max-height:200px;margin-top:8px;font-size:12px"></pre>
+          </article>
+        </div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>⚡ 手机端白名单快捷指令台 &amp; 完工通知测试</h2>
+              <span class="pill pale">SAFE ALLOWLIST</span>
+            </div>
+            <div id="fed-notify-box" style="margin-bottom:10px"></div>
+            <div id="jb-cmds-box" class="actions" style="flex-wrap:wrap;margin-bottom:10px"></div>
+            <pre id="jb-cmd-out" class="terminal-pre" style="min-height:110px">点击上方指令即时查看本机/HPC返回快照…</pre>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>🔗 4 套永久 0 元连接通道 &amp; 历史通知流</h2>
+              <span class="pill">¥0 FOREVER · Apache-2.0</span>
+            </div>
+            <div id="jb-tunnels-box" class="task-stack" style="margin-bottom:12px"></div>
+            <div id="jb-alerts-box" class="task-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: 3-PART INDEPENDENT ACCOUNT MONITORING (#gh) ==================== -->
+      <section id="gh" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">3 INDEPENDENT COMPARTMENTS · PORT 443 SSH · ZERO CREDENTIAL MIXING</span>
+              <h2>⚿ 三账号三分区独立监控中心（主控笔记本舱 · 学术超算舱 · 台式机模拟舱）</h2>
+              <p>已按您的习惯将三个账号拆分为 <b>三个完全独立、互不串号的监控分舱</b>：分别独立监测各自的 <b>Git/SSH 443 密钥通道</b>、<b>绑定算力设备</b>、<b>当前在跑作业</b>、<b>代表代码仓</b> 与 <b>AI 额度职责</b>，并锁定 <code>mqgg5630-cyber</code> 为 <code>git-sync-hub</code> 默认主号。</p>
+            </div>
+            <div class="banner-controls">
+              <button type="button" id="gh-check-btn" class="primary-btn">↻ 刷新三舱实时状态</button>
+              <button type="button" id="gh-hukeying-web-btn" class="ghost-btn">🌐 Chrome Profile 1 独立授权</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" style="margin-bottom:14px">
+          <div class="cardtop">
+            <h2>💬 三账号内嵌对话与跨仓直执总台（直接在软件内发话开启值守 · 提交粗粒化任务 · 查询超算）</h2>
+            <div class="actions" style="margin:0">
+              <button type="button" data-watcher-toggle="ALL" data-watcher-enable="1" class="primary-btn small">▶ 开启全部值守</button>
+              <button type="button" data-watcher-toggle="ALL" data-watcher-enable="0" class="ghost-btn small">⏸ 暂停全部值守</button>
+              <button type="button" data-sync-desktop-hub="1" class="ghost-btn small">🖥️ 同步默认基座到台式机</button>
+            </div>
+          </div>
+          <div id="gh-tri-chat-console" class="tri-account-grid"></div>
+        </article>
+
+        <!-- 3 Distinct Side-by-Side Independent Account Columns -->
+        <div id="gh-three-columns" class="tri-account-grid full-height"></div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>全局防串号守卫矩阵 &amp; 快捷运维动作</h2>
+              <span class="pill" id="gh-badge">检测中</span>
+            </div>
+            <p id="gh-summary" class="muted" style="margin-top:0">正在核验三账号独立路由与零弹窗凭据助手…</p>
+            <div id="gh-matrix" class="kv-list"></div>
+            <div class="actions" style="margin-top:12px;flex-wrap:wrap">
+              <button type="button" id="gh-provision-btn" class="ghost-btn small">🔧 预置 SSH 443 与 URL 路由</button>
+              <button type="button" id="gh-login-btn" class="ghost-btn small">🔑 gh 设备码登录</button>
+              <button type="button" id="gh-dpapi-btn" class="ghost-btn small">🛡️ 校验 winexe 静默凭据助手</button>
+              <button type="button" id="gh-unlock-btn" class="ghost-btn small">🔓 校验 0fuye 私人仓补丁</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>三账号 SSH / Git 实时探针诊断回执（自动脱敏）</h2>
+              <span class="pill pale">ZERO SECRET LEAK</span>
+            </div>
+            <pre id="gh-detail-box" class="terminal-pre" style="min-height:190px">等待诊断数据…</pre>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: CAREER, EXAM, IDENTITY & GOOGLE DRIVE CONCRETE EXPLORER (#personal) ==================== -->
+      <section id="personal" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">GOOGLE DRIVE 00–05 · 37 CONCRETE FILES · NOTION 4 DATABASES</span>
+              <h2>🗂️ 生涯求职 · 考公选调 · 身份脱敏保险箱 · 谷歌云盘具体文件总览</h2>
+              <p>每个云盘分区现已直接列出 <b>具体真实文件清单与一键打开链接</b>（File ID 100% 原生无损）；本人求职主线与外部朋友代管参考区物理折叠隔离，所有个人敏感证件信息严格脱敏。</p>
+            </div>
+            <div class="banner-controls" id="personal-top-links"></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>☁️ 谷歌云盘 `00–05` 分区具体文件清单（支持关键词秒搜 · 点击直接打开 Google Drive 原件）</h2>
+            <span class="pill" id="drive-summary-pill">6 大分区 · 具体文件直连</span>
+          </div>
+          <div class="toolbar" style="margin-bottom:12px">
+            <input id="drive-file-search" placeholder="搜索全部云盘具体文件名或编号（如：抗菌肽、Aβ、选调、简历、画册、OpenClaw、羊绒）…">
+            <div class="filter-pills" id="drive-part-filters"></div>
+          </div>
+          <div id="drive-folders-grid" class="catalog-grid"></div>
+        </article>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>💼 本人求职与科研岗位主线（外部朋友代管材料折叠隔离）</h2>
+              <span class="pill pale">PRIVACY ISOLATED</span>
+            </div>
+            <div id="career-box" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>🏛️ 考公 / 选调 / 事业编招考关键日程表</h2>
+              <span class="pill pale">CALENDAR SYNCED</span>
+            </div>
+            <div id="exam-box" class="task-stack"></div>
+          </article>
+        </div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>🛡️ 身份与重要数字资产索引（零明文脱敏保险箱）</h2>
+              <span class="pill">ZERO PLAINTEXT PII</span>
+            </div>
+            <div id="identity-box" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>💝 纪念与科研里程碑摘要（点击可前往「💖 爱情空间」看全量 18 项文件）</h2>
+              <button type="button" data-goto="love" class="ghost-btn small">打开 💖 爱情空间 ↗</button>
+            </div>
+            <div id="commem-box" class="task-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 6: ONE-CLICK THESIS FORMATTER (#thesis) ==================== -->
+      <section id="thesis" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">E:\0writing\Lark-Formatter v0.21.1 · HEADLESS 34-MODULE ENGINE</span>
+              <h2>🎓 硕士学位论文格式一键修改工作台</h2>
+              <p>直连本机 <code>E:\0writing\Lark-Formatter</code> 34 模块无头排版内核与 5 套学术写作 Skills，一键规整封面、摘要、多级标题、奇偶页眉页脚、三线表、图题表题、Zotero 9 引用域与 GB/T 7714 参考文献，同步输出 <b>标准定稿 + 红蓝修订对比稿 + 逐项审计报告</b>。</p>
+            </div>
+            <div class="banner-controls">
+              <button type="button" id="thesis-sample-btn" class="primary-btn">⚡ 一键实测内置硕士论文样稿 (1.5s)</button>
+            </div>
+          </div>
+        </article>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>选择本机论文或上传文稿一键修改</h2>
+              <span class="pill" id="thesis-engine-badge">检测引擎中</span>
+            </div>
+
+            <form id="thesis-form" class="compact-form">
+              <label>方式 A：快速选择已探测到的本机 E 盘 / 内置论文文稿
+                <select id="thesis-detected-select">
+                  <option value="">-- 选择本机检测到的论文文稿，或在下方粘贴路径 / 上传文件 --</option>
+                </select>
+              </label>
+
+              <div class="form-row">
+                <label>本机文稿完整路径 (.docx 或 .md)
+                  <input id="thesis-source-path" placeholder="例如：E:\1dagang\终版.docx 或 E:\0zhongqi\中期.docx">
+                </label>
+                <label>方式 B：直接从浏览器选文件上传 (.docx / .md)
+                  <input type="file" id="thesis-file-input" accept=".docx,.md,.markdown">
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label>排版规范模式
+                  <select id="thesis-mode">
+                    <option value="academic_master_2026">学术型硕士学位论文标准规范 (默认 34 模块全开)</option>
+                    <option value="clone_from_template">从任意参考母版 .docx 克隆样式参数 (通用适配)</option>
+                  </select>
+                </label>
+                <label>参考母版 .docx 路径（仅选「从参考母版克隆」时填写）
+                  <input id="thesis-template-path" placeholder="例如：E:\0writing\示范模板.docx">
+                </label>
+              </div>
+
+              <label class="check-item">
+                <input type="checkbox" id="thesis-save-alongside">
+                <span>本机运行时同时将 <code>_new.docx</code>、<code>_对比稿.docx</code>、<code>_报告.md</code> 写回原论文所在文件夹（原文件只读不覆盖）</span>
+              </label>
+
+              <div class="actions">
+                <button type="submit" class="primary-btn" id="thesis-run-btn">🎓 立即执行一键格式修改</button>
+                <button type="button" class="ghost-btn" id="thesis-use-sample-btn">📄 对内置硕士样稿执行并下载</button>
+              </div>
+            </form>
+
+            <hr class="sep">
+            <h3>已联动的 E:\0writing 学术写作 Skills 具体路径</h3>
+            <div id="thesis-skills-list" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>实时排版结果 · 34 模块统计与三件套下载</h2>
+              <span class="pill pale" id="thesis-elapsed-pill">就绪待命</span>
+            </div>
+
+            <div id="thesis-result-actions" class="actions" style="margin-top:0;margin-bottom:12px" hidden></div>
+            <div id="thesis-module-grid" class="module-stat-grid"></div>
+            <pre id="thesis-report-box" class="terminal-pre" style="min-height:220px">点击右上角「⚡ 一键实测内置硕士论文样稿」或提交本机论文路径，此处将实时展示 34 个排版模块的逐项修改统计与终稿/红蓝对比稿下载链接。</pre>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>📐 学术型硕士学位论文 8 大核心版式规整标准对照与三线表实时样张</h2>
+            <span class="pill">34-MODULE PRECISION</span>
+          </div>
+          <div id="thesis-spec-checklist" class="catalog-grid"></div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>最近论文排版任务归档记录</h2>
+            <span class="pill pale">ZERO DESTRUCTIVE OVERWRITE</span>
+          </div>
+          <div class="table-wrap">
+            <table class="clean-table">
+              <thead><tr><th>作业 ID</th><th>文稿来源</th><th>排版规范</th><th>修订统计</th><th>产物下载</th></tr></thead>
+              <tbody id="thesis-jobs-table"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <!-- ==================== TAB 7: MEDIA DOWNLOADER & COMPUTER USE (#mediacua) ==================== -->
+      <section id="mediacua" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">DOUYIN · XIAOHONGSHU · WECHAT MP · YT-DLP INSTALLED · COMPUTER USE</span>
+              <h2>🎬 抖音 · 小红书 · 微信公众号本地桥接 + 4K 视频无水印下载 + Computer Use 操控中心</h2>
+              <p>本机已安装就绪 <code>yt-dlp</code>（默认下载目录 <code>E:\0downloads\ArenaMedia</code>）；自动剥离分享口令乱码、提取公众号文章为洁净 Markdown，并通过左上角 <code>(0,0)</code> 物理熔断锁守护 AI 桌面键鼠安全。</p>
+            </div>
+          </div>
+        </article>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>📥 粘贴分享口令 / 链接：一键识别平台并生成无水印下载或入队</h2>
+              <span class="pill">抖 · 红 · 微 · B站 · YouTube</span>
+            </div>
+            <form id="media-parse-form" class="compact-form">
+              <label>支持直接粘贴带文案的抖音/小红书分享口令、公众号文章链接或 B站/YouTube 视频网址
+                <textarea id="media-share-input" rows="3" maxlength="800" required>7.43 复制打开抖音，看看【分子动力学与抗菌肽机制科普】 https://v.douyin.com/iYDemo88/</textarea>
+              </label>
+              <div class="actions" style="flex-wrap:wrap">
+                <button type="submit" class="primary-btn small">🔍 解析纯净链接与下载指令</button>
+                <button type="button" id="media-run-local-btn" class="ghost-btn small">⬇ 本机后台静默下载至 E:\0downloads\ArenaMedia</button>
+                <button type="button" class="ghost-btn small" data-media-preset="dy">试一下抖音无水印</button>
+                <button type="button" class="ghost-btn small" data-media-preset="xhs">试一下小红书图文</button>
+                <button type="button" class="ghost-btn small" data-media-preset="wx">试一下微信公众号转MD</button>
+                <button type="button" class="ghost-btn small" data-media-preset="bili">试一下B站 4K 视频</button>
+              </div>
+            </form>
+            <div id="media-parse-result" style="margin-top:10px"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>🛡️ Computer Use 三重硬件安全锁 &amp; 本机脚本清单</h2>
+              <span class="pill pale">TOP-LEFT (0,0) KILL-SWITCH</span>
+            </div>
+            <div class="task-stack">
+              <div class="subcard">
+                <strong>① 物理急停熔断锁 (<code>code/cua/local_cua_guard.py</code>)</strong>
+                <div class="small muted">任何时刻将鼠标甩至屏幕最左上角 <code>(0,0)</code>，0.1 秒内强制中止一切 AI 鼠标键盘动作。</div>
+              </div>
+              <div class="subcard">
+                <strong>② 微信 / QQ 只填草稿禁回车发送</strong>
+                <div class="small muted">延续 JevChat 铁律，对社交软件窗口硬件级拦截自动 Enter 发送，100% 由您本人过目发出。</div>
+              </div>
+              <div class="subcard">
+                <strong>③ 本机媒体脚本落盘路径</strong>
+                <div class="small muted"><code>code/media/universal_media_Fetch.py</code> · <code>code/media/wechat_mp_bridge.py</code> · 产物库 <code>E:\0downloads\ArenaMedia</code></div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>🔌 四大内容平台本地桥接能力明细（Cookie 不上云 · 零封号风险）</h2>
+            <span class="pill pale">LOCAL BRIDGE DETAILS</span>
+          </div>
+          <div id="media-platforms-grid" class="catalog-grid"></div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>🖱️ Computer Use 四层开源操控栈（从 L1 CLI 复用登录态到 L4 视觉模型）</h2>
+            <span class="pill">L1 OpenCLI → L4 UI-TARS</span>
+          </div>
+          <div id="cua-projects-grid" class="catalog-grid"></div>
+        </article>
+      </section>
+
+      <!-- ==================== TAB 8: GEMINI & ANTIGRAVITY QUOTA HUB (#quota) ==================== -->
+      <section id="quota" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">GEMINI 1M-2M CONTEXT · ANTIGRAVITY BURN QUEUE · BIO-AMP TOOLKIT</span>
+              <h2>⚡ Gemini 能力整合 + 反重力 (Antigravity) 额度零浪费中枢 + 生信肽段计算器</h2>
+              <p>按三账号与任务复杂度三级分流：<b>L0 本地确定性脚本（0 Token）→ L1 Gemini 百万上下文全书/多篇文献吞吐 → L2 反重力 Agent 高阶攻坚</b>，并在每次额度刷新前通过「防过期燃烧池」一键转化为科研成果。</p>
+            </div>
+          </div>
+        </article>
+
+        <div id="quota-pools-grid" class="catalog-grid"></div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>🔥 反重力 &amp; Gemini「防过期燃烧任务池」（刷新前一键复制投喂）</h2>
+              <span class="pill">ZERO QUOTA WASTE</span>
+            </div>
+            <div id="quota-burn-box" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>🧪 抗菌肽 (AMP) 理化指标即时计算器 &amp; HPC Slurm 完工推手机模板</h2>
+              <span class="pill pale">BIO-AMP ENGINE</span>
+            </div>
+            <form id="amp-calc-form" class="compact-form">
+              <label>输入候选抗菌肽氨基酸序列（实时计算分子量 MW、pH7.4 净电荷、等电点 pI、GRAVY 与两亲疏水矩 μH）
+                <input id="amp-seq-input" value="GIGKFLHSAKKFGKAFVGEIMNS" maxlength="200" required>
+              </label>
+              <div class="actions">
+                <button type="submit" class="primary-btn small">🧬 立即计算肽段理化指标</button>
+              </div>
+            </form>
+            <div id="amp-calc-result" class="kv-list" style="margin:10px 0 14px"></div>
+            <hr class="sep">
+            <h3>HPC mu01 挂载手机完工提醒 `.sbatch` 具体模板</h3>
+            <div id="slurm-tpl-box" class="task-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 9: GROKBOT WAR ROOM & MULTI-SESSION (#coord) ==================== -->
+      <section id="coord" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">GROKBOT WAR ROOM · 3-MACHINE FEDERATION · 0-TOKEN ROUTINES · HUMAN GATES</span>
+              <h2>🤖 多会话作战室（GrokBot 模式）与零冲突调度总线</h2>
+              <p>将三台算力设备（笔记本 <code>mqgg5630</code> · 超算 <code>shaohuawen03</code> · 台式机 <code>hukeying85</code>）与多个并存 Arena 会话通过原子租约锁、跨会话派单包和人工审批闸门协同起来，严守只读保护边界。</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>🪟 三账号 Arena 独立专窗与同屏工作台（物理隔离 Profile · 三号同时在线绝不串号）</h2>
+            <button type="button" class="primary-btn small" data-open-arena-slot="ALL">⊞ 一键三联同屏打开 3 个 Arena 专窗</button>
+          </div>
+          <p class="small muted" style="margin-top:0">每个账号拥有独立沙箱目录（<code>arena-profiles\S1 / S2 / S3</code>），首次在对应专窗登录各自的 Arena 账号后永久保持登录态，支持保存当前对话链接一键秒回：</p>
+          <div id="arena-tri-windows" class="catalog-grid"></div>
+        </article>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>🌐 三账号 × 三台机器 × Arena 多会话联邦矩阵</h2>
+            <span class="pill">mqgg5630 · shaohuawen03 · hukeying85</span>
+          </div>
+          <div id="fed-tri-matrix" class="catalog-grid"></div>
+        </article>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>📨 Arena 跨会话派单台（一键生成带完工推送的唤醒指令）</h2>
+              <span class="pill">DISPATCH GENERATOR</span>
+            </div>
+            <form id="fed-dispatch-form" class="compact-form">
+              <div class="form-row">
+                <label>派发目标会话与受控机器
+                  <select id="fed-target-node">
+                    <option value="desktop_hukeying">🖥️ [S3] 台式机粗粒化 MD 会话 (hukeying85-ux)</option>
+                    <option value="hpc_shaohua">🧬 [S2] HPC 毕业课题全原子 MD 会话 (shaohuawen03-cyber)</option>
+                    <option value="laptop_mqgg">💻 [S1] 笔记本总控与论文会话 (mqgg5630-cyber)</option>
+                  </select>
+                </label>
+                <label>关联抗菌肽序列（选填）
+                  <input id="fed-peptide-seq" value="GIGKFLHSAKKFGKAFVGEIMNS" maxlength="120">
+                </label>
+              </div>
+              <label>子任务标题
+                <input id="fed-task-title" value="批次1：Top-5 候选抗菌肽 Martini 3 粗粒化细菌膜 2.0 μs 打孔活性初筛" maxlength="150" required>
+              </label>
+              <label>验收指标与回传要求
+                <textarea id="fed-task-obj" rows="2" maxlength="800">使用 martinize2 + insane.py 构建 POPE:POPG (3:1) 双层膜，预平衡 20 ns 后 GPU 跑 2.0 us；挂载 node_agent.py 跑完秒推手机，并将膜结合深度与序参数摘要 JSON 回传毕业课题主线。</textarea>
+              </label>
+              <div class="actions">
+                <button type="submit" class="primary-btn small">🚀 生成跨会话派单包并复制</button>
+              </div>
+            </form>
+            <hr class="sep">
+            <h3>最近派单队列</h3>
+            <div id="fed-dispatches-list" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>⏱️ 会话监控边界 &amp; 架构防翻车优化</h2>
+              <span class="pill pale">24×7 LOCAL SENTINEL</span>
+            </div>
+            <div id="fed-limits-box" class="task-stack"></div>
+          </article>
+        </div>
+
+        <div id="wr-roster-grid" class="catalog-grid" style="margin-bottom:14px"></div>
+        <div id="wr-routines-box" class="grid-two" style="margin-bottom:14px"></div>
+        <div id="coord-rules-row" class="metrics"></div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>并存会话实例矩阵与资源边界</h2>
+              <span class="pill" id="coord-session-count">检测中</span>
+            </div>
+            <div id="coord-sessions-list" class="task-stack"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>共享资源租约锁 &amp; 跨会话协作事件流</h2>
+              <span class="pill pale">ATOMIC LEASE</span>
+            </div>
+            <div id="coord-locks-box" class="kv-list" style="margin-bottom:14px"></div>
+            <form id="coord-note-form" class="compact-form">
+              <label>发布跨会话交接留言（写入 <code>data/coord/events.jsonl</code>）
+                <input id="coord-note-input" placeholder="例如：已完成 Google Drive 爱情模块与三账号分舱升级" maxlength="300" required>
+              </label>
+              <div class="actions">
+                <button type="submit" class="primary-btn small">＋ 写入协作交接日志</button>
+                <button type="button" id="coord-test-lease-btn" class="ghost-btn small">🔒 测试申请/释放租约锁</button>
+              </div>
+            </form>
+            <hr class="sep">
+            <div id="coord-events-box" class="task-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 10: SOFTWARE CATALOG (#software) ==================== -->
+      <section id="software" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">SCIENTIFIC &amp; WRITING SUITE · SILENT INSTALL TO E:\0apps</span>
+              <h2>▦ 本机软件健康扫描与静默部署中心</h2>
+              <p>实时展示本机已检测到的具体可执行文件路径与版本（含开源版 <b>PyMOL 3.1.0</b>、<b>Lark-Formatter v0.21.1</b>、<b>yt-dlp</b>、<b>GitHub CLI</b>、<b>Miniforge3</b>），支持后台零弹窗一键补齐至数据盘 <code>E:\0apps</code>。</p>
+            </div>
+            <div class="banner-controls">
+              <label class="inline-label">目标安装盘
+                <select id="sw-drive">
+                  <option value="E:">E: 数据盘 (推荐)</option>
+                  <option value="D:">D: 盘</option>
+                  <option value="C:">C: 系统盘</option>
+                </select>
+              </label>
+              <button type="button" id="sw-scan-btn" class="primary-btn">↻ 重新扫描本机软件</button>
+            </div>
+          </div>
+        </article>
+
+        <div class="toolbar">
+          <input id="sw-search" placeholder="搜索软件名称、路径或功能（如：PyMOL、Lark、yt-dlp、cloudflared、Zotero）…">
+          <div class="filter-pills" id="sw-filters">
+            <button type="button" class="active" data-cat="all">全部</button>
+            <button type="button" data-cat="科研与生信">科研与生信</button>
+            <button type="button" data-cat="科研与写作">科研与写作</button>
+            <button type="button" data-cat="开发与同步">开发与同步</button>
+            <button type="button" data-cat="远程与组网">远程与组网</button>
+            <button type="button" data-cat="桌面美化">桌面美化</button>
+          </div>
+        </div>
+
+        <div id="sw-catalog-grid" class="catalog-grid"></div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>自定义静默安装软件包 (Winget / Conda-Forge)</h2>
+              <span class="pill pale">ALLOWLIST SAFE</span>
+            </div>
+            <form id="custom-sw-form" class="compact-form">
+              <div class="form-row">
+                <label>安装源
+                  <select id="custom-sw-mgr">
+                    <option value="winget">Windows 官方源 (winget)</option>
+                    <option value="conda">科研生信源 (conda-forge)</option>
+                  </select>
+                </label>
+                <label>精确包名 / Winget ID
+                  <input id="custom-sw-spec" placeholder="例如：Cloudflare.cloudflared 或 rdkit" required maxlength="80">
+                </label>
+              </div>
+              <button type="submit" class="primary-btn small">＋ 加入后台静默安装队列</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>安装任务队列与输出日志</h2>
+              <span class="pill pale" id="sw-scan-time">已扫描</span>
+            </div>
+            <div id="sw-jobs-box" class="task-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 11: REMOTE CONTROL (#remote) ==================== -->
+      <section id="remote" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">HPC MU01 SLURM · WSL2 UBUNTU · DESKTOP WORKSTATION</span>
+              <h2>⇄ 跨设备远程控制中心（超算 mu01 · 本机 WSL2 · 异地台式机）</h2>
+              <p>统一探测超算登录节点 <code>mu01</code>（<code>cu</code> 64核 / <code>fat1</code> 96核1T 分区）、本机 <code>WSL2</code> 与台式机节点的在线延迟，一键下发白名单队列/磁盘/GPU检查指令。</p>
+            </div>
+            <div class="banner-controls">
+              <button type="button" id="remote-probe-btn" class="primary-btn">↻ 一键探测全部节点连通性</button>
+            </div>
+          </div>
+        </article>
+
+        <div id="remote-grid" class="catalog-grid"></div>
+
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>向选定节点下发远程巡检指令</h2>
+              <span class="pill pale">BATCHMODE SSH / WSL</span>
+            </div>
+            <form id="remote-cmd-form" class="compact-form">
+              <div class="form-row">
+                <label>目标节点
+                  <select id="remote-host-select"></select>
+                </label>
+                <label>预设巡检动作
+                  <select id="remote-action-select">
+                    <option value="info">环境与系统盘点 (hostname / uname / Slurm)</option>
+                    <option value="jobs">查看运行中作业或进程 (squeue / ps)</option>
+                    <option value="disk">查看存储配额与剩余空间 (df -h)</option>
+                    <option value="gpu">查看 GPU / 计算分区空闲节点</option>
+                    <option value="custom">执行下方自定义 Shell 命令</option>
+                  </select>
+                </label>
+              </div>
+              <label>自定义命令（点击下方快捷胶囊自动填入，或手动输入）
+                <input id="remote-custom-input" placeholder="例如：squeue -u $USER" maxlength="380">
+              </label>
+              <div class="filter-pills" id="remote-quick-chips" style="margin-bottom:8px">
+                <button type="button" data-rcmd="squeue -u $USER -o '%.10i %.9P %.24j %.8T %.10M %.6D %R'">📊 Slurm 队列状态</button>
+                <button type="button" data-rcmd="nvidia-smi --query-gpu=name,utilization.gpu,memory.used,memory.total --format=csv">🎮 GPU 显存负载</button>
+                <button type="button" data-rcmd="grep -E 'Performance|Step' -B 1 -A 2 prod.log | tail -n 12">🧬 GROMACS 实时速率</button>
+                <button type="button" data-rcmd="df -h ~ /tmp">💾 存储配额余量</button>
+              </div>
+              <button type="submit" class="primary-btn small">▶ 立即执行远程指令</button>
+            </form>
+
+            <hr class="sep">
+            <h3>新增受控机器节点</h3>
+            <form id="remote-add-form" class="compact-form">
+              <div class="form-row">
+                <input id="add-host-name" placeholder="节点显示名（如：GPU 台式机）" required maxlength="50">
+                <input id="add-host-addr" placeholder="IP 或域名（如 10.147.x.x）" required maxlength="60">
+              </div>
+              <div class="form-row">
+                <input id="add-host-user" placeholder="SSH 用户名" required maxlength="32">
+                <input id="add-host-port" type="number" value="22" min="1" max="65535" placeholder="端口 22">
+              </div>
+              <button type="submit" class="ghost-btn small">＋ 注册节点</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>远程终端实时输出回执</h2>
+              <span class="pill pale">REDACTED OUTPUT</span>
+            </div>
+            <pre id="remote-console" class="terminal-pre" style="min-height:240px">选择左侧节点并点击「立即执行远程指令」，实时回执将展示在此处。</pre>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 12: CROSS-PC SCRIPTS (#scripts) ==================== -->
+      <section id="scripts" class="tab">
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>⚡ 新电脑 / 台式机一键体检与科研装机脚本生成器</h2>
+              <span class="pill">WINDOWS · LINUX · WSL · MAC</span>
+            </div>
+            <p class="muted">为台式机（<code>hukeying85-ux</code>）、新笔记本或 Linux 工作站一键生成自包含装机与组网脚本（含开源版 PyMOL、Git/gh、ZeroTier/Cloudflare 组网）。</p>
+            <div class="filter-pills" id="sb-role-presets" style="margin-bottom:10px">
+              <button type="button" class="active" data-sb-preset="laptop">💻 主力科研笔记本全套</button>
+              <button type="button" data-sb-preset="desktop_cg">🖥️ 台式机粗粒化 MD 算力节点</button>
+              <button type="button" data-sb-preset="hpc_linux">🧬 Linux / WSL2 超算哨兵</button>
+              <button type="button" data-sb-preset="diag_only">🔍 纯只读硬件与环境体检</button>
+            </div>
+            <form id="script-builder-form" class="compact-form">
+              <div class="form-row">
+                <label>目标电脑操作系统
+                  <select id="sb-os">
+                    <option value="windows">Windows 10 / 11 (PowerShell 5.1/7)</option>
+                    <option value="linux">Linux / WSL2 / HPC / macOS (Bash)</option>
+                  </select>
+                </label>
+                <label>执行模式
+                  <select id="sb-mode">
+                    <option value="install">全面体检 + 自动安装勾选软件 (推荐)</option>
+                    <option value="diag">仅硬件/网络/软件只读体检</option>
+                    <option value="node">受控算力节点接入 (开启 OpenSSH + 组网 + 防休眠)</option>
+                  </select>
+                </label>
+              </div>
+              <div class="form-row">
+                <label>首选安装磁盘 (Windows)
+                  <select id="sb-drive">
+                    <option value="E:">E: 盘 (推荐)</option>
+                    <option value="Auto">Auto (自动选最大非系统盘)</option>
+                    <option value="D:">D: 盘</option>
+                    <option value="C:">C: 盘</option>
+                  </select>
+                </label>
+                <label>附加 Winget 包 ID (逗号分隔)
+                  <input id="sb-extra" placeholder="例如：DigitalScholar.Zotero,7zip.7zip">
+                </label>
+              </div>
+              <div class="check-grid">
+                <label class="check-item"><input type="checkbox" id="sb-pymol" checked> <span>安装开源完整版 <b>PyMOL 3.1</b> (<code>conda-forge::pymol-open-source</code>)</span></label>
+                <label class="check-item"><input type="checkbox" id="sb-base" checked> <span>安装基础开发套件 (<b>Git</b> + <b>GitHub CLI gh</b> + <b>uv</b>)</span></label>
+                <label class="check-item"><input type="checkbox" id="sb-ts"> <span>安装异地虚拟局域网组网组件</span></label>
+              </div>
+              <div class="actions">
+                <a id="sb-download-link" class="primary-btn small" href="/api/script?os=windows&mode=install&pymol=1&base=1">⬇ 下载定制脚本文件</a>
+                <button type="button" id="sb-copy-cmd" class="ghost-btn small">📋 复制单行执行命令</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>生成的脚本执行指令与随附文件清单</h2>
+              <span class="pill pale">READY TO RUN</span>
+            </div>
+            <pre id="sb-preview" class="terminal-pre" style="min-height:140px"></pre>
+            <div class="task-stack" style="margin-top:12px">
+              <div class="subcard"><strong>仓库内置 Windows 双击脚本</strong><div class="small muted"><code>deliverable/bootstrap/pc-diag-install.bat</code> · <code>code/bootstrap/pc-diag-install.ps1</code></div></div>
+              <div class="subcard"><strong>仓库内置 A+D 免付费组网脚本</strong><div class="small muted"><code>code/connect/setup_ad_dual_mesh.ps1</code> · <code>code/federation/node_agent.py</code></div></div>
+              <div class="subcard"><strong>仓库内置 Linux / HPC 装机脚本</strong><div class="small muted"><code>code/bootstrap/pc-diag-install.sh</code></div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 13: ARENA CONNECTORS (#connectors) ==================== -->
+      <section id="connectors" class="tab">
+        <article class="card highlight-banner">
+          <div class="banner-flex">
+            <div>
+              <span class="pill">10 LIVE CONNECTORS · BOUND WORKSPACE RESOURCES</span>
+              <h2>∞ 已打通生产力连接器矩阵（每项均展示已绑定的具体云端实例与直达入口）</h2>
+              <p>覆盖 GitHub 三账号、Notion 总控台与四大数据库、Google Drive `00–05`（含爱情珍藏区）、Google Docs/Sheets/Slides/Calendar、Gmail、Linear 与 Dropbox。</p>
+            </div>
+          </div>
+        </article>
+        <div id="connector-grid" class="catalog-grid"></div>
+      </section>
+
+      <!-- ==================== TAB 14: STUDIO (DSH VIDEO SKIN + TRANSPARENCY + PET + LEDGER) (#studio) ==================== -->
+      <section id="studio" class="tab">
+        <div class="grid-two">
+          <article class="card">
+            <div class="cardtop">
+              <h2>✦ `dsh-video-skin` 原版开机动画 · 高透动态壁纸 · 玻璃引擎</h2>
+              <span class="pill">MIT LICENSE · ULTRA TRANSPARENT</span>
+            </div>
+            <p class="muted">已完整集成 <code>Something11235/dsh-video-skin</code> 原版视频开机动画（<code>dsh-boot.mp4</code>，含音轨平滑渐隐与底部 2px 进度条）与萌系书房循环视频壁纸（<code>dsh-bg.mp4</code>），默认调至高透清透模式（卡片不透明度 14%）。</p>
+
+            <h3>1. 一键透明度预设（参考 dsh-video-skin 原生高透曲线 · <span id="skin-contrast-badge">可读性优良</span>）</h3>
+            <div class="theme-swatches" style="margin-bottom:10px">
+              <button type="button" data-alpha-preset="ultra" class="swatch">💎 极致全透 (卡片10% · 蒙版6%)</button>
+              <button type="button" data-alpha-preset="clear" class="swatch active">✨ 默认超透 (卡片14% · 蒙版10%)</button>
+              <button type="button" data-alpha-preset="balanced" class="swatch">🌸 均衡高透 (卡片22% · 蒙版14%)</button>
+              <button type="button" data-alpha-preset="solid" class="swatch">📖 稳态阅读 (卡片38% · 蒙版22%)</button>
+            </div>
+
+            <h3>2. 动态视频壁纸 / 二次元静态壁纸切换</h3>
+            <div class="theme-swatches" style="margin-bottom:10px">
+              <button type="button" data-wp-pick="dsh-bg.mp4" class="swatch active">🎬 DSH原版：萌系女仆书房动态壁纸</button>
+              <button type="button" data-wp-pick="wallpaper-anime.jpg" class="swatch">🌸 云海鲸灵少女</button>
+              <button type="button" data-wp-pick="boot-mascot.jpg" class="swatch">🎀 星盘双马尾鲸灵</button>
+              <button type="button" data-wp-pick="wallpaper-aurora.jpg" class="swatch">🌌 极光星海</button>
+            </div>
+
+            <h3>3. 色彩主题光晕</h3>
+            <div class="theme-swatches" id="theme-swatches">
+              <button type="button" data-theme-pick="sakura-mist" class="swatch active">🌸 樱云粉霞</button>
+              <button type="button" data-theme-pick="aurora-abyss" class="swatch">🌌 深海极光</button>
+              <button type="button" data-theme-pick="emerald-nebula" class="swatch">🌿 流光翡翠</button>
+              <button type="button" data-theme-pick="obsidian-pulse" class="swatch">🖤 星际暗曜</button>
+              <button type="button" data-theme-pick="cyber-prism" class="swatch">🔮 赛博霓虹</button>
+              <button type="button" data-theme-pick="mist-paper" class="swatch">☀️ 晨雾宣纸</button>
+            </div>
+
+            <div class="slider-group" style="margin-top:12px">
+              <label>卡片表面不透明度（越低壁纸越透亮：<span id="lbl-opacity">14%</span>）
+                <input type="range" id="rng-opacity" min="8" max="90" value="14">
+              </label>
+              <label>背景暗角蒙版浓度（<span id="lbl-veil">10%</span>）
+                <input type="range" id="rng-veil" min="0" max="65" value="10">
+              </label>
+              <label>毛玻璃模糊半径（越低背景细节越清晰：<span id="lbl-blur">4px</span>）
+                <input type="range" id="rng-blur" min="0" max="32" value="4">
+              </label>
+            </div>
+
+            <div class="check-grid two-col" style="margin-top:10px">
+              <label class="check-item"><input type="checkbox" id="chk-motion" checked> <span>启用星尘微粒点缀层</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-boot" checked> <span>启用 dsh-video-skin 视频开机动画</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-boot-sound" checked> <span>开机动画原版音轨（平滑渐隐）</span></label>
+              <label class="check-item"><input type="checkbox" id="chk-whale" checked> <span>显示右下角小鲸鱼伴侣挂件</span></label>
+            </div>
+
+            <div class="form-row" style="margin-top:12px">
+              <input id="custom-media-path" placeholder="本机自定义 MP4 / WebM / 图片完整路径（如 E:\Wallpapers\my_boot_or_bg.mp4）">
+              <button type="button" id="apply-media-btn" class="ghost-btn small">应用本地视频/壁纸</button>
+            </div>
+
+            <div class="actions" style="margin-top:12px;flex-wrap:wrap">
+              <button type="button" id="studio-boot-btn" class="primary-btn">🎬 立即全屏播放 dsh-video-skin 开机动画</button>
+              <button type="button" id="save-skin-btn" class="ghost-btn">💾 保存透明度与壁纸预设</button>
+              <button type="button" id="scan-we-btn" class="ghost-btn">🔍 扫描本机 Wallpaper Engine 壁纸</button>
+              <button type="button" id="open-whale-cfg" class="ghost-btn">🐋 小鲸鱼设置</button>
+            </div>
+            <div id="we-gallery" class="we-gallery" style="margin-top:10px"></div>
+          </article>
+
+          <article class="card">
+            <div class="cardtop">
+              <h2>独立桌面宠物 &amp; Windows 计划任务零弹窗静默值守</h2>
+              <span class="pill pale">ZERO-CONSOLE VERIFIED</span>
+            </div>
+            <p class="muted">本机全部 5 个计划任务均已切换为纯 GUI 无控制台壳（<code>ArenaSilentRun.exe</code> / <code>pythonw.exe</code> / <code>ArenaDesk.exe</code>）与 <code>git-credential-arenasilent.exe</code>，彻底消除后台闪窗。</p>
+            <div class="actions" style="margin-top:10px;margin-bottom:14px">
+              <button type="button" id="pet-hide" class="ghost-btn small">🙈 隐藏桌面宠物</button>
+              <button type="button" id="pet-show" class="primary-btn small">🐾 唤醒桌面宠物</button>
+            </div>
+            <div id="task-cards" class="task-stack"></div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="cardtop">
+            <h2>会话台账与用户提示词登记</h2>
+            <span class="pill pale">LOCAL LEDGER + NOTION SNAPSHOT</span>
+          </div>
+          <div class="toolbar">
+            <input id="search" placeholder="搜索会话 ID、标题或分支…">
+          </div>
+          <div class="table-wrap">
+            <table class="clean-table">
+              <thead><tr><th>会话标题 / 摘要</th><th>仓库与分支</th><th>状态</th><th>同步模式</th><th>更新时间</th><th>一键启停</th></tr></thead>
+              <tbody id="session-table"></tbody>
+            </table>
+          </div>
+
+          <hr class="sep">
+          <h3>补录或修改本机会话提示词</h3>
+          <form id="prompt-form" class="compact-form">
+            <div class="form-row">
+              <label>选择已发现的会话
+                <select id="session-select" required></select>
+              </label>
+              <label>会话显示标题
+                <input id="session-title" maxlength="160" placeholder="例如：Arena Desk v2.5 升级与验收">
+              </label>
+            </div>
+            <label>任务提示词 / 目标与验收标准
+              <textarea id="session-prompt" rows="3" maxlength="12000" placeholder="仅记录任务目标与验收标准，切勿填入密码或 API Key。"></textarea>
+            </label>
+            <button type="submit" class="primary-btn small">保存到本机台账</button>
+          </form>
+        </article>
+      </section>
+
+      <footer class="app-footer">
+        <span>Arena Desk Crystal Edition v2.6 · Private Repo <code>hukeying85-ux/0fuye</code> · dsh-video-skin (MIT) Integrated</span>
+        <span>前台自动开机动画 · 安卓原生 WebAPK 伴侣 · 三账号物理分舱 · 全域隐私严格脱敏</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- dsh-video-skin Style Floating Quick Transparency Trigger & Popover -->
+  <button type="button" id="dsvs-fab" class="dsvs-fab" title="壁纸与透明度快捷调节">✦ 透明</button>
+
+  <div id="skin-popover" class="floating-popover" hidden>
+    <div class="pop-head">
+      <b>✦ 壁纸与高透玻璃调节</b>
+      <button type="button" id="close-skin-pop" class="icon-close">✕</button>
+    </div>
+    <div class="mini-swatches" style="margin-bottom:8px">
+      <button type="button" data-alpha-preset="clear">✨壁纸最清</button>
+      <button type="button" data-alpha-preset="balanced">🌸均衡高透</button>
+      <button type="button" data-alpha-preset="solid">📖稳态阅读</button>
+    </div>
+    <label>卡片不透明度 <span id="pop-lbl-op">14%</span>
+      <input type="range" id="pop-rng-op" min="8" max="90" value="14">
+    </label>
+    <label>背景蒙版浓度 <span id="pop-lbl-veil">10%</span>
+      <input type="range" id="pop-rng-veil" min="0" max="65" value="10">
+    </label>
+    <label>毛玻璃模糊 <span id="pop-lbl-bl">4px</span>
+      <input type="range" id="pop-rng-bl" min="0" max="32" value="4">
+    </label>
+    <div class="mini-swatches" style="margin:8px 0 6px">
+      <button type="button" data-wp-pick="dsh-bg.mp4">🎬女仆书房</button>
+      <button type="button" data-wp-pick="wallpaper-anime.jpg">🌸云海少女</button>
+      <button type="button" data-wp-pick="boot-mascot.jpg">🎀星盘少女</button>
+      <button type="button" data-wp-pick="wallpaper-aurora.jpg">🌌极光</button>
+    </div>
+    <div class="mini-swatches">
+      <button type="button" data-theme-pick="sakura-mist">樱云</button>
+      <button type="button" data-theme-pick="aurora-abyss">极光</button>
+      <button type="button" data-theme-pick="emerald-nebula">翡翠</button>
+      <button type="button" data-theme-pick="cyber-prism">霓虹</button>
+      <button type="button" data-theme-pick="mist-paper">宣纸</button>
+    </div>
+  </div>
+
+  <!-- Whale Companion Customizer Modal -->
+  <div id="whale-modal" class="modal-backdrop" hidden>
+    <div class="modal-card">
+      <div class="cardtop">
+        <h2>🐋 小鲸鱼伴侣挂件设置</h2>
+        <button type="button" id="close-whale-modal" class="icon-close">✕</button>
+      </div>
+      <div class="compact-form">
+        <label>挂件尺寸缩放 (<span id="lbl-whale-scale">100%</span>)
+          <input type="range" id="rng-whale-scale" min="65" max="145" value="100">
+        </label>
+        <div class="check-grid two-col">
+          <label class="check-item"><input type="checkbox" id="chk-whale-snap" checked> <span>四边磁吸与贴左镜像翻转</span></label>
+          <label class="check-item"><input type="checkbox" id="chk-whale-sound" checked> <span>按压气泡风铃音效</span></label>
+        </div>
+        <label>自定义轮播气泡语句（每行一条）
+          <textarea id="txt-whale-quotes" rows="4"></textarea>
+        </label>
+        <div class="actions">
+          <button type="button" id="save-whale-btn" class="primary-btn small">保存配置</button>
+          <button type="button" id="hide-whale-now" class="ghost-btn small">暂时隐藏</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Draggable Whale Companion -->
+  <div id="whale-widget" aria-label="基座小鲸鱼挂件">
+    <div id="whale-bubble" class="whale-bubble">
+      <div class="wb-tag" id="wb-tag">◈ Arena Desk v2.5</div>
+      <div class="wb-body" id="wb-body">点我切换气泡：已接入 dsh-video-skin 原版开机动画与 💖 爱情空间～</div>
+    </div>
+    <div class="whale-actor-wrap" id="whale-actor-wrap">
+      <button type="button" id="whale-gear" class="whale-gear" title="小鲸鱼设置">⚙</button>
+      <img src="/assets/whale.svg" alt="Arena Whale" id="whale-img" draggable="false">
+    </div>
+  </div>
+
+  <div id="toast" role="status" hidden></div>
+  <script src="/app.js?v=2.8.0"></script>
+</body>
+</html>
