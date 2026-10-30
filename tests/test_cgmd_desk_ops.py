@@ -115,3 +115,33 @@ def test_main_reports_unsupported_mode(tmp_path):
         payload = json.load(handle)
     assert payload["status"] == "unsupported"
     assert "unknown mode" in payload["summary"]
+
+
+def test_search_reads_the_peptide_out_of_the_second_gro(tmp_path, monkeypatch):
+    """box.gro (solvent) must not hide the peptide in complex.gro."""
+    run = tmp_path / "md_ylsllqr"
+    run.mkdir()
+    solver = ["box.gro", "3", "    1SOL  HW1    1   0.000   0.000   0.000",
+              "    1SOL  HW2    1   0.000   0.000   0.000",
+              "    1SOL  OW     1   0.000   0.000   0.000", "   3.000   3.000   3.000"]
+    peptide = ["complex.gro", "3"]
+    for index, name in enumerate(("TYR", "LEU", "SER"), start=1):
+        peptide.append("{:5d}{:<5s}{:>5s}{:5d}{:8.3f}{:8.3f}{:8.3f}".format(
+            index, name, "BB", index, 0.5 * index, 0.5, 0.5))
+    peptide.append("   3.000   3.000   3.000")
+    (run / "box.gro").write_text("\n".join(solver) + "\n", encoding="utf-8")
+    (run / "complex.gro").write_text("\n".join(peptide) + "\n", encoding="utf-8")
+
+    status, summary, detail = desk_ops.mode_search(
+        {"roots": [str(tmp_path)], "days": 3650, "limit": 4, "depth": 4}, "")
+    assert status == "ok"
+    candidate = detail["candidates"][0]
+    assert candidate["sequence"] == "YLS"
+    assert candidate["sequence_source"] == "complex.gro"
+
+
+def test_which_finds_an_executable_without_shutil(monkeypatch):
+    """A Python 3.2 on PATH has no shutil.which; the local helper must cope."""
+    monkeypatch.setattr(desk_ops.shutil, "which", None, raising=False)
+    found = desk_ops.which("python3" if os.name != "nt" else "python.exe")
+    assert found is None or os.path.isfile(found)

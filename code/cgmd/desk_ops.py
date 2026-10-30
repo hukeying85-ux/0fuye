@@ -525,9 +525,25 @@ def mode_search(args, note):
                 "topology": topo[:6],
                 "files": len(files),
             }
-            gro_path = os.path.join(folder, gro[0]) if gro else None
-            if gro_path and "min" not in os.path.basename(gro_path).lower():
-                entry["sequence"] = sequence_from_gro(gro_path)
+            # Ask every .gro, not just the first one: sorted order puts box.gro
+            # (pure solvent) first in a normal GROMACS directory, and the peptide
+            # lives in complex.gro / em.gro.  Reading only the first file is why
+            # a real run on F: reported "sequence: null" and the caller fell back
+            # to a made-up peptide.
+            best_sequence = None
+            best_length = 0
+            for name in gro[:12]:
+                if "min" in name.lower():
+                    continue
+                guess = sequence_from_gro(os.path.join(folder, name))
+                if guess and len(guess) > best_length:
+                    best_sequence = guess
+                    best_length = len(guess)
+            if best_sequence:
+                entry["sequence"] = best_sequence
+                entry["sequence_source"] = next(
+                    name for name in gro
+                    if sequence_from_gro(os.path.join(folder, name)) == best_sequence)
             candidates.append(entry)
         if truncated:
             break
