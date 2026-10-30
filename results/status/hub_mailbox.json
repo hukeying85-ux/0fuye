@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:49:02+08:00",
+    "generated_at":  "2026-10-30T15:57:06+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T075645-e045.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -78,19 +78,10 @@
                      "20261030T071719-b39b":  1,
                      "20261030T071928-c462":  1,
                      "20261030T074626-9153":  1,
-                     "20261030T074736-15f9":  1
+                     "20261030T074736-15f9":  1,
+                     "20261030T075645-e045":  1
                  },
     "log_tail":  [
-                     "2026-10-30 15:10:55 [INFO] job 20261030T071030-88d7 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
-                     "2026-10-30 15:11:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:12:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:13:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:14:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:15:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-30 15:15:55 [INFO] job kind=deskdiag",
-                     "2026-10-30 15:15:59 [INFO] job 20261030T071529-f003 (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
-                     "2026-10-30 15:16:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-30 15:16:55 [INFO] job kind=gmx",
                      "2026-10-30 15:16:55 [INFO] job 20261030T071636-eb87 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 15:17:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 15:17:55 [INFO] job kind=gmx",
@@ -140,7 +131,17 @@
                      "2026-10-30 15:47:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 15:47:55 [INFO] job kind=pipeline",
                      "2026-10-30 15:47:55 [INFO] job 20261030T074736-15f9 (pipeline) -\u003e unsupported: the Martini pipeline job kind is not wired yet; use smoke or gmx",
-                     "2026-10-30 15:48:56 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-30 15:48:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:49:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:50:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:51:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:52:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:53:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:54:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:55:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 15:56:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 15:56:56 [INFO] job kind=ping",
+                     "2026-10-30 15:56:57 [INFO] job 20261030T075645-e045 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
                  ],
     "call_tail":  [
 
@@ -164,9 +165,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261030T075645-e045",
+                          "kind":  "ping",
+                          "status":  "ok",
+                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T075645-e045",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T15:56:57+08:00"
+                   },
                    {
                        "id":  "20261030T074736-15f9",
                        "kind":  "pipeline",
@@ -299,13 +312,6 @@
                        "status":  "timeout",
                        "summary":  "gmx energy -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.edr -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\energy.xvg exit 124:  41  Box-Vel-YY      42  Box-Vel-ZZ      43  T-System        44  Lamb-System   ",
                        "finished_at":  "2026-10-30T12:25:25+08:00"
-                   },
-                   {
-                       "id":  "20261030T041918-8934",
-                       "kind":  "gmx",
-                       "status":  "timeout",
-                       "summary":  "gmx gyrate -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg exit 124: \u003e ",
-                       "finished_at":  "2026-10-30T12:22:54+08:00"
                    }
                ]
 }
