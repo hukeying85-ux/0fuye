@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T16:06:03+08:00",
+    "generated_at":  "2026-10-30T16:09:18+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T080755-8d9a.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -85,14 +85,10 @@
                      "20261030T080044-649b":  1,
                      "20261030T080225-1720":  1,
                      "20261030T080316-230e":  1,
-                     "20261030T080341-974c":  1
+                     "20261030T080341-974c":  1,
+                     "20261030T080755-8d9a":  1
                  },
     "log_tail":  [
-                     "2026-10-30 15:26:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:27:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:27:59 [INFO] job kind=gmx",
-                     "2026-10-30 15:27:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T072726-9c39 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\em_long.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\system.pdb -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -o out.tpr -maxwarn 2 exit 1: CGMD_EXIT_CODE=1 ",
-                     "2026-10-30 15:28:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:29:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:30:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:31:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -147,7 +143,12 @@
                      "2026-10-30 16:04:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:04:56 [INFO] job kind=cgmd",
                      "2026-10-30 16:04:57 [INFO] job 20261030T080341-974c (cgmd) -\u003e ok: cgmd search: 46 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.2 d ago)",
-                     "2026-10-30 16:05:56 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-30 16:05:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:06:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:07:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:08:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 16:08:55 [INFO] job kind=cgmd",
+                     "2026-10-30 16:09:09 [INFO] job 20261030T080755-8d9a (cgmd) -\u003e ok: cgmd search: 46 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.3 d ago)"
                  ],
     "call_tail":  [
 
@@ -171,9 +172,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261030T080755-8d9a",
+                          "kind":  "cgmd",
+                          "status":  "ok",
+                          "summary":  "cgmd search: 46 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.3 d ago)"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T080755-8d9a",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd search: 46 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.3 d ago)",
+                       "finished_at":  "2026-10-30T16:09:09+08:00"
+                   },
                    {
                        "id":  "20261030T080341-974c",
                        "kind":  "cgmd",
@@ -306,13 +319,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-10-30T15:10:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T070716-af74",
-                       "kind":  "gmx",
-                       "status":  "fail",
-                       "summary":  "gmx check -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 1: CGMD_EXIT_CODE=1 ",
-                       "finished_at":  "2026-10-30T15:07:58+08:00"
                    }
                ]
 }
