@@ -1,17 +1,18 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T12:02:53+08:00",
+    "generated_at":  "2026-10-30T12:04:31+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  2,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T033123-f579.json"
+                  "20261030T033257-5c2a.json",
+                  "20261030T040258-9a11.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -58,12 +59,10 @@
                      "20261030T032555-f197":  1,
                      "20261030T032946-2409":  1,
                      "20261030T033022-dadf":  1,
-                     "20261030T033123-f579":  1
+                     "20261030T033123-f579":  1,
+                     "20261030T033257-5c2a":  1
                  },
     "log_tail":  [
-                     "2026-10-30 11:19:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-30 11:19:55 [INFO] job kind=gmx",
-                     "2026-10-30 11:19:55 [INFO] job 20261030T031929-de92 (gmx) -\u003e fail: gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 exit 1: CGMD_EXIT_CODE=1 ",
                      "2026-10-30 11:20:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 11:20:55 [INFO] job kind=gmx",
                      "2026-10-30 11:21:00 [INFO] job 20261030T032022-1efc (gmx) -\u003e ok: gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em -nb gpu -bonded cpu -gpu_id 0 -ntmpi 1 -ntomp 4 exit 0: CGMD_EXIT_CODE=0 ",
@@ -120,7 +119,10 @@
                      "hint: have locally. This is usually caused by another repository pushing to",
                      "hint: the same ref. If you want to integrate the remote changes, use",
                      "hint: \u0027git pull\u0027 before pushing again.",
-                     "hint: See the \u0027Note about fast-forwards\u0027 in \u0027git push --help\u0027 for details."
+                     "hint: See the \u0027Note about fast-forwards\u0027 in \u0027git push --help\u0027 for details.",
+                     "2026-10-30 12:03:54 [INFO] mailbox: 2 queued, running at most 1",
+                     "2026-10-30 12:03:54 [INFO] job kind=selfcheck",
+                     "2026-10-30 12:04:22 [INFO] job 20261030T033257-5c2a (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
                  ],
     "call_tail":  [
 
@@ -145,13 +147,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T033123-f579",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 -pin on -maxh 0.50 exit 0: CGMD_EXIT_CODE=0 "
+                          "id":  "20261030T033257-5c2a",
+                          "kind":  "selfcheck",
+                          "status":  "fail",
+                          "summary":  "selfcheck: 15 pass / 3 warn / 0 fail"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T033257-5c2a",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-10-30T12:04:22+08:00"
+                   },
                    {
                        "id":  "20261030T033123-f579",
                        "kind":  "gmx",
@@ -284,13 +293,6 @@
                        "status":  "ok",
                        "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\em.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\system.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.tpr -maxwarn 2 exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T10:48:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T024445-eac0",
-                       "kind":  "pipeline",
-                       "status":  "unsupported",
-                       "summary":  "the Martini pipeline job kind is not wired yet; use smoke or gmx",
-                       "finished_at":  "2026-10-30T10:44:55+08:00"
                    }
                ]
 }
