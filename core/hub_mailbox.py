@@ -52,7 +52,7 @@ SCHEMA_RESULT = "cgmd.mailbox.result.v1"
 DEFAULT_REF = "hub/mailbox"
 
 # Kinds the desktop worker knows.  shell is opt-in on the desk side.
-KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline")
+KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline", "cgmd")
 
 # One line per kind, printed by ``caps`` so a brand-new session never has to
 # guess what the desk can do.
@@ -65,6 +65,7 @@ JOB_HELP = {
     "deskdiag": "file hashes repo-vs-desk, scheduled tasks, served HTML, boot ack, lock state",
     "deskfix": "re-arm the logon trigger, keep the panel alive, launch the boot animation now",
     "shell": "opt-in on the desk side (allow_shell=false by default)",
+    "cgmd": '{"mode": "build|run|probe|search|ff|all"} coarse-grained MD, no shell needed',
     "pipeline": "Martini pipeline, not wired yet - use smoke or gmx",
 }
 
