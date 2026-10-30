@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T11:31:05+08:00",
+    "generated_at":  "2026-10-30T11:32:34+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,8 +11,8 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T032946-2409.json",
-                  "20261030T033022-dadf.json"
+                  "20261030T033022-dadf.json",
+                  "20261030T033123-f579.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -57,12 +57,10 @@
                      "20261030T032322-9a87":  1,
                      "20261030T032414-2adc":  1,
                      "20261030T032555-f197":  1,
-                     "20261030T032946-2409":  1
+                     "20261030T032946-2409":  1,
+                     "20261030T033022-dadf":  1
                  },
     "log_tail":  [
-                     "2026-10-30 11:08:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 11:09:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 11:10:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 11:11:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 11:12:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 11:12:55 [INFO] job kind=ping",
@@ -119,7 +117,10 @@
                      "2026-10-30 11:29:55 [INFO] job 20261030T032555-f197 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                      "2026-10-30 11:30:55 [INFO] mailbox: 2 queued, running at most 1",
                      "2026-10-30 11:30:55 [INFO] job kind=gmx",
-                     "2026-10-30 11:30:56 [INFO] job 20261030T032946-2409 (gmx) -\u003e ok: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\prod.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.gro -t C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.cpt -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 11:30:56 [INFO] job 20261030T032946-2409 (gmx) -\u003e ok: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\prod.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.gro -t C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.cpt -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 11:31:55 [INFO] mailbox: 2 queued, running at most 1",
+                     "2026-10-30 11:31:55 [INFO] job kind=smoke",
+                     "2026-10-30 11:32:25 [INFO] job 20261030T033022-dadf (smoke) -\u003e ok: gmx 2025.1: 100 ps integrated on gpu"
                  ],
     "call_tail":  [
 
@@ -144,13 +145,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T032946-2409",
-                          "kind":  "gmx",
+                          "id":  "20261030T033022-dadf",
+                          "kind":  "smoke",
                           "status":  "ok",
-                          "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\prod.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.gro -t C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.cpt -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 "
+                          "summary":  "gmx 2025.1: 100 ps integrated on gpu"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T033022-dadf",
+                       "kind":  "smoke",
+                       "status":  "ok",
+                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
+                       "finished_at":  "2026-10-30T11:32:25+08:00"
+                   },
                    {
                        "id":  "20261030T032946-2409",
                        "kind":  "gmx",
@@ -283,13 +291,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-10-30T10:38:58+08:00"
-                   },
-                   {
-                       "id":  "20261030T023304-8ca9",
-                       "kind":  "ping",
-                       "status":  "ok",
-                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
-                       "finished_at":  "2026-10-30T10:33:55+08:00"
                    }
                ]
 }
