@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.selfcheck.v1",
-    "checked_at":  "2026-10-30T15:20:22+08:00",
+    "checked_at":  "2026-10-30T17:07:24+08:00",
     "overall":  "warn",
     "exit_code":  6,
     "config":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\config\\cgmd_hub.local.json",
@@ -37,7 +37,7 @@
                     "passed":  15,
                     "warnings":  3,
                     "failed":  0,
-                    "seconds":  26.2
+                    "seconds":  28.2
                 },
     "checks":  [
                    {
@@ -58,22 +58,22 @@
                        "id":  "branch",
                        "title":  "branch synchronisation",
                        "status":  "pass",
-                       "detail":  "arena/32cd826e-0fuye @ c5522b9 (ahead 0, behind 0)",
-                       "seconds":  1.46
+                       "detail":  "arena/32cd826e-0fuye @ 6b40341 (ahead 0, behind 0)",
+                       "seconds":  1.44
                    },
                    {
                        "id":  "creds",
                        "title":  "git credentials",
                        "status":  "pass",
                        "detail":  "hukeying85-ux / store --file=C:/cgmd/0fuye/skills/cgmd-hub/state/git-credentials",
-                       "seconds":  0.09
+                       "seconds":  0.08
                    },
                    {
                        "id":  "wsl",
                        "title":  "WSL2 distro",
                        "status":  "pass",
                        "detail":  "Ubuntu-18.04 | Ubuntu 18.04.6 LTS | 48 cores | 31.2 GB RAM",
-                       "seconds":  17.58
+                       "seconds":  19.55
                    },
                    {
                        "id":  "gpu",
@@ -156,7 +156,7 @@
                        "id":  "task",
                        "title":  "poll task",
                        "status":  "pass",
-                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/30/2026 15:19:19 | result 0",
+                       "detail":  "CGMD-Hub-Poll | state Ready | last run 10/30/2026 17:06:06 | result 0",
                        "seconds":  0
                    },
                    {
@@ -164,7 +164,7 @@
                        "title":  "phone beacon",
                        "status":  "pass",
                        "detail":  "POST https://ntfy.sh/arena-beacon-95bc796a66",
-                       "seconds":  2.15
+                       "seconds":  1.89
                    }
                ]
 }
