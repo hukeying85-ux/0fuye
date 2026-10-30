@@ -965,6 +965,28 @@ def parse_mdrun_log(path):
     return report
 
 
+def last_step_in_log(path):
+    """Highest step number mdrun wrote in its log (progress, not a guess)."""
+    best = None
+    try:
+        with open(path, "r", encoding="utf-8", errors="replace") as handle:
+            for line in handle:
+                parts = line.split()
+                if len(parts) < 2:
+                    continue
+                try:
+                    step = int(parts[0])
+                    float(parts[1])
+                except ValueError:
+                    continue
+                if step > 1e8:
+                    continue
+                best = step if best is None else max(best, step)
+    except Exception:
+        return None
+    return best
+
+
 def read_gro(path):
     """Return ``(beads, box)`` where beads is a list of (resname, atomname, xyz)."""
     beads = []
@@ -1111,6 +1133,11 @@ def mode_run(args, note):
 
     log_path = os.path.join(workdir, "prod.log")
     report = parse_mdrun_log(log_path)
+    # What the log actually said, so a caller never has to take a number on
+    # trust.  mdrun puts its Performance line at the very end of the log; when
+    # it is missing the wall clock still gives a defensible figure.
+    report["log_tail"] = tail_lines(log_path, 15)
+    report["steps_done"] = last_step_in_log(log_path)
     report["ps_completed"] = round(production_ns * 1000.0, 1)
     report["steps_requested"] = steps
     report["accelerator"] = "gpu" if use_gpu else "cpu"
@@ -1134,10 +1161,16 @@ def mode_run(args, note):
     report["structure"] = structure
     report["stages_seconds"] = round(sum(entry["seconds"] for entry in stages), 2)
     report["workdir"] = workdir
-    ok = bool(report.get("finished")) and (report.get("performance_ns_per_day") or 0) > 0
+    if not report.get("performance_ns_per_day") and report.get("finished") and entry["seconds"]:
+        # only meaningful when the slice really finished every requested step
+        report["performance_ns_per_day_estimated"] = round(
+            production_ns * 86400.0 / float(entry["seconds"]), 1)
+    rate = report.get("performance_ns_per_day") or report.get("performance_ns_per_day_estimated")
+    ok = bool(report.get("finished")) and bool(rate)
     status = "ok" if ok else "warn"
-    summary = "{} ps CG on {} at {} ns/day".format(
-        report["ps_completed"], report["accelerator"], report.get("performance_ns_per_day"))
+    summary = "{} ps CG on {} at {} ns/day{}".format(
+        report["ps_completed"], report["accelerator"], rate,
+        "" if report.get("performance_ns_per_day") else " (wall-clock)")
     return status, summary, {"report": report, "stages": stages, "workdir": workdir}
 
 
