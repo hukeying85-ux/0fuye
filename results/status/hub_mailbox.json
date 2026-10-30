@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T15:17:05+08:00",
+    "generated_at":  "2026-10-30T15:18:04+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T071636-eb87.json"
+                  "20261030T071719-b39b.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -74,12 +74,10 @@
                      "20261030T042918-da58":  1,
                      "20261030T071030-88d7":  1,
                      "20261030T071529-f003":  1,
-                     "20261030T071636-eb87":  1
+                     "20261030T071636-eb87":  1,
+                     "20261030T071719-b39b":  1
                  },
     "log_tail":  [
-                     "2026-10-30 14:29:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:30:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 14:31:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:32:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:33:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 14:34:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -136,7 +134,10 @@
                      "2026-10-30 15:15:59 [INFO] job 20261030T071529-f003 (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
                      "2026-10-30 15:16:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 15:16:55 [INFO] job kind=gmx",
-                     "2026-10-30 15:16:55 [INFO] job 20261030T071636-eb87 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 15:16:55 [INFO] job 20261030T071636-eb87 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 15:17:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 15:17:55 [INFO] job kind=gmx",
+                     "2026-10-30 15:17:55 [INFO] job 20261030T071719-b39b (gmx) -\u003e fail: gmx solvate -cs spc216.gro -box 2.0 -o F:\\cgmd\\runs\\probe-dir-check.gro exit 1: CGMD_EXIT_CODE=1 "
                  ],
     "call_tail":  [
 
@@ -161,13 +162,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T071636-eb87",
+                          "id":  "20261030T071719-b39b",
                           "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 "
+                          "status":  "fail",
+                          "summary":  "gmx solvate -cs spc216.gro -box 2.0 -o F:\\cgmd\\runs\\probe-dir-check.gro exit 1: CGMD_EXIT_CODE=1 "
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T071719-b39b",
+                       "kind":  "gmx",
+                       "status":  "fail",
+                       "summary":  "gmx solvate -cs spc216.gro -box 2.0 -o F:\\cgmd\\runs\\probe-dir-check.gro exit 1: CGMD_EXIT_CODE=1 ",
+                       "finished_at":  "2026-10-30T15:17:55+08:00"
+                   },
                    {
                        "id":  "20261030T071636-eb87",
                        "kind":  "gmx",
@@ -300,13 +308,6 @@
                        "status":  "ok",
                        "summary":  "gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 -pin on -maxh 0.50 exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T12:02:38+08:00"
-                   },
-                   {
-                       "id":  "20261030T033022-dadf",
-                       "kind":  "smoke",
-                       "status":  "ok",
-                       "summary":  "gmx 2025.1: 100 ps integrated on gpu",
-                       "finished_at":  "2026-10-30T11:32:25+08:00"
                    }
                ]
 }
