@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T16:11:01+08:00",
+    "generated_at":  "2026-10-30T16:13:07+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261030T081239-0ace.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -87,13 +87,10 @@
                      "20261030T080316-230e":  1,
                      "20261030T080341-974c":  1,
                      "20261030T080755-8d9a":  1,
-                     "20261030T080933-a2cf":  1
+                     "20261030T080933-a2cf":  1,
+                     "20261030T081239-0ace":  1
                  },
     "log_tail":  [
-                     "2026-10-30 15:33:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:34:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:35:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 15:36:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:37:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:38:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 15:39:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -149,7 +146,11 @@
                      "2026-10-30 16:09:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:09:55 [INFO] job kind=cgmd",
                      "2026-10-30 16:09:57 [INFO] job 20261030T080933-a2cf (cgmd) -\u003e fail: cgmd all: grompp-em failed (exit 1) (1711 beads)",
-                     "2026-10-30 16:10:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-10-30 16:10:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:11:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 16:12:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 16:12:55 [INFO] job kind=cgmd",
+                     "2026-10-30 16:12:57 [INFO] job 20261030T081239-0ace (cgmd) -\u003e fail: cgmd all: grompp-em failed (exit 1) (1711 beads)"
                  ],
     "call_tail":  [
 
@@ -173,9 +174,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261030T081239-0ace",
+                          "kind":  "cgmd",
+                          "status":  "fail",
+                          "summary":  "cgmd all: grompp-em failed (exit 1) (1711 beads)"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T081239-0ace",
+                       "kind":  "cgmd",
+                       "status":  "fail",
+                       "summary":  "cgmd all: grompp-em failed (exit 1) (1711 beads)",
+                       "finished_at":  "2026-10-30T16:12:57+08:00"
+                   },
                    {
                        "id":  "20261030T080933-a2cf",
                        "kind":  "cgmd",
@@ -308,13 +321,6 @@
                        "status":  "ok",
                        "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-30T15:16:55+08:00"
-                   },
-                   {
-                       "id":  "20261030T071529-f003",
-                       "kind":  "deskdiag",
-                       "status":  "ok",
-                       "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
-                       "finished_at":  "2026-10-30T15:15:59+08:00"
                    }
                ]
 }
