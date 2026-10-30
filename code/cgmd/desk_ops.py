@@ -765,8 +765,10 @@ def build_system(sequence, workdir, ff_file, box_nm=None, salt_m=0.15, temperatu
         itp_lines += ["", "[ bonds ]", "; elastic network (|i-j| >= 2, r <= {} nm, k = {})".format(EN_MAX_NM, EN_K)]
         for atom_i, atom_j, distance in elastic:
             itp_lines.append("{:5d} {:5d} {:5d} {:8.3f} {:8.1f}".format(atom_i, atom_j, 1, distance, EN_K))
-    itp_lines += ["", "[ system ]", "CGMD backbone CG {}".format(sequence), "",
-                  "[ molecules ]", "Peptide 1", ""]
+    # No [ molecules ] here: the peptide is declared once, in topol.top.  An
+    # included file that also declares it makes grompp count the peptide twice
+    # ("number of coordinates ... 1711 does not match topology ... 1718").
+    itp_lines += [""]
     itp_path = os.path.join(workdir, "peptide.itp")
     with open(itp_path, "w", encoding="ascii", newline="\n") as handle:
         handle.write("\n".join(itp_lines))
