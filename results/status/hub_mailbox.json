@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T10:52:07+08:00",
+    "generated_at":  "2026-10-30T10:53:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T025113-6ac4.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -46,7 +46,6 @@
                      "20261030T025113-6ac4":  1
                  },
     "log_tail":  [
-                     "2026-10-30 10:11:33 [INFO] peer hukeying85-ux/JevHarness job 20261030T021021-360c (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail",
                      "2026-10-30 10:11:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:12:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:13:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -105,7 +104,8 @@
                      "2026-10-30 10:50:56 [INFO] job 20261030T025021-7065 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 2 exit 1: Fatal error:",
                      "2026-10-30 10:51:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 10:51:55 [INFO] job kind=gmx",
-                     "2026-10-30 10:51:56 [INFO] job 20261030T025113-6ac4 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 2 exit 1: Fatal error:"
+                     "2026-10-30 10:51:56 [INFO] job 20261030T025113-6ac4 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 2 exit 1: Fatal error:",
+                     "2026-10-30 10:52:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -129,12 +129,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T025113-6ac4",
-                          "kind":  "gmx",
-                          "status":  "fail",
-                          "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 2 exit 1: Fatal error:"
-                      }
+
                   ],
     "recent":  [
                    {
