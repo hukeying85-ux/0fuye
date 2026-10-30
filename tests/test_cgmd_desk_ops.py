@@ -145,3 +145,20 @@ def test_which_finds_an_executable_without_shutil(monkeypatch):
     monkeypatch.setattr(desk_ops.shutil, "which", None, raising=False)
     found = desk_ops.which("python3" if os.name != "nt" else "python.exe")
     assert found is None or os.path.isfile(found)
+
+
+def test_peptide_itp_declares_no_molecules(tmp_path, ff_dir):
+    """The peptide must be declared once (topol.top), never in the include."""
+    system = desk_ops.build_system("KLVFFAE", str(tmp_path / "run"),
+                                   os.path.join(ff_dir, "martini_v3.0.0.itp"), box_nm=6.0)
+    itp = open(system["itp"], encoding="ascii").read()
+    assert "[ molecules ]" not in itp
+    assert itp.count("[ moleculetype ]") == 1
+    top = open(system["top"], encoding="ascii").read()
+    molecules = [line.split() for line in top.split("[ molecules ]")[1].splitlines()
+                 if line.strip() and not line.strip().startswith(";")]
+    counts = {name: int(count) for name, count in molecules}
+    assert counts["Peptide"] == 1
+    # one BB bead per residue, plus the solvent and ions, must add up to the .gro
+    total = counts["Peptide"] * system["residues"] + counts["W"] + counts["NA"] + counts["CL"]
+    assert total == system["beads_total"]
