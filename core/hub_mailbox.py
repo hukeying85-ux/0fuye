@@ -52,7 +52,7 @@ SCHEMA_RESULT = "cgmd.mailbox.result.v1"
 DEFAULT_REF = "hub/mailbox"
 
 # Kinds the desktop worker knows.  shell is opt-in on the desk side.
-KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline")
+KINDS = ("ping", "selfcheck", "smoke", "sync", "gmx", "deskdiag", "deskfix", "shell", "pipeline", "files")
 
 # One line per kind, printed by ``caps`` so a brand-new session never has to
 # guess what the desk can do.
@@ -61,11 +61,12 @@ JOB_HELP = {
     "selfcheck": "18-item health check, writes results/status/desktop_selfcheck.json",
     "smoke": '{"ps": 100} real GROMACS run on the GPU, writes results/status/gmx_smoke.json',
     "sync": '{"desk": true} pull the branch on the desk, redeploy Arena Desk, restart the panel',
-    "gmx": '--arg --version whitelisted gmx sub-command, argv lives in args.argv',
+    "gmx": '--arg --version whitelisted gmx sub-command; args.argv plus optional args.stdin_text and F-drive args.workdir for non-interactive tools',
     "deskdiag": "file hashes repo-vs-desk, scheduled tasks, served HTML, boot ack, lock state",
     "deskfix": "re-arm the logon trigger, keep the panel alive, launch the boot animation now",
     "shell": "opt-in on the desk side (allow_shell=false by default)",
     "pipeline": '{"sequence": "...", "production_ns": 100} full Martini 3 chain on the native python + gmx.exe (no WSL)',
+    "files": '{"action": "survey"|"migrate"|"deploy"|"handover_stage"|"handover_enable"|"handover_rollback"|"status"} fixed-path F-drive layout, SHA-256 migration, clone deployment and reversible watcher handover; mutating actions require an exact confirmation string',
 }
 
 # Status files the desk publishes; ``caps`` reads them straight from the tree.
@@ -587,8 +588,8 @@ def capabilities(repo: str, ref: str = DEFAULT_REF) -> Dict[str, Any]:
         "jobs": dict(JOB_HELP),
         "first_steps": [
             "python3 -m core.hub_mailbox run --kind ping --timeout 300",
-            "python3 -m core.hub_mailbox run --kind smoke --json-args '{\"ps\": 100}' --timeout 1800",
-            "python3 -m core.hub_mailbox run --kind pipeline --json-args '{\"sequence\": \"GIGKFLHSAKKFGKAFVGEIMNS\", \"production_ns\": 100, \"equilibration_ns\": 10}' --timeout 5400",
+            "python3 -m core.hub_mailbox run --kind files --json-args '{\"action\": \"survey\"}' --timeout 900",
+            "python3 -m core.hub_mailbox run --kind pipeline --json-args '{\"sequence\": \"GIGKFLHSAKKFGKAFVGEIMNS\", \"production_ns\": 100, \"equilibration_ns\": 10, \"workdir\": \"F:\\\\cgmd\\\\runs\\\\<task>\", \"outdir\": \"F:\\\\cgmd\\\\results\\\\<task>\"}' --timeout 5400",
         ],
         "if_broken": [
             "python3 -m core.hub_mailbox run --kind deskdiag --timeout 600",
@@ -609,6 +610,8 @@ def capabilities(repo: str, ref: str = DEFAULT_REF) -> Dict[str, Any]:
             "outside this repo you can only push your own mailbox: queue there, read the answer with --read-repo",
             "never commit or push from the calling session; jobs live on the mailbox ref",
             "this sandbox reaches github.com only - do not try the LAN bridge from here",
+            "do not infer deployment from repository contents: compare the desktop-pinned branch and require a mailbox receipt for the exact kind",
+            "new CGMD run data belongs under F:\\cgmd\\runs\\<task> and small results under F:\\cgmd\\results\\<task>; refuse to run if those roots are not verified",
             "the desk has no E: drive; the panel is Arena Desk on 127.0.0.1:18765",
             "a job that returns timeout usually means the desk worker stopped - say so plainly",
         ],

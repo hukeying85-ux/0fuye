@@ -17,7 +17,7 @@
     runs it here on the Windows GROMACS / GPU, and publishes the answer back.
     Nothing is ever written to the caller's branch, so no rebase conflicts.
 
-    Supported kinds: ping, selfcheck, smoke, sync, gmx, pipeline, deskdiag,
+    Supported kinds: ping, selfcheck, smoke, sync, gmx, pipeline, files, deskdiag,
     deskfix, shell (opt-in).  pipeline runs the whole Martini 3 chain with the
     NATIVE Windows python + gmx.exe (no WSL).
 
@@ -186,6 +186,48 @@ function Set-HubConfigValue {
     $dict[$Name] = $Value
     Write-JsonFile -Path $path -Data $dict
     return $path
+}
+
+function Resolve-FullPath {
+    param([string]$Path)
+    if (-not $Path) { return '' }
+    try { return [System.IO.Path]::GetFullPath($Path) } catch { return $Path }
+}
+
+function Test-PathUnderRoot {
+    param([string]$Path, [string]$Root)
+    if (-not $Path -or -not $Root) { return $false }
+    $full = (Resolve-FullPath -Path $Path).TrimEnd('\')
+    $rootFull = (Resolve-FullPath -Path $Root).TrimEnd('\')
+    if ($full.Equals($rootFull, [System.StringComparison]::OrdinalIgnoreCase)) { return $true }
+    return $full.StartsWith(($rootFull + '\'), [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-CgmdRoot {
+    param([string]$Name, [string]$Default)
+    $value = [string](Get-Property $script:Config $Name '')
+    if (-not $value) { $value = $Default }
+    return (Resolve-FullPath -Path $value)
+}
+
+function ConvertTo-StdinText {
+    param($Value)
+    if ($null -eq $Value) { return '' }
+    $lines = @()
+    if ($Value -is [string]) {
+        $lines = @(([string]$Value) -split "`r?`n")
+    } else {
+        foreach ($item in @($Value)) { $lines += [string]$item }
+    }
+    if ($lines.Count -eq 0) { return '' }
+    foreach ($line in $lines) {
+        foreach ($character in $line.ToCharArray()) {
+            if ([int]$character -gt 127 -or [int]$character -eq 0) {
+                throw 'stdin_text must contain printable ASCII only'
+            }
+        }
+    }
+    return (($lines -join [Environment]::NewLine) + [Environment]::NewLine)
 }
 
 # Other projects cannot push into this repo's mailbox: an Arena session token is
@@ -415,12 +457,19 @@ function Invoke-PeerCycle {
 }
 
 function Invoke-Captured {
-    param([string]$CommandLine, [string]$OutFile = '', [int]$TimeoutSeconds = 600, [string]$WorkingDirectory = '')
+    param([string]$CommandLine, [string]$OutFile = '', [int]$TimeoutSeconds = 600, [string]$WorkingDirectory = '',
+          [string]$StdinText = '')
     if (-not $OutFile) {
         $OutFile = Join-Path $script:StateDir ('mailbox-{0}.log' -f ([guid]::NewGuid().ToString('N').Substring(0, 8)))
     }
     $cmdFile = [System.IO.Path]::ChangeExtension($OutFile, '.cmd')
-    $body = '@echo off' + [Environment]::NewLine + $CommandLine + ' > "' + $OutFile + '" 2>&1' + [Environment]::NewLine +
+    $effectiveCommand = $CommandLine
+    if ($StdinText) {
+        $stdinFile = [System.IO.Path]::ChangeExtension($OutFile, '.stdin')
+        [System.IO.File]::WriteAllText($stdinFile, $StdinText, [System.Text.Encoding]::ASCII)
+        $effectiveCommand = $CommandLine + ' < "' + $stdinFile + '"'
+    }
+    $body = '@echo off' + [Environment]::NewLine + $effectiveCommand + ' > "' + $OutFile + '" 2>&1' + [Environment]::NewLine +
             ('echo CGMD_EXIT_CODE=%ERRORLEVEL% >> "' + $OutFile + '"')
     [System.IO.File]::WriteAllText($cmdFile, $body, [System.Text.Encoding]::ASCII)
     $working = $WorkingDirectory
@@ -880,16 +929,34 @@ function Invoke-JobGmx {
     }
     $gmx = Get-GmxBinary
     if (-not $gmx) { return [ordered]@{ status = 'fail'; summary = 'gmx.exe not found on this workstation' } }
-    $scratch = Join-Path $script:StateDir ('gmx-job-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    $stdinText = ''
+    try {
+        $stdinText = ConvertTo-StdinText -Value (Get-Property $JobArgs 'stdin_text' $null)
+    } catch {
+        return [ordered]@{ status = 'unsupported'; summary = $_.Exception.Message }
+    }
+    $runRoot = Get-CgmdRoot -Name 'run_root' -Default 'F:\cgmd\runs'
+    $resultRoot = Get-CgmdRoot -Name 'result_root' -Default 'F:\cgmd\results'
+    $requestedWorkdir = [string](Get-Property $JobArgs 'workdir' '')
+    if ($requestedWorkdir) {
+        $scratch = Resolve-FullPath -Path $requestedWorkdir
+        if (-not ((Test-PathUnderRoot -Path $scratch -Root $runRoot) -or
+                  (Test-PathUnderRoot -Path $scratch -Root $resultRoot))) {
+            return [ordered]@{ status = 'unsupported'; summary = 'gmx workdir must be under run_root or result_root' }
+        }
+        $out = Join-Path $scratch ('gmx-output-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.log')
+    } else {
+        $scratch = Join-Path $script:StateDir ('gmx-job-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
+        $out = Join-Path $scratch 'output.log'
+    }
     if (-not (Test-Path -LiteralPath $scratch)) { New-Item -ItemType Directory -Path $scratch -Force | Out-Null }
-    $out = Join-Path $scratch 'output.log'
     $quoted = @()
     foreach ($word in $argv) {
         if ($word -match '\s') { $quoted += ('"' + $word + '"') } else { $quoted += $word }
     }
     $line = '"' + $gmx + '" ' + ($quoted -join ' ')
     $limit = [math]::Min($MaxJobSeconds, [int](Get-Property $JobArgs 'timeout_s' 900))
-    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $scratch
+    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $scratch -StdinText $stdinText
     $tail = @(Get-Tail -Path $out -Count 40)
     $status = $(if ($code -eq 0) { 'ok' } elseif ($code -eq 124) { 'timeout' } else { 'fail' })
     $headline = ''
@@ -900,7 +967,7 @@ function Invoke-JobGmx {
     return [ordered]@{
         status    = $status
         summary   = ('gmx {0} exit {1}: {2}' -f ($argv -join ' '), $code, $headline)
-        detail    = [ordered]@{ exit_code = $code; argv = $argv; workdir = $scratch; gmx = $gmx }
+        detail    = [ordered]@{ exit_code = $code; argv = $argv; workdir = $scratch; gmx = $gmx; stdin_supplied = [bool]$stdinText; output_log = $out }
         logs_tail = $tail
     }
 }
@@ -908,9 +975,9 @@ function Invoke-JobGmx {
 function Invoke-JobPipeline {
     # The whole Martini 3 chain (structure -> martinize2 -> insane -> topology ->
     # EM -> eq -> production -> analysis) executed by the NATIVE Windows python
-    # and the NATIVE gmx.exe.  WSL is never involved, and every heavy artefact
-    # stays in skills/cgmd-hub/state/cgmd-runs (git-ignored) so nothing large can
-    # ever reach the repository.
+    # and the NATIVE gmx.exe.  WSL is never involved.  Heavy artefacts are
+    # confined to run_root/<task> and small outputs to result_root/<task> so
+    # nothing large can ever reach the repository or the legacy C: state.
     param($JobArgs)
     $runner = Join-Path $script:ScriptDir 'Invoke-CgmdPipeline.ps1'
     if (-not (Test-Path -LiteralPath $runner)) {
@@ -935,8 +1002,25 @@ function Invoke-JobPipeline {
             return [ordered]@{ status = 'unsupported'; summary = ('invalid pipeline path: ' + $key) }
         }
     }
-    $resultFile = Join-Path $script:StateDir ('pipeline-' + $taskId + '.json')
-    $out = Join-Path $script:StateDir ('mailbox-pipeline-' + $taskId + '.log')
+    $runRoot = Get-CgmdRoot -Name 'run_root' -Default 'F:\cgmd\runs'
+    $resultRoot = Get-CgmdRoot -Name 'result_root' -Default 'F:\cgmd\results'
+    $workdir = [string](Get-Property $JobArgs 'workdir' '')
+    if (-not $workdir) { $workdir = Join-Path $runRoot $taskId }
+    $workdir = Resolve-FullPath -Path $workdir
+    $outdir = [string](Get-Property $JobArgs 'outdir' '')
+    if (-not $outdir) { $outdir = Join-Path $resultRoot $taskId }
+    $outdir = Resolve-FullPath -Path $outdir
+    if (-not (Test-PathUnderRoot -Path $workdir -Root $runRoot)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'pipeline workdir must be under run_root' }
+    }
+    if (-not (Test-PathUnderRoot -Path $outdir -Root $resultRoot)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'pipeline outdir must be under result_root' }
+    }
+    foreach ($dir in @($workdir, $outdir)) {
+        if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    }
+    $resultFile = Join-Path $outdir 'pipeline-result.json'
+    $out = Join-Path $outdir 'mailbox-pipeline.log'
     $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runner + '"'
     $line += ' -Sequence "' + $sequence + '"'
     $line += ' -Name "' + $name + '"'
@@ -973,10 +1057,8 @@ function Invoke-JobPipeline {
             if ($pairs.Count -gt 0) { $line += (' -Lipids "' + ($pairs -join ',') + '"') }
         }
     }
-    $workdir = [string](Get-Property $JobArgs 'workdir' '')
-    if ($workdir) { $line += ' -WorkDir "' + $workdir + '"' }
-    $outdir = [string](Get-Property $JobArgs 'outdir' '')
-    if ($outdir) { $line += ' -OutDir "' + $outdir + '"' }
+    $line += ' -WorkDir "' + $workdir + '"'
+    $line += ' -OutDir "' + $outdir + '"'
     if ([bool](Get-Property $JobArgs 'install' $false)) { $line += ' -Install' }
     if ([bool](Get-Property $JobArgs 'no_fetch_ff' $false)) { $line += ' -NoFetchForcefield' }
     if ($script:Config) {
@@ -987,13 +1069,81 @@ function Invoke-JobPipeline {
     }
     $requested = [int](Get-Property $JobArgs 'timeout_s' $MaxJobSeconds)
     $limit = [math]::Max(120, [math]::Min($MaxJobSeconds, $requested) - 60)
-    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $script:StateDir
+    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $workdir
     $answer = Read-JsonFile -Path $resultFile
     if ($null -eq $answer) {
         return [ordered]@{
             status    = $(if ($code -eq 124) { 'timeout' } else { 'fail' })
             summary   = ('pipeline runner exit {0} without a result file' -f $code)
-            detail    = [ordered]@{ exit_code = $code; task_id = $taskId; runner = $runner }
+            detail    = [ordered]@{ exit_code = $code; task_id = $taskId; runner = $runner; workdir = $workdir; outdir = $outdir }
+            logs_tail = @(Get-Tail -Path $out -Count 40)
+        }
+    }
+    $detail = Get-Property $answer 'detail' ([ordered]@{})
+    try { $detail['exit_code'] = $code } catch { }
+    return [ordered]@{
+        status    = [string](Get-Property $answer 'status' 'fail')
+        summary   = [string](Get-Property $answer 'summary' '')
+        detail    = $detail
+        logs_tail = @(Get-Property $answer 'logs_tail' @(Get-Tail -Path $out -Count 30))
+    }
+}
+
+function Invoke-JobFiles {
+    # Fixed-path F-drive operations.  This deliberately is not a generic file
+    # API: the child script only surveys, copies one validated legacy prefix,
+    # deploys the locked repository to F:\cgmd\0fuye, or performs a staged and
+    # reversible watcher handover.
+    param($JobArgs)
+    $runner = Join-Path $script:ScriptDir 'Invoke-CgmdFiles.ps1'
+    if (-not (Test-Path -LiteralPath $runner)) {
+        return [ordered]@{ status = 'unsupported'; summary = 'Invoke-CgmdFiles.ps1 is missing' }
+    }
+    $action = ([string](Get-Property $JobArgs 'action' 'survey')).ToLowerInvariant()
+    $allowedActions = @('survey', 'migrate', 'deploy', 'handover_stage',
+                        'handover_enable', 'handover_rollback', 'status')
+    if ($allowedActions -notcontains $action) {
+        return [ordered]@{ status = 'unsupported'; summary = ('invalid files action: ' + $action) }
+    }
+    $taskId = [string](Get-Property $JobArgs 'task_id' 'legacy-cgmd-100ns-20261030')
+    $sourcePrefix = [string](Get-Property $JobArgs 'source_prefix' 'cgmd_100ns')
+    $requestedBranch = [string](Get-Property $JobArgs 'branch' $Branch)
+    $confirmText = [string](Get-Property $JobArgs 'confirm' '')
+    $oldTaskName = [string](Get-Property $JobArgs 'old_task_name' '')
+    $newTaskName = [string](Get-Property $JobArgs 'new_task_name' '')
+    if ($taskId -notmatch '^[A-Za-z0-9_-]+$' -or
+        $sourcePrefix -notmatch '^[A-Za-z0-9_.-]+$' -or
+        ($requestedBranch -and ($requestedBranch -notmatch '^[A-Za-z0-9_./-]+$' -or
+         $requestedBranch.Contains('..') -or $requestedBranch.StartsWith('-'))) -or
+        ($confirmText -and $confirmText -notmatch '^[A-Za-z0-9_ -]+$') -or
+        ($oldTaskName -and $oldTaskName -notmatch '^[A-Za-z0-9_ -]+$') -or
+        ($newTaskName -and $newTaskName -notmatch '^[A-Za-z0-9_ -]+$')) {
+        return [ordered]@{ status = 'unsupported'; summary = 'invalid files task_id, source_prefix, branch, confirmation or task name' }
+    }
+    $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+    $resultFile = Join-Path $script:StateDir ('files-' + $stamp + '.json')
+    $out = Join-Path $script:StateDir ('mailbox-files-' + $stamp + '.log')
+    $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runner + '"'
+    $line += ' -Action "' + $action + '"'
+    $line += ' -TaskId "' + $taskId + '"'
+    $line += ' -SourcePrefix "' + $sourcePrefix + '"'
+    $line += ' -ResultFile "' + $resultFile + '" -Quiet'
+    if ($RepoPath) { $line += ' -RepoPath "' + $RepoPath + '"' }
+    if ($requestedBranch) { $line += ' -Branch "' + $requestedBranch + '"' }
+    $configFile = Get-HubConfigPath
+    if ($configFile) { $line += ' -ConfigPath "' + $configFile + '"' }
+    if ($confirmText) { $line += ' -ConfirmText "' + $confirmText + '"' }
+    if ($oldTaskName) { $line += ' -OldTaskName "' + $oldTaskName + '"' }
+    if ($newTaskName) { $line += ' -NewTaskName "' + $newTaskName + '"' }
+    if ([bool](Get-Property $JobArgs 'copy_credentials' $false)) { $line += ' -CopyCredentials' }
+    $limit = [math]::Min($MaxJobSeconds, [int](Get-Property $JobArgs 'timeout_s' 1800))
+    $code = Invoke-Captured -CommandLine $line -OutFile $out -TimeoutSeconds $limit -WorkingDirectory $script:StateDir
+    $answer = Read-JsonFile -Path $resultFile
+    if ($null -eq $answer) {
+        return [ordered]@{
+            status    = $(if ($code -eq 124) { 'timeout' } else { 'fail' })
+            summary   = ('files runner exit {0} without a result file' -f $code)
+            detail    = [ordered]@{ exit_code = $code; action = $action; task_id = $taskId; runner = $runner }
             logs_tail = @(Get-Tail -Path $out -Count 40)
         }
     }
@@ -1379,6 +1529,7 @@ function Invoke-Job {
         'deskfix'   { return Invoke-JobDeskfix -JobArgs $jobArgs }
         'shell'     { return Invoke-JobShell -JobArgs $jobArgs }
         'pipeline'  { return Invoke-JobPipeline -JobArgs $jobArgs }
+        'files'     { return Invoke-JobFiles -JobArgs $jobArgs }
         default     { return [ordered]@{ status = 'unsupported'; summary = ('unknown kind: ' + $kind) } }
     }
 }

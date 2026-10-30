@@ -28,7 +28,7 @@
     Locked repository URL.  Any other repository is rejected.
 
 .PARAMETER RepoPath
-    Local clone location, default C:\cgmd\0fuye.
+    Local clone location, default F:\cgmd\0fuye.
 
 .PARAMETER Branch
     Branch to poll.  Default: the branch currently checked out in the clone.
@@ -68,7 +68,7 @@
 [CmdletBinding()]
 param(
     [string]$RepoUrl = 'https://github.com/hukeying85-ux/0fuye.git',
-    [string]$RepoPath = 'C:\cgmd\0fuye',
+    [string]$RepoPath = 'F:\cgmd\0fuye',
     [string]$Branch = '',
     [string]$WslDistro = 'Ubuntu',
     [int]$GpuId = 0,
@@ -300,7 +300,7 @@ if (-not $Branch) {
 Write-Ok ('branch: ' + $Branch)
 
 if (-not $WslWorkDir) {
-    $WslWorkDir = '~/cgmd-runs'
+    $WslWorkDir = '/mnt/f/cgmd/runs'
 }
 
 # --- 2. credentials (repository local only) --------------------------------
@@ -391,6 +391,12 @@ $cfg = [ordered]@{
     github_user       = $GitHubUser
     wsl_distro        = $WslDistro
     wsl_workdir_root  = $WslWorkDir
+    run_root          = 'F:\cgmd\runs'
+    result_root       = 'F:\cgmd\results'
+    f_repo_path       = 'F:\cgmd\0fuye'
+    migration_source_dir = 'C:\cgmd\0fuye\skills\cgmd-hub\state'
+    legacy_task_name  = 'CGMD-Hub-Poll'
+    f_task_name       = 'CGMD-Hub-Poll-F'
     gpu_id            = $GpuId
     ntfy_topic        = $NtfyTopic
     poll_seconds      = $IntervalSeconds
