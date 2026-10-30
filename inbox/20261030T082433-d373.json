@@ -1,0 +1,34 @@
+{
+  "args": {
+    "argv": [
+      "mdrun",
+      "-s",
+      "F:\\cgmd_20ns_20261030_0820.tpr",
+      "-deffnm",
+      "F:\\cgmd_20ns_20261030_0820",
+      "-nb",
+      "gpu",
+      "-bonded",
+      "gpu",
+      "-gpu_id",
+      "0",
+      "-ntmpi",
+      "1",
+      "-ntomp",
+      "4",
+      "-pin",
+      "on",
+      "-maxh",
+      "0.50"
+    ],
+    "timeout_s": 2400
+  },
+  "created_at": "2026-10-30T08:24:33+0000",
+  "from": "user",
+  "host": "e2b.local",
+  "id": "20261030T082433-d373",
+  "kind": "gmx",
+  "note": "",
+  "schema": "cgmd.mailbox.request.v1",
+  "timeout_s": 2600
+}
