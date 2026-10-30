@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T12:28:05+08:00",
+    "generated_at":  "2026-10-30T12:28:59+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T042317-d463.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -73,7 +73,6 @@
                      "20261030T042317-d463":  1
                  },
     "log_tail":  [
-                     "2026-10-30 11:30:55 [INFO] mailbox: 2 queued, running at most 1",
                      "2026-10-30 11:30:55 [INFO] job kind=gmx",
                      "2026-10-30 11:30:56 [INFO] job 20261030T032946-2409 (gmx) -\u003e ok: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\prod.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.gro -t C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.cpt -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 11:31:55 [INFO] mailbox: 2 queued, running at most 1",
@@ -132,7 +131,8 @@
                      "2026-10-30 12:26:55 [INFO] job 20261030T041946-f2ab (gmx) -\u003e ok: gmx traj -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -ox C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.xvg -dt 5000 -xvg none exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 12:27:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 12:27:55 [INFO] job kind=gmx",
-                     "2026-10-30 12:27:56 [INFO] job 20261030T042317-d463 (gmx) -\u003e ok: gmx gyrate -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -sel group 0 -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 12:27:56 [INFO] job 20261030T042317-d463 (gmx) -\u003e ok: gmx gyrate -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -sel group 0 -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 12:28:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -156,12 +156,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T042317-d463",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx gyrate -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.xtc -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\peptide.ndx -sel group 0 -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\gyrate.xvg exit 0: CGMD_EXIT_CODE=0 "
-                      }
+
                   ],
     "recent":  [
                    {
