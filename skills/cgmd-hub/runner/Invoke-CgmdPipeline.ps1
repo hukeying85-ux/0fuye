@@ -235,6 +235,7 @@ function Resolve-Python {
         if ($null -eq $version) { continue }
         if ($version.Major -lt 3 -or $version.Minor -lt 8) { continue }
         $score = $version.Minor
+        if ($version.Major -eq 3 -and $version.Minor -eq 12) { $score = 100 }
         if ($null -eq $best -or $score -gt $best.Score) {
             $best = [pscustomobject]@{ Path = $path; Version = $version.Text; Score = $score }
         }

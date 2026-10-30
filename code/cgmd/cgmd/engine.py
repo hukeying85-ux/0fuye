@@ -283,6 +283,9 @@ class Gromacs:
         command += ["-dlb", "yes", "-pin", "on"]
         threads = self.cfg.ntomp if ntomp is None else ntomp
         if threads:
+            # GROMACS requires an explicit rank count with GPU and -ntomp.
+            if nb == "gpu":
+                command += ["-ntmpi", "1"]
             command += ["-ntomp", str(threads)]
         if maxh:
             command += ["-maxh", "{:.3f}".format(float(maxh))]

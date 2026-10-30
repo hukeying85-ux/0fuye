@@ -10,8 +10,7 @@ Everything is resolved from (in order of precedence):
 
 The Martini 3 force field is *never* vendored into this repository (it is
 third-party material with its own licence).  :func:`resolve_martini3_dir`
-therefore looks for it in the usual places, including the ``martini_forcefields``
-PyPI package, and raises an actionable error if it cannot be found.
+therefore looks for it on disk or shallow-clones the upstream git repository.
 """
 
 from __future__ import annotations
@@ -146,7 +145,9 @@ def fetch_martini_forcefields(
     if os.path.isdir(os.path.join(dest, ".git")):
         command = ["git", "-C", dest, "fetch", "--depth", str(depth), "origin"]
         say("$ " + " ".join(command))
-        subprocess.run(command, capture_output=True, text=True, timeout=timeout, check=False)
+        completed = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+        if completed.returncode != 0:
+            raise RuntimeError("git fetch of {} failed: {}".format(url, (completed.stderr or completed.stdout or "").strip()[:300]))
         command = ["git", "-C", dest, "reset", "--hard", "FETCH_HEAD"]
     else:
         if os.path.isdir(dest) and os.listdir(dest):
@@ -194,17 +195,6 @@ def resolve_martini3_dir(
         if isinstance(value, str) and value:
             candidates.append(value)
     candidates.extend(DEFAULT_FF_CANDIDATES)
-
-    # pip package `martini_forcefields` (kept for workstations that have it)
-    try:  # pragma: no cover - depends on the workstation environment
-        import martini_forcefields  # type: ignore
-
-        package_root = os.path.dirname(martini_forcefields.__file__)
-        candidates.extend(
-            sorted(glob.glob(os.path.join(package_root, "**", "gmx_files"), recursive=True))
-        )
-    except Exception:
-        pass
 
     # an existing clone from a previous run (cheap, no network)
     clone_dest = clone_root or os.path.join(REPO_ROOT, "forcefields", "martini-forcefields")

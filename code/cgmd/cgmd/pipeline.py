@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from core import gmx_log
 
-from . import analyze, figure, index as index_mod, peptide, seq2pdb, topology
+from . import analyze, figure, index as index_mod, peptide, seq2pdb, topology, salt
 from .config import Config, resolve_martini3_dir
 from .engine import Gromacs, StageError, probe_environment, probe_gpu, write_json
 
@@ -164,6 +164,8 @@ class Pipeline:
         self.stage_index(system, topo)
         em_report = self.stage_em(system)
         eq_report = self.stage_equilibration()
+        if not self.cfg.dry_run and not eq_report.get("completed"):
+            raise PipelineError("equilibration incomplete or diverged; production not started")
         prod_report = self.stage_production()
 
         metrics = self.stage_analyze(structure, topo, em_report, eq_report, prod_report)
@@ -175,7 +177,8 @@ class Pipeline:
                 if entry.get("seconds") is not None
             },
         }
-        self._mark("all", "done", seconds=round(time.time() - started, 1))
+        complete = self.cfg.dry_run or (prod_report.get("completed") and not prod_report.get("diverged"))
+        self._mark("all", "done" if complete else "partial", seconds=round(time.time() - started, 1))
         return metrics
 
     # -- stages -----------------------------------------------------------
@@ -358,7 +361,9 @@ class Pipeline:
         gro = self.cfg.path("system.gro")
         if not os.path.exists(gro):
             raise PipelineError("insane did not produce {}".format(gro))
+        salt_info = salt.ensure_salt_pairs(gro, self.cfg.path("insane.top"), self.cfg.salt_m, self.cfg.seed)
         info = {
+            "salt": salt_info,
             "gro": gro,
             "top": self.cfg.path("insane.top"),
             "box_nm": box,
@@ -552,7 +557,8 @@ class Pipeline:
             return {}
         assert self.engine is not None
         self.engine.grompp("eq", self.cfg.path("eq.mdp"), self.cfg.path("em.gro"), self.cfg.path("topol.top"),
-                           self.cfg.path("eq.tpr"), ndx=self.cfg.path("index.ndx"))
+                           self.cfg.path("eq.tpr"), ndx=self.cfg.path("index.ndx"),
+                           extra=["-r", self.cfg.path("em.gro")])
         report = self._mdrun_until("eq", self.cfg.equilibration_ns, "eq")
         report["wall_seconds"] = round(time.time() - started, 1)
         write_json(self.cfg.path("eq.json"), report)
@@ -572,10 +578,11 @@ class Pipeline:
             return {"dry_run": True}
         assert self.engine is not None
         self.engine.grompp("prod", self.cfg.path("prod.mdp"), self.cfg.path("eq.gro"), self.cfg.path("topol.top"),
-                           self.cfg.path("prod.tpr"), ndx=self.cfg.path("index.ndx"))
-        self.notify("start", "生产模拟已启动（{} ns, GPU {}）".format(self.cfg.production_ns, self.cfg.gpu_id),
-                    ["肽: {} ({} aa)".format(self.cfg.peptide_name, len(self.cfg.sequence)),
-                     "速度与 ETA 由 node_agent 每秒跟踪"])
+                           self.cfg.path("prod.tpr"), ndx=self.cfg.path("index.ndx"),
+                           extra=["-t", self.cfg.path("eq.cpt")])
+        self.notify("start", "Production started ({} ns, GPU {})".format(self.cfg.production_ns, self.cfg.gpu_id),
+                    ["Peptide: {} ({} aa)".format(self.cfg.peptide_name, len(self.cfg.sequence)),
+                     "Speed and ETA tracked by node_agent"])
         report = self._mdrun_until("prod", self.cfg.production_ns, "prod")
         report["wall_seconds"] = round(time.time() - started, 1)
         report["gpu_flags"] = " ".join(self.cfg.mdrun_gpu_flags)
@@ -588,8 +595,8 @@ class Pipeline:
         self.log("prod: {} ns / {} ns, {} ns/day, diverged={}".format(
             report["ns"], report["target_ns"], report["ns_per_day"], report["diverged"]))
         if report["diverged"]:
-            self.notify("error", "生产模拟发散", ["原因: {}".format(report["divergence"] or "unknown"),
-                                                 "已完成 {:.1f} ns".format(report["ns"])])
+            self.notify("error", "Production diverged", ["Reason: {}".format(report["divergence"] or "unknown"),
+                                                 "Completed {:.1f} ns".format(report["ns"])])
         return report
 
     def stage_analyze(

@@ -8,7 +8,7 @@
 #
 # What it checks
 #   python3 >= 3.9, pip, numpy, matplotlib, MDAnalysis, vermouth (martinize2),
-#   insane (Martini membrane builder), martini-forcefields (Martini 3 itp set),
+#   insane (Martini membrane builder), Martini 3 itp files from upstream git,
 #   GROMACS (gmx) with CUDA GPU support, nvidia-smi inside WSL2.
 #
 # GROMACS itself is never installed silently: the script prints the exact
@@ -115,7 +115,6 @@ if [ -n "$PYTHON_BIN" ]; then
     check_py MDAnalysis MDAnalysis required || MISSING_PKGS="$MISSING_PKGS MDAnalysis"
     check_py vermouth "vermouth (martinize2)" required || MISSING_PKGS="$MISSING_PKGS vermouth"
     check_py insane "insane (membrane builder)" required || MISSING_PKGS="$MISSING_PKGS insane"
-    check_py martini_forcefields "martini-forcefields" required || MISSING_PKGS="$MISSING_PKGS martini-forcefields"
 
     for tool in martinize2 insane; do
         if command -v "$tool" >/dev/null 2>&1; then
@@ -134,7 +133,7 @@ if [ -n "$PYTHON_BIN" ]; then
             info "pip upgraded"
         fi
         if "$PYTHON_BIN" -m pip install $EXTRA \
-            numpy matplotlib MDAnalysis vermouth insane martini-forcefields; then
+            numpy matplotlib MDAnalysis vermouth insane; then
             ok "python packages installed"
         else
             fail "pip install failed (try --venv ~/cgmd-venv or add --user)"
@@ -186,18 +185,9 @@ fi
 
 # --- 5. Martini 3 force field ------------------------------------------------
 MARTINI_DIR="${CGMD_MARTINI3_DIR:-}"
-if [ -z "$MARTINI_DIR" ] && [ -n "$PYTHON_BIN" ]; then
-    MARTINI_DIR="$("$PYTHON_BIN" - <<'PY' 2>/dev/null
-import glob, os
-try:
-    import martini_forcefields
-except Exception:
-    raise SystemExit(0)
-root = os.path.dirname(martini_forcefields.__file__)
-hits = sorted(glob.glob(os.path.join(root, "**", "gmx_files"), recursive=True))
-print(hits[0] if hits else "")
-PY
-)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [ -z "$MARTINI_DIR" ]; then
+    MARTINI_DIR="$REPO_ROOT/forcefields/martini-forcefields/martini_forcefields/regular/v3.0.0/gmx_files"
 fi
 if [ -n "$MARTINI_DIR" ] && [ -d "$MARTINI_DIR" ]; then
     if ls "$MARTINI_DIR"/*.itp >/dev/null 2>&1 || find "$MARTINI_DIR" -name "*.itp" -print -quit | grep -q .; then
@@ -206,7 +196,7 @@ if [ -n "$MARTINI_DIR" ] && [ -d "$MARTINI_DIR" ]; then
         fail "Martini 3 directory has no .itp files: $MARTINI_DIR"
     fi
 else
-    warn "Martini 3 force field not located yet (pip install martini-forcefields or set CGMD_MARTINI3_DIR)"
+    warn "Martini 3 force field not located yet (use --fetch-forcefield or set CGMD_MARTINI3_DIR)"
 fi
 
 # --- 6. repository sanity ----------------------------------------------------

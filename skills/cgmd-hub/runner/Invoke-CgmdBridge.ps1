@@ -329,11 +329,16 @@ function Invoke-BridgeJob {
             }
             $taskId = [string](Get-Property $jobArgs 'task_id' '')
             if (-not $taskId) { $taskId = 'cgmd-' + (Get-Date -Format 'yyyyMMdd-HHmmss') }
+            $name = [string](Get-Property $jobArgs 'name' 'peptide')
+            if ($sequence -notmatch '^[ACDEFGHIKLMNPQRSTVWY]+$' -or
+                $taskId -notmatch '^[A-Za-z0-9_-]+$' -or $name -notmatch '^[A-Za-z0-9_. -]+$') {
+                return New-Result -Kind 'pipeline' -Status 'unsupported' -Summary 'invalid pipeline sequence, task_id or name'
+            }
             $resultFile = Join-Path $script:StateDir ('pipeline-' + $taskId + '.json')
             $out = Join-Path $script:StateDir ('bridge-pipeline-' + $taskId + '.log')
             $line = 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + $runner + '"'
             $line += ' -Sequence "' + $sequence + '"'
-            $line += ' -Name "' + [string](Get-Property $jobArgs 'name' 'peptide') + '"'
+            $line += ' -Name "' + $name + '"'
             $line += ' -ProductionNs ' + [double](Get-Property $jobArgs 'production_ns' 100)
             $line += ' -EquilibrationNs ' + [double](Get-Property $jobArgs 'equilibration_ns' 10)
             $line += ' -GpuId ' + [int](Get-Property $jobArgs 'gpu_id' 0)
@@ -341,9 +346,16 @@ function Invoke-BridgeJob {
             $line += ' -ResultFile "' + $resultFile + '"'
             if ($RepoPath) { $line += ' -RepoPath "' + $RepoPath + '"' }
             $salt = Get-Property $jobArgs 'salt_M' $null
+            if ($null -eq $salt) { $salt = Get-Property $jobArgs 'salt_m' $null }
             if ($null -ne $salt) { $line += (' -SaltM ' + [double]$salt) }
             $temperature = Get-Property $jobArgs 'temperature_K' $null
+            if ($null -eq $temperature) { $temperature = Get-Property $jobArgs 'temperature_k' $null }
             if ($null -ne $temperature) { $line += (' -TemperatureK ' + [double]$temperature) }
+            $lipids = [string](Get-Property $jobArgs 'lipids' '')
+            if ($lipids) {
+                if ($lipids -notmatch '^[A-Za-z0-9_:., -]+$') { return New-Result -Kind 'pipeline' -Status 'unsupported' -Summary 'invalid lipid specification' }
+                $line += (' -Lipids "' + $lipids + '"')
+            }
             if ([bool](Get-Property $jobArgs 'install' $false)) { $line += ' -Install' }
             $requested = [int](Get-Property $jobArgs 'timeout_s' $MaxJobSeconds)
             $limit = [math]::Max(120, [math]::Min($MaxJobSeconds, $requested) - 60)
