@@ -1,0 +1,94 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T080225-1720",
+    "kind":  "cgmd",
+    "status":  "ok",
+    "summary":  "cgmd ff: martini 3 downloaded: martini_v3.0.0.itp",
+    "detail":  {
+                   "exit_code":  0,
+                   "python":  "C:\\\\Users\\\\BNI\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe",
+                   "mode":  "ff",
+                   "ops":  {
+                               "detail":  {
+                                              "found":  {
+                                                            "dir":  "C:\\Users\\BNI\\cgmd-runs\\martini3\\martini-forcefields-main\\martini_forcefields\\regular\\v3.0.0\\gmx_files",
+                                                            "file":  "C:\\Users\\BNI\\cgmd-runs\\martini3\\martini-forcefields-main\\martini_forcefields\\regular\\v3.0.0\\gmx_files\\martini_v3.0.0.itp",
+                                                            "how":  "download"
+                                                        },
+                                              "molecules":  [
+
+                                                            ],
+                                              "steps":  [
+                                                            {
+                                                                "record":  {
+                                                                               "command":  "C:\\\\Users\\\\BNI\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe -m pip install --disable-pip-version-check --no-input martini-forcefields",
+                                                                               "returncode":  1,
+                                                                               "seconds":  8.11,
+                                                                               "stderr_tail":  [
+                                                                                                   "ERROR: Could not find a version that satisfies the requirement martini-forcefields (from versions: none)",
+                                                                                                   "ERROR: No matching distribution found for martini-forcefields"
+                                                                                               ],
+                                                                               "stdout_tail":  [
+                                                                                                   "Looking in indexes: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+                                                                                               ]
+                                                                           },
+                                                                "step":  "pip"
+                                                            },
+                                                            {
+                                                                "bytes":  2749015,
+                                                                "returncode":  0,
+                                                                "step":  "download",
+                                                                "url":  "https://codeload.github.com/marrink-lab/martini-forcefields/tar.gz/refs/heads/main"
+                                                            }
+                                                        ],
+                                              "target":  "C:\\Users\\BNI\\cgmd-runs\\martini3"
+                                          },
+                               "generated_at":  "2026-10-30T16:03:07",
+                               "host":  "DESKTOP-IEUDGS5",
+                               "mode":  "ff",
+                               "python":  "3.12.10",
+                               "schema":  "cgmd.desk_ops.v1",
+                               "seconds":  10.24,
+                               "status":  "ok",
+                               "summary":  "martini 3 downloaded: martini_v3.0.0.itp"
+                           }
+               },
+    "logs_tail":  [
+                      "          \"seconds\": 8.11,",
+                      "          \"stdout_tail\": [",
+                      "            \"Looking in indexes: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple\"",
+                      "          ],",
+                      "          \"stderr_tail\": [",
+                      "            \"ERROR: Could not find a version that satisfies the requirement martini-forcefields (from versions: none)\",",
+                      "            \"ERROR: No matching distribution found for martini-forcefields\"",
+                      "          ]",
+                      "        }",
+                      "      },",
+                      "      {",
+                      "        \"step\": \"download\",",
+                      "        \"url\": \"https://codeload.github.com/marrink-lab/martini-forcefields/tar.gz/refs/heads/main\",",
+                      "        \"returncode\": 0,",
+                      "        \"bytes\": 2749015",
+                      "      }",
+                      "    ],",
+                      "    \"found\": {",
+                      "      \"dir\": \"C:\\\\Users\\\\BNI\\\\cgmd-runs\\\\martini3\\\\martini-forcefields-main\\\\martini_forcefields\\\\regular\\\\v3.0.0\\\\gmx_files\",",
+                      "      \"file\": \"C:\\\\Users\\\\BNI\\\\cgmd-runs\\\\martini3\\\\martini-forcefields-main\\\\martini_forcefields\\\\regular\\\\v3.0.0\\\\gmx_files\\\\martini_v3.0.0.itp\",",
+                      "      \"how\": \"download\"",
+                      "    },",
+                      "    \"molecules\": []",
+                      "  },",
+                      "  \"generated_at\": \"2026-10-30T16:03:07\",",
+                      "  \"seconds\": 10.24,",
+                      "  \"python\": \"3.12.10\",",
+                      "  \"host\": \"DESKTOP-IEUDGS5\"",
+                      "}",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "martini3 force field",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T16:02:56+08:00",
+    "finished_at":  "2026-10-30T16:03:07+08:00",
+    "seconds":  11.13,
+    "worker":  "DESKTOP-IEUDGS5"
+}
