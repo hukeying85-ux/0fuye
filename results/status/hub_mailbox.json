@@ -1,18 +1,19 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T19:53:05+08:00",
+    "generated_at":  "2026-10-30T19:54:09+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  2,
+    "queued":  3,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T115222-ec62.json",
-                  "20261030T115250-dd1a.json"
+                  "20261030T115250-dd1a.json",
+                  "20261030T115316-1ab3.json",
+                  "20261030T115316-60ce.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -113,12 +114,10 @@
                      "20261030T113400-0c24":  1,
                      "20261030T115006-8a5b":  1,
                      "20261030T115115-a185":  1,
-                     "20261030T115222-ec62":  1
+                     "20261030T115222-ec62":  1,
+                     "20261030T115250-dd1a":  1
                  },
     "log_tail":  [
-                     "2026-10-30 19:03:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 19:04:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 19:05:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:06:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:07:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:08:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -175,7 +174,10 @@
                      "2026-10-30 19:51:55 [INFO] job 20261030T115115-a185 (gmx) -\u003e ok: gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro -select atomnr 8000 to 9000 and resnr 1 to 7 -on F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 19:52:55 [INFO] mailbox: 2 queued, running at most 1",
                      "2026-10-30 19:52:55 [INFO] job kind=gmx",
-                     "2026-10-30 19:52:56 [INFO] job 20261030T115222-ec62 (gmx) -\u003e ok: gmx editconf -f F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro -n F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx -o F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 19:52:56 [INFO] job 20261030T115222-ec62 (gmx) -\u003e ok: gmx editconf -f F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro -n F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx -o F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 19:53:55 [INFO] mailbox: 3 queued, running at most 1",
+                     "2026-10-30 19:53:55 [INFO] job kind=cgmd",
+                     "2026-10-30 19:53:59 [INFO] job 20261030T115250-dd1a (cgmd) -\u003e ok: cgmd search: 23 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.4 d ago)"
                  ],
     "call_tail":  [
 
@@ -200,13 +202,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T115222-ec62",
-                          "kind":  "gmx",
+                          "id":  "20261030T115250-dd1a",
+                          "kind":  "cgmd",
                           "status":  "ok",
-                          "summary":  "gmx editconf -f F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\complex.gro -n F:\\Abeta_MD_20261030_01\\ylsllqr_source_selection_20261030.ndx -o F:\\Abeta_MD_20261030_01\\ylsllqr_extracted_20261030.gro exit 0: CGMD_EXIT_CODE=0 "
+                          "summary":  "cgmd search: 23 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.4 d ago)"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T115250-dd1a",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd search: 23 candidate run(s); newest F:\\\\0wsh\\\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.4 d ago)",
+                       "finished_at":  "2026-10-30T19:53:59+08:00"
+                   },
                    {
                        "id":  "20261030T115222-ec62",
                        "kind":  "gmx",
@@ -339,13 +348,6 @@
                        "status":  "fail",
                        "summary":  "gmx convert-tpr -s C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr -until 20000 -o F:\\cgmd\\runs\\cgmd_20ns_20261030.tpr exit 1: CGMD_EXIT_CODE=1 ",
                        "finished_at":  "2026-10-30T16:21:54+08:00"
-                   },
-                   {
-                       "id":  "20261030T082012-3637",
-                       "kind":  "cgmd",
-                       "status":  "fail",
-                       "summary":  "cgmd all: grompp-eq failed (exit 1) (1711 beads)",
-                       "finished_at":  "2026-10-30T16:20:56+08:00"
                    }
                ]
 }
