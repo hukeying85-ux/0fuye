@@ -1,0 +1,44 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T115622-62e3",
+    "kind":  "gmx",
+    "status":  "ok",
+    "summary":  "gmx editconf -f F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\complex.gro -n F:\\Abeta_MD_20261030_01\\alllhrc_source_selection_20261030.ndx -o F:\\Abeta_MD_20261030_01\\alllhrc_extracted_20261030.gro exit 0: CGMD_EXIT_CODE=0 ",
+    "detail":  {
+                   "exit_code":  0,
+                   "argv":  [
+                                "editconf",
+                                "-f",
+                                "F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\complex.gro",
+                                "-n",
+                                "F:\\Abeta_MD_20261030_01\\alllhrc_source_selection_20261030.ndx",
+                                "-o",
+                                "F:\\Abeta_MD_20261030_01\\alllhrc_extracted_20261030.gro"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-195655",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                     :-) GROMACS - gmx editconf, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-195655",
+                      "Command line:",
+                      "  gmx editconf -f F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\complex.gro -n F:\\Abeta_MD_20261030_01\\alllhrc_source_selection_20261030.ndx -o F:\\Abeta_MD_20261030_01\\alllhrc_extracted_20261030.gro",
+                      "Select a group for output:",
+                      "Group     0 (atomnr_8000_to_9000_and_resnr_1_to_7) has   122 elements",
+                      "There is one group in the index",
+                      "GROMACS reminds you: \"I Feel a Great Disturbance in the Force\" (The Emperor Strikes Back)",
+                      "Note that major changes are planned in future for editconf, to improve usability and utility.",
+                      "Read 8267 atoms",
+                      "Volume: 259.074 nm^3, corresponds to roughly 116500 electrons",
+                      "No velocities found",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T19:56:55+08:00",
+    "finished_at":  "2026-10-30T19:56:56+08:00",
+    "seconds":  0.24,
+    "worker":  "DESKTOP-IEUDGS5"
+}
