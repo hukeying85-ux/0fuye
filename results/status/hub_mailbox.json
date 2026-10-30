@@ -1,17 +1,18 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T16:59:18+08:00",
+    "generated_at":  "2026-10-30T17:00:09+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  2,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T083706-a8ba.json"
+                  "20261030T085346-8dc1.json",
+                  "20261030T085901-6482.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -99,12 +100,10 @@
                      "20261030T082433-d373":  1,
                      "20261030T082539-816f":  1,
                      "20261030T083306-8d56":  1,
-                     "20261030T083706-a8ba":  1
+                     "20261030T083706-a8ba":  1,
+                     "20261030T085346-8dc1":  1
                  },
     "log_tail":  [
-                     "2026-10-30 16:18:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-30 16:18:55 [INFO] job kind=pipeline",
-                     "2026-10-30 16:18:55 [INFO] job 20261030T081840-1204 (pipeline) -\u003e unsupported: the Martini pipeline job kind is not wired yet; use smoke or gmx",
                      "2026-10-30 16:19:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 16:19:54 [INFO] job kind=gmx",
                      "2026-10-30 16:19:55 [INFO] job 20261030T081927-aeb7 (gmx) -\u003e ok: gmx check -s1 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_prod.tpr exit 0: CGMD_EXIT_CODE=0 ",
@@ -161,7 +160,10 @@
                      "hint: have locally. This is usually caused by another repository pushing to",
                      "hint: the same ref. If you want to integrate the remote changes, use",
                      "hint: \u0027git pull\u0027 before pushing again.",
-                     "hint: See the \u0027Note about fast-forwards\u0027 in \u0027git push --help\u0027 for details."
+                     "hint: See the \u0027Note about fast-forwards\u0027 in \u0027git push --help\u0027 for details.",
+                     "2026-10-30 16:59:54 [INFO] mailbox: 2 queued, running at most 1",
+                     "2026-10-30 16:59:54 [INFO] job kind=cgmd",
+                     "2026-10-30 16:59:59 [INFO] job 20261030T085346-8dc1 (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
                  ],
     "call_tail":  [
 
@@ -186,13 +188,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T083706-a8ba",
+                          "id":  "20261030T085346-8dc1",
                           "kind":  "cgmd",
                           "status":  "ok",
-                          "summary":  "cgmd all: 100000.0 ps CG on gpu at 6889.954 ns/day (1711 beads)"
+                          "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T085346-8dc1",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
+                       "finished_at":  "2026-10-30T16:59:59+08:00"
+                   },
                    {
                        "id":  "20261030T083706-a8ba",
                        "kind":  "cgmd",
@@ -325,13 +334,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-10-30T16:00:57+08:00"
-                   },
-                   {
-                       "id":  "20261030T075711-e36a",
-                       "kind":  "cgmd",
-                       "status":  "error",
-                       "summary":  "cgmd probe: AttributeError: \u0027module\u0027 object has no attribute \u0027which\u0027",
-                       "finished_at":  "2026-10-30T15:57:57+08:00"
                    }
                ]
 }
