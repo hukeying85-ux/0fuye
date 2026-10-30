@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T10:05:05+08:00",
+    "generated_at":  "2026-10-30T10:06:06+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -40,9 +40,6 @@
                      "20261029T082826-2cd0":  1
                  },
     "log_tail":  [
-                     "2026-10-30 09:09:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:10:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 09:11:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:12:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:13:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 09:14:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -99,7 +96,10 @@
                      "2026-10-30 10:03:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:04:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 10:04:59 [INFO] job kind=ping",
-                     "2026-10-30 10:04:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020454-ecd8 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                     "2026-10-30 10:04:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020454-ecd8 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-10-30 10:05:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-10-30 10:05:58 [INFO] job kind=ping",
+                     "2026-10-30 10:05:59 [INFO] peer hukeying85-ux/JevHarness job 20261030T020458-3bc6 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
                  ],
     "call_tail":  [
 
@@ -124,13 +124,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T020454-ecd8",
+                          "id":  "20261030T020458-3bc6",
                           "kind":  "ping",
                           "status":  "ok",
                           "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T020458-3bc6",
+                       "kind":  "ping",
+                       "status":  "ok",
+                       "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                       "finished_at":  "2026-10-30T10:05:59+08:00"
+                   },
                    {
                        "id":  "20261030T020454-ecd8",
                        "kind":  "ping",
@@ -263,13 +270,6 @@
                        "status":  "ok",
                        "summary":  "desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
                        "finished_at":  "2026-10-29T15:04:00+08:00"
-                   },
-                   {
-                       "id":  "20261029T070210-d9c0",
-                       "kind":  "deskfix",
-                       "status":  "ok",
-                       "summary":  "panel up | boot task trigger 1 | launched True",
-                       "finished_at":  "2026-10-29T15:03:09+08:00"
                    }
                ]
 }
