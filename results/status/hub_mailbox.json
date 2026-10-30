@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T11:24:06+08:00",
+    "generated_at":  "2026-10-30T11:29:36+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T032322-9a87.json"
+                  "20261030T032414-2adc.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -53,27 +53,10 @@
                      "20261030T032022-1efc":  1,
                      "20261030T032121-945b":  1,
                      "20261030T032212-dc4a":  1,
-                     "20261030T032322-9a87":  1
+                     "20261030T032322-9a87":  1,
+                     "20261030T032414-2adc":  1
                  },
     "log_tail":  [
-                     "2026-10-30 10:49:55 [INFO] job kind=gmx",
-                     "2026-10-30 10:49:57 [INFO] job 20261030T024913-4961 (gmx) -\u003e ok: gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em -nb cpu -ntomp 16 -pin on exit 0: CGMD_EXIT_CODE=0 ",
-                     "2026-10-30 10:50:54 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-30 10:50:55 [INFO] job kind=gmx",
-                     "2026-10-30 10:50:56 [INFO] job 20261030T025021-7065 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 2 exit 1: Fatal error:",
-                     "2026-10-30 10:51:55 [INFO] mailbox: 1 queued, running at most 1",
-                     "2026-10-30 10:51:55 [INFO] job kind=gmx",
-                     "2026-10-30 10:51:56 [INFO] job 20261030T025113-6ac4 (gmx) -\u003e fail: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\stage\\cgmd100ns\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 2 exit 1: Fatal error:",
-                     "2026-10-30 10:52:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:53:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:54:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:55:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:56:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:57:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:58:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 10:59:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 11:00:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-10-30 11:01:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 11:02:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 11:03:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 11:04:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -115,7 +98,25 @@
                      "2026-10-30 11:23:03 [INFO] job 20261030T032212-dc4a (gmx) -\u003e ok: gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2 -nb gpu -bonded cpu -gpu_id 0 -ntmpi 1 -ntomp 4 exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-30 11:23:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 11:23:55 [INFO] job kind=gmx",
-                     "2026-10-30 11:23:56 [INFO] job 20261030T032322-9a87 (gmx) -\u003e ok: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2.gro -r C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-30 11:23:56 [INFO] job 20261030T032322-9a87 (gmx) -\u003e ok: gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2.gro -r C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 11:24:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-10-30 11:24:56 [INFO] job kind=gmx",
+                     "2026-10-30 11:29:21 [INFO] job 20261030T032414-2adc (gmx) -\u003e ok: gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 -pin on exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-30 11:29:29 [WARN] mailbox push rejected (attempt 1): git.exe : fatal: Cannot prompt because user interactivity has been disabled.",
+                     "所在位置 C:\\cgmd\\0fuye\\skills\\cgmd-hub\\runner\\Invoke-CgmdMailbox.ps1:141 字符: 19",
+                     "+         $output = \u0026 git -C $Directory @GitArgs 2\u003e\u00261 | Out-String",
+                     "+                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                     "    + CategoryInfo          : NotSpecified: (fatal: Cannot p... been disabled.:String) [], RemoteException",
+                     "    + FullyQualifiedErrorId : NativeCommandError",
+                     " ",
+                     "To https://github.com/hukeying85-ux/0fuye.git",
+                     " ! [rejected]        HEAD -\u003e hub/mailbox (fetch first)",
+                     "error: failed to push some refs to \u0027https://github.com/hukeying85-ux/0fuye.git\u0027",
+                     "hint: Updates were rejected because the remote contains work that you do not",
+                     "hint: have locally. This is usually caused by another repository pushing to",
+                     "hint: the same ref. If you want to integrate the remote changes, use",
+                     "hint: \u0027git pull\u0027 before pushing again.",
+                     "hint: See the \u0027Note about fast-forwards\u0027 in \u0027git push --help\u0027 for details."
                  ],
     "call_tail":  [
 
@@ -140,13 +141,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261030T032322-9a87",
+                          "id":  "20261030T032414-2adc",
                           "kind":  "gmx",
                           "status":  "ok",
-                          "summary":  "gmx grompp -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\eq.mdp -c C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2.gro -r C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em2.gro -p C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\topol.top -n C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\cgmd_100ns_stage\\index.ndx -o C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq.tpr -maxwarn 0 exit 0: CGMD_EXIT_CODE=0 "
+                          "summary":  "gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 -pin on exit 0: CGMD_EXIT_CODE=0 "
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261030T032414-2adc",
+                       "kind":  "gmx",
+                       "status":  "ok",
+                       "summary":  "gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_eq -nb gpu -bonded gpu -gpu_id 0 -ntmpi 1 -ntomp 4 -pin on exit 0: CGMD_EXIT_CODE=0 ",
+                       "finished_at":  "2026-10-30T11:29:21+08:00"
+                   },
                    {
                        "id":  "20261030T032322-9a87",
                        "kind":  "gmx",
@@ -279,13 +287,6 @@
                        "status":  "fail",
                        "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
                        "finished_at":  "2026-10-30T10:15:23+08:00"
-                   },
-                   {
-                       "id":  "20261030T021021-360c",
-                       "kind":  "selfcheck",
-                       "status":  "fail",
-                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
-                       "finished_at":  "2026-10-30T10:11:33+08:00"
                    }
                ]
 }
