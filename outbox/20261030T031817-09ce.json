@@ -1,0 +1,53 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T031817-09ce",
+    "kind":  "gmx",
+    "status":  "fail",
+    "summary":  "gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em -nb gpu -bonded gpu -gpu_id 0 -ntomp 4 exit 1: Fatal error:",
+    "detail":  {
+                   "exit_code":  1,
+                   "argv":  [
+                                "mdrun",
+                                "-deffnm",
+                                "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em",
+                                "-nb",
+                                "gpu",
+                                "-bonded",
+                                "gpu",
+                                "-gpu_id",
+                                "0",
+                                "-ntomp",
+                                "4"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-111856",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx mdrun, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261030-111856",
+                      "Command line:",
+                      "  gmx mdrun -deffnm C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em -nb gpu -bonded gpu -gpu_id 0 -ntomp 4",
+                      "Back Off! I just backed up C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.log to C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state/#cgmd_100ns_em.log.1#",
+                      "Compiled SIMD is AVX2_256, but CPU also supports AVX_512 (see log).",
+                      "Reading file C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\cgmd_100ns_em.tpr, VERSION 2025.1 (single precision)",
+                      "-------------------------------------------------------",
+                      "Program:     gmx mdrun, version 2025.1",
+                      "Source file: src\\gromacs\\taskassignment\\resourcedivision.cpp (line 227)",
+                      "Fatal error:",
+                      "When using GPUs, setting the number of OpenMP threads without specifying the",
+                      "number of ranks can lead to conflicting demands. Please specify the number of",
+                      "thread-MPI ranks as well (option -ntmpi).",
+                      "For more information and tips for troubleshooting, please check the GROMACS",
+                      "website at https://manual.gromacs.org/current/user-guide/run-time-errors.html",
+                      "-------------------------------------------------------",
+                      "CGMD_EXIT_CODE=1 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T11:18:56+08:00",
+    "finished_at":  "2026-10-30T11:18:56+08:00",
+    "seconds":  0.46,
+    "worker":  "DESKTOP-IEUDGS5"
+}
