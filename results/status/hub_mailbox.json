@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-30T19:35:06+08:00",
+    "generated_at":  "2026-10-30T19:36:01+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261030T113400-0c24.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -112,7 +112,6 @@
                      "20261030T113400-0c24":  1
                  },
     "log_tail":  [
-                     "2026-10-30 18:39:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 18:40:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 18:41:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 18:42:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -171,7 +170,8 @@
                      "2026-10-30 19:33:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-10-30 19:34:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-30 19:34:56 [INFO] job kind=abeta_preflight",
-                     "2026-10-30 19:34:56 [INFO] job 20261030T113400-0c24 (abeta_preflight) -\u003e unsupported: unknown kind: abeta_preflight"
+                     "2026-10-30 19:34:56 [INFO] job 20261030T113400-0c24 (abeta_preflight) -\u003e unsupported: unknown kind: abeta_preflight",
+                     "2026-10-30 19:35:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -195,12 +195,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261030T113400-0c24",
-                          "kind":  "abeta_preflight",
-                          "status":  "unsupported",
-                          "summary":  "unknown kind: abeta_preflight"
-                      }
+
                   ],
     "recent":  [
                    {
