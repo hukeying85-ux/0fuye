@@ -1,0 +1,549 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261030T091736-1dae",
+    "kind":  "cgmd",
+    "status":  "ok",
+    "summary":  "cgmd search: 23 candidate run(s); newest F:\\0wsh\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.3 d ago)",
+    "detail":  {
+                   "exit_code":  0,
+                   "python":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "mode":  "search",
+                   "ops":  {
+                               "detail":  {
+                                              "candidates":  [
+                                                                 {
+                                                                     "age_days":  57.3,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache",
+                                                                     "files":  66,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-03T10:04:56",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  57.3,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_four_systems-20260831-151645\\md_ache",
+                                                                     "files":  66,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-03T10:04:56",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  58.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ylsllqr",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-02T17:53:00",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  58.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_four_systems-20260831-151645\\md_ylsllqr",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-02T17:53:00",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  58.7,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_fllhttr",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-02T01:02:04",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  58.7,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_four_systems-20260831-151645\\md_fllhttr",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-02T01:02:04",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  59.3,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_analysis_apo_first_plus_complex_20260831\\md_ylsllqr",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-01T10:49:19",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  59.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_four_systems-20260831-151645\\md_alllhrc",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-09-01T08:02:39",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  60.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_analysis_apo_first_plus_complex_20260831\\md_fllhttr",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-31T17:59:14",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  60.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_analysis_apo_first_plus_complex_20260831\\md_alllhrc",
+                                                                     "files":  85,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-31T16:43:40",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  62.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_complexes-20260827-090911\\md_ylsllqr",
+                                                                     "files":  45,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-29T08:50:29",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  62.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_results_20260827-090911\\md_ylsllqr",
+                                                                     "files":  8,
+                                                                     "gro":  [
+
+                                                                             ],
+                                                                     "newest":  "2026-08-29T08:50:29",
+                                                                     "topology":  [
+                                                                                      "topol.top"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  62.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_complexes-20260827-090911\\md_fllhttr",
+                                                                     "files":  45,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-29T08:49:45",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  62.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_results_20260827-090911\\md_fllhttr",
+                                                                     "files":  8,
+                                                                     "gro":  [
+
+                                                                             ],
+                                                                     "newest":  "2026-08-29T08:49:45",
+                                                                     "topology":  [
+                                                                                      "topol.top"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  62.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_complexes-20260827-090911\\md_alllhrc",
+                                                                     "files":  45,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-29T08:48:54",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  62.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_results_20260827-090911\\md_alllhrc",
+                                                                     "files":  8,
+                                                                     "gro":  [
+
+                                                                             ],
+                                                                     "newest":  "2026-08-29T08:48:54",
+                                                                     "topology":  [
+                                                                                      "topol.top"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  64.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\md_ache",
+                                                                     "files":  68,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-27T08:03:02",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  64.4,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\rerun_analysis_apo_first_plus_complex_20260831\\md_ache",
+                                                                     "files":  68,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-27T08:03:02",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  64.9,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr",
+                                                                     "files":  110,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-26T19:07:21",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  65.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\md_fllhttr",
+                                                                     "files":  134,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-26T17:57:42",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  65.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_alllhrc",
+                                                                     "files":  235,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-26T16:49:28",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  65.0,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\md_alllhrc",
+                                                                     "files":  235,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-26T16:49:28",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 },
+                                                                 {
+                                                                     "age_days":  65.2,
+                                                                     "dir":  "F:\\0wsh\\asd\\gromacs_md\\md_ache_complex_backup",
+                                                                     "files":  112,
+                                                                     "gro":  [
+                                                                                 "box.gro",
+                                                                                 "complex.gro",
+                                                                                 "em.gro",
+                                                                                 "equil_free.gro",
+                                                                                 "equil_npt.gro",
+                                                                                 "heat.gro"
+                                                                             ],
+                                                                     "newest":  "2026-08-26T11:31:56",
+                                                                     "topology":  [
+                                                                                      "em.tpr",
+                                                                                      "equil_free.tpr",
+                                                                                      "equil_npt.tpr",
+                                                                                      "heat.tpr",
+                                                                                      "ions.tpr",
+                                                                                      "md.tpr"
+                                                                                  ]
+                                                                 }
+                                                             ],
+                                              "cutoff_days_back":  3650.0,
+                                              "dirs_visited":  117,
+                                              "roots":  [
+                                                            "F:\\0wsh\\asd"
+                                                        ],
+                                              "walk_truncated":  false,
+                                              "with_sequence":  [
+
+                                                                ]
+                                          },
+                               "generated_at":  "2026-10-30T17:18:00",
+                               "host":  "DESKTOP-IEUDGS5",
+                               "mode":  "search",
+                               "python":  "3.12.10",
+                               "schema":  "cgmd.desk_ops.v1",
+                               "seconds":  5.04,
+                               "status":  "ok",
+                               "summary":  "23 candidate run(s); newest F:\\0wsh\\asd\\gromacs_md\\combined_compare_mixed-20260906-144003\\md_ache (57.3 d ago)"
+                           }
+               },
+    "logs_tail":  [
+                      "        \"dir\": \"F:\\\\0wsh\\\\asd\\\\gromacs_md\\\\md_ache_complex_backup\",",
+                      "        \"newest\": \"2026-08-26T11:31:56\",",
+                      "        \"age_days\": 65.2,",
+                      "        \"gro\": [",
+                      "          \"box.gro\",",
+                      "          \"complex.gro\",",
+                      "          \"em.gro\",",
+                      "          \"equil_free.gro\",",
+                      "          \"equil_npt.gro\",",
+                      "          \"heat.gro\"",
+                      "        ],",
+                      "        \"topology\": [",
+                      "          \"em.tpr\",",
+                      "          \"equil_free.tpr\",",
+                      "          \"equil_npt.tpr\",",
+                      "          \"heat.tpr\",",
+                      "          \"ions.tpr\",",
+                      "          \"md.tpr\"",
+                      "        ],",
+                      "        \"files\": 112",
+                      "      }",
+                      "    ],",
+                      "    \"with_sequence\": []",
+                      "  },",
+                      "  \"generated_at\": \"2026-10-30T17:18:00\",",
+                      "  \"seconds\": 5.04,",
+                      "  \"python\": \"3.12.10\",",
+                      "  \"host\": \"DESKTOP-IEUDGS5\"",
+                      "}",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "Read-only inventory of user-specified peptide structures",
+    "requested_by":  "user",
+    "started_at":  "2026-10-30T17:17:55+08:00",
+    "finished_at":  "2026-10-30T17:18:01+08:00",
+    "seconds":  5.89,
+    "worker":  "DESKTOP-IEUDGS5"
+}
