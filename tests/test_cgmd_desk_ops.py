@@ -20,8 +20,8 @@ FAKE_ITP = """[ defaults ]
 
 [ atomtypes ]
 Q5 72.0 0.0 A 0.47 4.4
-Qa 72.0 -1.0 A 0.47 4.4
-Qd 72.0 1.0 A 0.47 4.4
+Q5n 72.0 -1.0 A 0.47 4.4
+Q5p 72.0 1.0 A 0.47 4.4
 W  72.0 0.0 A 0.47 2.0
 NA 36.0 1.0 A 0.47 1.0
 CL 36.0 -1.0 A 0.47 1.0
@@ -61,8 +61,8 @@ def test_charges_carry_sidechain_and_termini():
 
 
 def test_bead_type_follows_charge():
-    assert desk_ops.bead_type(1.0) == "Qd"
-    assert desk_ops.bead_type(-1.0) == "Qa"
+    assert desk_ops.bead_type(1.0) == "Q5p"
+    assert desk_ops.bead_type(-1.0) == "Q5n"
     assert desk_ops.bead_type(0.0) == "Q5"
 
 

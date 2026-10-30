@@ -22,7 +22,7 @@ number that ends up in the result file is measured on the desk, never assumed.
 Model, stated plainly
 ---------------------
 ``build`` writes a **backbone-only Martini 3 elastic-network model**: one BB
-bead per residue, bead type ``Q5`` (neutral) / ``Qa`` (net negative) / ``Qd``
+bead per residue, bead type ``Q5`` (neutral) / ``Q5n`` (net negative) / ``Q5p``
 (net positive), the residue's net charge written on the bead, harmonic
 backbone bonds (b0 = 0.35 nm, k = 1250 kJ mol-1 nm-2) and an elastic network
 over pairs closer than 0.9 nm (k = 500).  Water is the official Martini 3
@@ -639,10 +639,15 @@ def peptide_charges(sequence):
 
 
 def bead_type(charge):
+    """Martini 3 spells charge in the bead name: Q5 / Q5p (positive) / Q5n.
+
+    ``Qa`` and ``Qd`` are Martini 2 names; martini_v3.0.0.itp has no atomtypes
+    by those names, and grompp stops with "Atomtype Qd not found".
+    """
     if charge > 0:
-        return "Qd"
+        return "Q5p"
     if charge < 0:
-        return "Qa"
+        return "Q5n"
     return "Q5"
 
 
@@ -730,7 +735,7 @@ def build_system(sequence, workdir, ff_file, box_nm=None, salt_m=0.15, temperatu
     itp_lines = [
         "; CGMD desk_ops.py -- backbone-only Martini 3 peptide",
         "; sequence {}  ({} residues)".format(sequence, count),
-        "; mapping: one BB bead per residue, bead type Q5/Qa/Qd, charge on the bead",
+        "; mapping: one BB bead per residue, bead type Q5/Q5p/Q5n, charge on the bead",
         "; backbone bond b0 = {} nm, k = {} ; elastic network k = {}, cutoff {} nm".format(
             BB_BOND_NM, BB_BOND_K, EN_K, EN_MAX_NM),
         "",
@@ -802,7 +807,7 @@ def build_system(sequence, workdir, ff_file, box_nm=None, salt_m=0.15, temperatu
         "top": top_path,
         "itp": itp_path,
         "model": "martini3-backbone-only+elastic-network",
-        "mapping": "1 BB bead / residue, Q5(neutral) Qa(neg) Qd(pos), charge on bead",
+        "mapping": "1 BB bead / residue, Q5(neutral) Q5n(neg) Q5p(pos), charge on bead",
         "ff_file": ff_file,
     }
 
