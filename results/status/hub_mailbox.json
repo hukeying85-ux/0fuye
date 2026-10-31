@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-10-31T09:46:05+08:00",
+    "generated_at":  "2026-10-31T09:47:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261031T014520-8f80.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -146,7 +146,6 @@
                      "20261031T014520-8f80":  1
                  },
     "log_tail":  [
-                     "2026-10-31 09:26:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-31 09:26:55 [INFO] job kind=ping",
                      "2026-10-31 09:26:56 [INFO] job 20261031T012601-f9a3 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                      "2026-10-31 09:27:55 [INFO] mailbox: 1 queued, running at most 1",
@@ -205,7 +204,8 @@
                      "2026-10-31 09:44:55 [INFO] job 20261031T014427-e4a2 (gmx) -\u003e ok: gmx pdb2gmx -f C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox\\scratch\\abeta_public_20261031\\abeta42_helix.pdb -ff charmm36-mar2019 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.gro -p F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.top -i F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.itp exit 0: CGMD_EXIT_CODE=0 ",
                      "2026-10-31 09:45:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-10-31 09:45:55 [INFO] job kind=gmx",
-                     "2026-10-31 09:45:55 [INFO] job 20261031T014520-8f80 (gmx) -\u003e ok: gmx editconf -f F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.gro -o F:\\Abeta_MD_20261030_01\\abeta42_helix_box_preflight_20261031.gro -bt cubic -d 1.2 -c exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-10-31 09:45:55 [INFO] job 20261031T014520-8f80 (gmx) -\u003e ok: gmx editconf -f F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.gro -o F:\\Abeta_MD_20261030_01\\abeta42_helix_box_preflight_20261031.gro -bt cubic -d 1.2 -c exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-10-31 09:46:55 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -229,12 +229,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261031T014520-8f80",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx editconf -f F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.gro -o F:\\Abeta_MD_20261030_01\\abeta42_helix_box_preflight_20261031.gro -bt cubic -d 1.2 -c exit 0: CGMD_EXIT_CODE=0 "
-                      }
+
                   ],
     "recent":  [
                    {
