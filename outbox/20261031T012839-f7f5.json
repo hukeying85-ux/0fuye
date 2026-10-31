@@ -1,0 +1,40 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261031T012839-f7f5",
+    "kind":  "gmx",
+    "status":  "ok",
+    "summary":  "gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr -select molindex 1 -on F:\\Abeta_MD_20261030_01\\ylsllqr_tpr_molindex1_20261031.ndx exit 0: CGMD_EXIT_CODE=0 ",
+    "detail":  {
+                   "exit_code":  0,
+                   "argv":  [
+                                "select",
+                                "-s",
+                                "F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr",
+                                "-select",
+                                "molindex 1",
+                                "-on",
+                                "F:\\Abeta_MD_20261030_01\\ylsllqr_tpr_molindex1_20261031.ndx"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261031-092854",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx select, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261031-092854",
+                      "Command line:",
+                      "  gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr -select \u0027molindex 1\u0027 -on F:\\Abeta_MD_20261030_01\\ylsllqr_tpr_molindex1_20261031.ndx",
+                      "Reading file F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr, VERSION 2025.1 (single precision)",
+                      "Reading file F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr, VERSION 2025.1 (single precision)",
+                      "Analyzed topology coordinates",
+                      "GROMACS reminds you: \"The difficulty lies, not in the new ideas, but in escaping the old ones.\" (John Maynard Keynes)",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-31T09:28:54+08:00",
+    "finished_at":  "2026-10-31T09:28:54+08:00",
+    "seconds":  0.31,
+    "worker":  "DESKTOP-IEUDGS5"
+}
