@@ -1,0 +1,9 @@
+{
+    "schema":  "cgmd.selfcheck.request.v1",
+    "desk":  false,
+    "smoke":  true,
+    "how":  "automatic schedule (self-healing), no human involved",
+    "requested_at":  "2026-10-31T11:32:00+08:00",
+    "requested_by":  "hub-scheduler",
+    "note":  "periodic 100 ps verification of the workstation"
+}
