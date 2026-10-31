@@ -1,12 +1,12 @@
 {
     "schema":  "cgmd.heartbeat.v1",
-    "at":  "2026-10-31T16:15:01+08:00",
+    "at":  "2026-10-31T17:16:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "branch":  "arena/32cd826e-0fuye",
-    "head":  "ed95cd6",
+    "head":  "2aeae26",
     "state":  "idle",
     "task_id":  "idle",
     "interval_s":  60,
-    "poll_count":  54,
+    "poll_count":  55,
     "launcher":  "wscript -\u003e CGMDHub.exe (winexe) -\u003e powershell hidden"
 }
