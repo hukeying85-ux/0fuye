@@ -1,0 +1,40 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261031T013631-d16c",
+    "kind":  "gmx",
+    "status":  "ok",
+    "summary":  "gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\md.tpr -select molindex 2 -on F:\\Abeta_MD_20261030_01\\alllhrc_tpr_molindex2_20261031.ndx exit 0: CGMD_EXIT_CODE=0 ",
+    "detail":  {
+                   "exit_code":  0,
+                   "argv":  [
+                                "select",
+                                "-s",
+                                "F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\md.tpr",
+                                "-select",
+                                "molindex 2",
+                                "-on",
+                                "F:\\Abeta_MD_20261030_01\\alllhrc_tpr_molindex2_20261031.ndx"
+                            ],
+                   "workdir":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261031-093754",
+                   "gmx":  "F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe"
+               },
+    "logs_tail":  [
+                      "                      :-) GROMACS - gmx select, 2025.1 (-:",
+                      "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
+                      "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
+                      "Working dir:  C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\gmx-job-20261031-093754",
+                      "Command line:",
+                      "  gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\md.tpr -select \u0027molindex 2\u0027 -on F:\\Abeta_MD_20261030_01\\alllhrc_tpr_molindex2_20261031.ndx",
+                      "Reading file F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\md.tpr, VERSION 2025.1 (single precision)",
+                      "Reading file F:\\0wsh\\asd\\gromacs_md\\md_alllhrc\\md.tpr, VERSION 2025.1 (single precision)",
+                      "Analyzed topology coordinates",
+                      "GROMACS reminds you: \"I\u0027ve basically become a vegetarian since the only meat I\u0027m eating is from animals I\u0027ve killed myself\" (Mark Zuckerberg)",
+                      "CGMD_EXIT_CODE=0 "
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-10-31T09:37:54+08:00",
+    "finished_at":  "2026-10-31T09:37:54+08:00",
+    "seconds":  0.32,
+    "worker":  "DESKTOP-IEUDGS5"
+}
