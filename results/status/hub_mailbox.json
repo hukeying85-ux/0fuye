@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:16:05+08:00",
+    "generated_at":  "2026-11-02T09:17:05+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -147,9 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 08:28:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:29:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:30:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:31:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:32:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:33:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -206,7 +203,10 @@
                      "2026-11-02 09:15:01 [INFO] peer hukeying85-ux/JevHarness job 20261102T011418-6f8e (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                      "2026-11-02 09:15:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:15:58 [INFO] job kind=cgmd",
-                     "2026-11-02 09:15:59 [INFO] peer hukeying85-ux/JevHarness job 20261102T011521-3ee8 (cgmd) -\u003e ok: cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)"
+                     "2026-11-02 09:15:59 [INFO] peer hukeying85-ux/JevHarness job 20261102T011521-3ee8 (cgmd) -\u003e ok: cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)",
+                     "2026-11-02 09:16:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:16:57 [INFO] job kind=cgmd",
+                     "2026-11-02 09:16:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T011624-0c0f (cgmd) -\u003e unsupported: cgmd run: run needs args.workdir from a finished build"
                  ],
     "call_tail":  [
 
@@ -231,13 +231,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261102T011521-3ee8",
+                          "id":  "20261102T011624-0c0f",
                           "kind":  "cgmd",
-                          "status":  "ok",
-                          "summary":  "cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)"
+                          "status":  "unsupported",
+                          "summary":  "cgmd run: run needs args.workdir from a finished build"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261102T011624-0c0f",
+                       "kind":  "cgmd",
+                       "status":  "unsupported",
+                       "summary":  "cgmd run: run needs args.workdir from a finished build",
+                       "finished_at":  "2026-11-02T09:16:58+08:00"
+                   },
                    {
                        "id":  "20261102T011521-3ee8",
                        "kind":  "cgmd",
@@ -370,13 +377,6 @@
                        "status":  "ok",
                        "summary":  "gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\ylsllqr_mol2_last_20261031.gro -ff charmm36-mar2019 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\ylsllqr_mol2_last_probe_20261031.gro -p F:\\Abeta_MD_20261030_01\\ylsllqr_mol2_last_probe_20261031.top -i F:\\Abeta_MD_20261030_01\\ylsllqr_mol2_last_probe_20261031.itp exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-31T09:33:55+08:00"
-                   },
-                   {
-                       "id":  "20261031T013215-e999",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx trjconv -f F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.xtc -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr -n F:\\Abeta_MD_20261030_01\\ylsllqr_tpr_molindex2_20261031.ndx -o F:\\Abeta_MD_20261030_01\\ylsllqr_mol2_last_20261031.gro -dump 100000 -pbc whole exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-31T09:33:13+08:00"
                    }
                ]
 }
