@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:19:04+08:00",
+    "generated_at":  "2026-11-02T09:20:04+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -147,9 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 08:37:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:38:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:39:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:40:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:41:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:42:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -206,7 +203,10 @@
                      "2026-11-02 09:17:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T011737-02cb (cgmd) -\u003e unsupported: cgmd run: run needs args.workdir from a finished build",
                      "2026-11-02 09:18:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:18:57 [INFO] job kind=cgmd",
-                     "2026-11-02 09:18:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T011850-4a65 (cgmd) -\u003e unsupported: cgmd run: run needs args.workdir from a finished build"
+                     "2026-11-02 09:18:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T011850-4a65 (cgmd) -\u003e unsupported: cgmd run: run needs args.workdir from a finished build",
+                     "2026-11-02 09:19:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:19:57 [INFO] job kind=cgmd",
+                     "2026-11-02 09:19:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T011942-cdfc (cgmd) -\u003e unsupported: cgmd run: run needs args.workdir from a finished build"
                  ],
     "call_tail":  [
 
@@ -231,13 +231,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261102T011850-4a65",
+                          "id":  "20261102T011942-cdfc",
                           "kind":  "cgmd",
                           "status":  "unsupported",
                           "summary":  "cgmd run: run needs args.workdir from a finished build"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261102T011942-cdfc",
+                       "kind":  "cgmd",
+                       "status":  "unsupported",
+                       "summary":  "cgmd run: run needs args.workdir from a finished build",
+                       "finished_at":  "2026-11-02T09:19:58+08:00"
+                   },
                    {
                        "id":  "20261102T011850-4a65",
                        "kind":  "cgmd",
@@ -370,13 +377,6 @@
                        "status":  "ok",
                        "summary":  "gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_fllhttr\\md.tpr -select molindex 2 -on F:\\Abeta_MD_20261030_01\\fllhttr_tpr_molindex2_20261031.ndx exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-31T09:36:55+08:00"
-                   },
-                   {
-                       "id":  "20261031T013418-7fea",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx check -f F:\\0wsh\\asd\\gromacs_md\\md_fllhttr\\md.xtc exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-31T09:36:15+08:00"
                    }
                ]
 }
