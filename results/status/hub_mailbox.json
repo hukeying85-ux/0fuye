@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:52:53+08:00",
+    "generated_at":  "2026-11-02T10:06:34+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -147,9 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 09:15:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 09:15:58 [INFO] job kind=cgmd",
-                     "2026-11-02 09:15:59 [INFO] peer hukeying85-ux/JevHarness job 20261102T011521-3ee8 (cgmd) -\u003e ok: cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)",
                      "2026-11-02 09:16:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:16:57 [INFO] job kind=cgmd",
                      "2026-11-02 09:16:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T011624-0c0f (cgmd) -\u003e unsupported: cgmd run: run needs args.workdir from a finished build",
@@ -206,7 +203,10 @@
                      "2026-11-02 09:40:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T014012-224b (cgmd) -\u003e ok: cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)",
                      "2026-11-02 09:41:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:41:57 [INFO] job kind=cgmd",
-                     "2026-11-02 09:52:47 [INFO] peer hukeying85-ux/JevHarness job 20261102T014115-cf33 (cgmd) -\u003e ok: cgmd run: 50000.0 ps CG on gpu at 6718.51 ns/day"
+                     "2026-11-02 09:52:47 [INFO] peer hukeying85-ux/JevHarness job 20261102T014115-cf33 (cgmd) -\u003e ok: cgmd run: 50000.0 ps CG on gpu at 6718.51 ns/day",
+                     "2026-11-02 09:53:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:53:58 [INFO] job kind=cgmd",
+                     "2026-11-02 10:06:28 [INFO] peer hukeying85-ux/JevHarness job 20261102T015308-01d4 (cgmd) -\u003e ok: cgmd run: 100000.0 ps CG on gpu at 5814.269 ns/day"
                  ],
     "call_tail":  [
 
@@ -231,13 +231,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261102T014115-cf33",
+                          "id":  "20261102T015308-01d4",
                           "kind":  "cgmd",
                           "status":  "ok",
-                          "summary":  "cgmd run: 50000.0 ps CG on gpu at 6718.51 ns/day"
+                          "summary":  "cgmd run: 100000.0 ps CG on gpu at 5814.269 ns/day"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261102T015308-01d4",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd run: 100000.0 ps CG on gpu at 5814.269 ns/day",
+                       "finished_at":  "2026-11-02T10:06:28+08:00"
+                   },
                    {
                        "id":  "20261102T014115-cf33",
                        "kind":  "cgmd",
@@ -370,13 +377,6 @@
                        "status":  "ok",
                        "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                        "finished_at":  "2026-11-02T09:15:01+08:00"
-                   },
-                   {
-                       "id":  "20261102T011312-8301",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
-                       "finished_at":  "2026-11-02T09:14:00+08:00"
                    }
                ]
 }
