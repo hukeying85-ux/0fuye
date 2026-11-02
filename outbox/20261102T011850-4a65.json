@@ -1,0 +1,46 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261102T011850-4a65",
+    "kind":  "cgmd",
+    "status":  "unsupported",
+    "summary":  "cgmd run: run needs args.workdir from a finished build",
+    "detail":  {
+                   "exit_code":  1,
+                   "python":  "C:\\Users\\BNI\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+                   "mode":  "run",
+                   "ops":  {
+                               "detail":  {
+
+                                          },
+                               "generated_at":  "2026-11-02T09:18:58",
+                               "host":  "DESKTOP-IEUDGS5",
+                               "mode":  "run",
+                               "python":  "3.12.10",
+                               "schema":  "cgmd.desk_ops.v1",
+                               "seconds":  0.0,
+                               "status":  "unsupported",
+                               "summary":  "run needs args.workdir from a finished build"
+                           }
+               },
+    "logs_tail":  [
+                      "{",
+                      "  \"schema\": \"cgmd.desk_ops.v1\",",
+                      "  \"mode\": \"run\",",
+                      "  \"status\": \"unsupported\",",
+                      "  \"summary\": \"run needs args.workdir from a finished build\",",
+                      "  \"detail\": {},",
+                      "  \"generated_at\": \"2026-11-02T09:18:58\",",
+                      "  \"seconds\": 0.0,",
+                      "  \"python\": \"3.12.10\",",
+                      "  \"host\": \"DESKTOP-IEUDGS5\"",
+                      "}",
+                      "CGMD_EXIT_CODE=1 "
+                  ],
+    "note":  "run 2.000 ns",
+    "requested_by":  "user",
+    "peer":  "hukeying85-ux/JevHarness",
+    "worker":  "DESKTOP-IEUDGS5",
+    "started_at":  "2026-11-02T09:18:57+08:00",
+    "finished_at":  "2026-11-02T09:18:58+08:00",
+    "seconds":  0.83
+}
