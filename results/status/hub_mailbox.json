@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:32:15+08:00",
+    "generated_at":  "2026-11-02T09:33:59+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -147,9 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 09:05:54 [INFO] job kind=abeta_preflight",
-                     "2026-11-02 09:05:56 [INFO] job 20261102T010506-e58e (abeta_preflight) -\u003e ok: read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen",
-                     "2026-11-02 09:06:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:07:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:08:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:09:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -206,7 +203,10 @@
                      "2026-11-02 09:29:53 [INFO] peer hukeying85-ux/JevHarness job 20261102T012816-1996 (cgmd) -\u003e ok: cgmd run: 4000.0 ps CG on gpu at 7053.096 ns/day",
                      "2026-11-02 09:30:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:30:58 [INFO] job kind=cgmd",
-                     "2026-11-02 09:32:09 [INFO] peer hukeying85-ux/JevHarness job 20261102T013020-9770 (cgmd) -\u003e ok: cgmd run: 8000.0 ps CG on gpu at 5485.742 ns/day"
+                     "2026-11-02 09:32:09 [INFO] peer hukeying85-ux/JevHarness job 20261102T013020-9770 (cgmd) -\u003e ok: cgmd run: 8000.0 ps CG on gpu at 5485.742 ns/day",
+                     "2026-11-02 09:32:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:32:57 [INFO] job kind=cgmd",
+                     "2026-11-02 09:33:53 [INFO] peer hukeying85-ux/JevHarness job 20261102T013225-667a (cgmd) -\u003e ok: cgmd run: 12000.0 ps CG on gpu at 7200.036 ns/day"
                  ],
     "call_tail":  [
 
@@ -231,13 +231,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261102T013020-9770",
+                          "id":  "20261102T013225-667a",
                           "kind":  "cgmd",
                           "status":  "ok",
-                          "summary":  "cgmd run: 8000.0 ps CG on gpu at 5485.742 ns/day"
+                          "summary":  "cgmd run: 12000.0 ps CG on gpu at 7200.036 ns/day"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261102T013225-667a",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd run: 12000.0 ps CG on gpu at 7200.036 ns/day",
+                       "finished_at":  "2026-11-02T09:33:53+08:00"
+                   },
                    {
                        "id":  "20261102T013020-9770",
                        "kind":  "cgmd",
@@ -370,13 +377,6 @@
                        "status":  "ok",
                        "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
                        "finished_at":  "2026-11-02T09:04:03+08:00"
-                   },
-                   {
-                       "id":  "20261031T014520-8f80",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx editconf -f F:\\Abeta_MD_20261030_01\\abeta42_helix_preflight_20261031.gro -o F:\\Abeta_MD_20261030_01\\abeta42_helix_box_preflight_20261031.gro -bt cubic -d 1.2 -c exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-31T09:45:55+08:00"
                    }
                ]
 }
