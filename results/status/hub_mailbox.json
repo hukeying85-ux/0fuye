@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:06:59+08:00",
+    "generated_at":  "2026-11-02T09:12:08+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -147,13 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 08:11:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:12:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:13:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:14:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:15:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:16:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:17:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:18:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:19:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:20:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -206,7 +199,14 @@
                      "2026-11-02 09:05:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-02 09:05:54 [INFO] job kind=abeta_preflight",
                      "2026-11-02 09:05:56 [INFO] job 20261102T010506-e58e (abeta_preflight) -\u003e ok: read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen",
-                     "2026-11-02 09:06:54 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-11-02 09:06:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:07:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:08:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:09:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:10:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:11:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:11:57 [INFO] job kind=cgmd",
+                     "2026-11-02 09:12:01 [INFO] peer hukeying85-ux/JevHarness job 20261102T011124-3a0d (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
                  ],
     "call_tail":  [
 
@@ -218,9 +218,9 @@
     "peers":  [
                   {
                       "peer":  "hukeying85-ux/JevHarness",
-                      "status":  "idle",
-                      "ran":  0,
-                      "note":  "19 request(s) seen, all already answered"
+                      "status":  "ran",
+                      "ran":  1,
+                      "note":  ""
                   },
                   {
                       "peer":  "hukeying85-ux/0fuye#arena/7ed6241a-0fuye",
@@ -230,9 +230,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261102T011124-3a0d",
+                          "kind":  "cgmd",
+                          "status":  "ok",
+                          "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261102T011124-3a0d",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
+                       "finished_at":  "2026-11-02T09:12:01+08:00"
+                   },
                    {
                        "id":  "20261102T010506-e58e",
                        "kind":  "abeta_preflight",
@@ -365,13 +377,6 @@
                        "status":  "ok",
                        "summary":  "gmx trjconv -f F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.xtc -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr -n F:\\Abeta_MD_20261030_01\\ylsllqr_tpr_molindex1_20261031.ndx -o F:\\Abeta_MD_20261030_01\\ylsllqr_mol1_last_20261031.gro -dump 100000 -pbc whole exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-31T09:30:14+08:00"
-                   },
-                   {
-                       "id":  "20261031T012839-f7f5",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx select -s F:\\0wsh\\asd\\gromacs_md\\md_ylsllqr\\md.tpr -select molindex 1 -on F:\\Abeta_MD_20261030_01\\ylsllqr_tpr_molindex1_20261031.ndx exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-31T09:28:54+08:00"
                    }
                ]
 }
