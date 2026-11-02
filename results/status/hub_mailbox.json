@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:24:05+08:00",
+    "generated_at":  "2026-11-02T09:25:43+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -147,9 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 08:52:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:53:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-02 08:54:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:55:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:56:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:57:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -206,7 +203,10 @@
                      "2026-11-02 09:23:00 [INFO] peer hukeying85-ux/JevHarness job 20261102T012245-2093 (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                      "2026-11-02 09:23:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:23:57 [INFO] job kind=cgmd",
-                     "2026-11-02 09:23:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T012308-7bc6 (cgmd) -\u003e ok: cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)"
+                     "2026-11-02 09:23:58 [INFO] peer hukeying85-ux/JevHarness job 20261102T012308-7bc6 (cgmd) -\u003e ok: cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)",
+                     "2026-11-02 09:24:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-02 09:24:57 [INFO] job kind=cgmd",
+                     "2026-11-02 09:25:37 [INFO] peer hukeying85-ux/JevHarness job 20261102T012411-9e6d (cgmd) -\u003e ok: cgmd run: 2000.0 ps CG on gpu at 5400.054 ns/day"
                  ],
     "call_tail":  [
 
@@ -231,13 +231,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261102T012308-7bc6",
+                          "id":  "20261102T012411-9e6d",
                           "kind":  "cgmd",
                           "status":  "ok",
-                          "summary":  "cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)"
+                          "summary":  "cgmd run: 2000.0 ps CG on gpu at 5400.054 ns/day"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261102T012411-9e6d",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd run: 2000.0 ps CG on gpu at 5400.054 ns/day",
+                       "finished_at":  "2026-11-02T09:25:37+08:00"
+                   },
                    {
                        "id":  "20261102T012308-7bc6",
                        "kind":  "cgmd",
@@ -370,13 +377,6 @@
                        "status":  "ok",
                        "summary":  "gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\alllhrc_mol2_last_20261031.gro -ff charmm36-mar2019 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\alllhrc_mol2_last_probe_20261031.gro -p F:\\Abeta_MD_20261030_01\\alllhrc_mol2_last_probe_20261031.top -i F:\\Abeta_MD_20261030_01\\alllhrc_mol2_last_probe_20261031.itp exit 0: CGMD_EXIT_CODE=0 ",
                        "finished_at":  "2026-10-31T09:41:55+08:00"
-                   },
-                   {
-                       "id":  "20261031T014039-81db",
-                       "kind":  "gmx",
-                       "status":  "ok",
-                       "summary":  "gmx pdb2gmx -f F:\\Abeta_MD_20261030_01\\fllhttr_mol2_last_20261031.gro -ff charmm36-mar2019 -water tip3p -ignh -o F:\\Abeta_MD_20261030_01\\fllhttr_mol2_last_probe_20261031.gro -p F:\\Abeta_MD_20261030_01\\fllhttr_mol2_last_probe_20261031.top -i F:\\Abeta_MD_20261030_01\\fllhttr_mol2_last_probe_20261031.itp exit 0: CGMD_EXIT_CODE=0 ",
-                       "finished_at":  "2026-10-31T09:40:55+08:00"
                    }
                ]
 }
