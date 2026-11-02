@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-02T09:06:05+08:00",
+    "generated_at":  "2026-11-02T09:06:59+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261102T010506-e58e.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -147,7 +147,6 @@
                      "20261102T010506-e58e":  1
                  },
     "log_tail":  [
-                     "2026-11-02 08:10:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:11:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:12:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 08:13:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -206,7 +205,8 @@
                      "2026-11-02 09:04:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-02 09:05:54 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-02 09:05:54 [INFO] job kind=abeta_preflight",
-                     "2026-11-02 09:05:56 [INFO] job 20261102T010506-e58e (abeta_preflight) -\u003e ok: read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen"
+                     "2026-11-02 09:05:56 [INFO] job 20261102T010506-e58e (abeta_preflight) -\u003e ok: read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen",
+                     "2026-11-02 09:06:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -230,12 +230,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261102T010506-e58e",
-                          "kind":  "abeta_preflight",
-                          "status":  "ok",
-                          "summary":  "read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen"
-                      }
+
                   ],
     "recent":  [
                    {
