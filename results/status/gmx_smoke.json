@@ -1,11 +1,11 @@
 {
     "schema":  "cgmd.gmxsmoke.v1",
-    "generated_at":  "2026-11-10T11:42:06+08:00",
+    "generated_at":  "2026-11-11T11:43:06+08:00",
     "status":  "ok",
     "ok":  true,
     "ps_requested":  100,
     "ps_completed":  100,
-    "workdir":  "C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+    "workdir":  "C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
     "gpu_id":  0,
     "temperature_K":  300,
     "dt_ps":  0.002,
@@ -18,14 +18,14 @@
                        "stage":  "solvate",
                        "command":  "gmx solvate -cs spc216.gro -box 2.500 -o smoke_box.gro -p smoke_box.top",
                        "returncode":  0,
-                       "seconds":  0.15,
+                       "seconds":  0.14,
                        "stderr_tail":  [
                                            "Volume                 :      15.625 (nm^3)",
                                            "Density                :     976.435 (g/l)",
                                            "Number of solvent molecules:    510   ",
                                            "Processing topology",
                                            "Back Off! I just backed up smoke_box.top to ./#smoke_box.top.1#",
-                                           "GROMACS reminds you: \"Academe, n.: An ancient school where morality and philosophy were taught. Academy, n.: A modern school where football is taught.\" (Ambrose Bierce)"
+                                           "GROMACS reminds you: \"I am at two with nature.\" (Woody Allen)"
                                        ],
                        "missing_markers":  [
 
@@ -33,24 +33,24 @@
                    },
                    {
                        "stage":  "grompp-em",
-                       "command":  "gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box.top -o smoke_em.tpr -maxwarn 2",
+                       "command":  "gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box.top -o smoke_em.tpr -maxwarn 2",
                        "returncode":  -1073741819,
-                       "seconds":  5.13,
+                       "seconds":  4.88,
                        "stderr_tail":  [
                                            "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
                                            "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
-                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box.top -o smoke_em.tpr -maxwarn 2",
+                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box.top -o smoke_em.tpr -maxwarn 2",
                                            "Generating 1-4 interactions: fudge = 0.5"
                                        ],
                        "output_tail":  [
                                            ":-) GROMACS - gmx grompp, 2025.1 (-:",
                                            "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
                                            "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
-                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box.top -o smoke_em.tpr -maxwarn 2",
+                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box.top -o smoke_em.tpr -maxwarn 2",
                                            "Generating 1-4 interactions: fudge = 0.5"
                                        ],
                        "missing_markers":  [
@@ -59,19 +59,19 @@
                    },
                    {
                        "stage":  "grompp-em-inline",
-                       "command":  "gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top -o smoke_em.tpr -maxwarn 2",
+                       "command":  "gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top -o smoke_em.tpr -maxwarn 2",
                        "returncode":  0,
                        "seconds":  0.1,
                        "stderr_tail":  [
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
-                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top -o smoke_em.tpr -maxwarn 2",
+                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top -o smoke_em.tpr -maxwarn 2",
                                            "Number of degrees of freedom in T-Coupling group rest is 3057.00",
                                            "The integrator does not provide a ensemble temperature, there is no system ensemble temperature",
-                                           "GROMACS reminds you: \"Computers are like humans - they do everything except think.\" (John von Neumann)"
+                                           "GROMACS reminds you: \"I always think there is something foreign about jolly phrases at breakfast.\" (Mr. Carson in Downtown Abbey)"
                                        ],
                        "output_tail":  [
-                                           "Setting the LD random seed to 1946134015",
+                                           "Setting the LD random seed to -139497089",
                                            "Generated 3 of the 3 non-bonded parameter combinations",
                                            "Excluding 2 bonded neighbours molecule type \u0027SOL\u0027",
                                            "Analysing residue names:",
@@ -84,12 +84,12 @@
                                            ":-) GROMACS - gmx grompp, 2025.1 (-:",
                                            "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
                                            "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
-                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top -o smoke_em.tpr -maxwarn 2",
+                                           "  gmx grompp -f smoke_em.mdp -c smoke_box.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top -o smoke_em.tpr -maxwarn 2",
                                            "Number of degrees of freedom in T-Coupling group rest is 3057.00",
                                            "The integrator does not provide a ensemble temperature, there is no system ensemble temperature",
-                                           "GROMACS reminds you: \"Computers are like humans - they do everything except think.\" (John von Neumann)"
+                                           "GROMACS reminds you: \"I always think there is something foreign about jolly phrases at breakfast.\" (Mr. Carson in Downtown Abbey)"
                                        ],
                        "missing_markers":  [
 
@@ -99,14 +99,14 @@
                        "stage":  "mdrun-em",
                        "command":  "gmx mdrun -deffnm smoke_em -nb cpu",
                        "returncode":  0,
-                       "seconds":  1.13,
+                       "seconds":  1.03,
                        "stderr_tail":  [
                                            "writing lowest energy coordinates.",
                                            "Steepest Descents converged to Fmax \u003c 100 in 239 steps",
                                            "Potential Energy  = -2.7885928e+04",
                                            "Maximum force     =  9.7543068e+01 on atom 487",
                                            "Norm of force     =  9.1768425e+00",
-                                           "GROMACS reminds you: \"Men love to wonder, and that is the seed of science.\" (Ralph Waldo Emerson)"
+                                           "GROMACS reminds you: \"I originally implemented PME to prove that you didn\u0027t need it...\" (Erik Lindahl)"
                                        ],
                        "output_tail":  [
                                            "step 11: One or more water molecules can not be settled.",
@@ -138,7 +138,7 @@
                                            "Potential Energy  = -2.7885928e+04",
                                            "Maximum force     =  9.7543068e+01 on atom 487",
                                            "Norm of force     =  9.1768425e+00",
-                                           "GROMACS reminds you: \"Men love to wonder, and that is the seed of science.\" (Ralph Waldo Emerson)"
+                                           "GROMACS reminds you: \"I originally implemented PME to prove that you didn\u0027t need it...\" (Erik Lindahl)"
                                        ],
                        "missing_markers":  [
 
@@ -146,23 +146,23 @@
                    },
                    {
                        "stage":  "grompp-md",
-                       "command":  "gmx grompp -f smoke_md.mdp -c smoke_em.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top -o smoke_md.tpr -maxwarn 2",
+                       "command":  "gmx grompp -f smoke_md.mdp -c smoke_em.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top -o smoke_md.tpr -maxwarn 2",
                        "returncode":  0,
                        "seconds":  0.1,
                        "stderr_tail":  [
                                            "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
-                                           "  gmx grompp -f smoke_md.mdp -c smoke_em.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top -o smoke_md.tpr -maxwarn 2",
+                                           "  gmx grompp -f smoke_md.mdp -c smoke_em.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top -o smoke_md.tpr -maxwarn 2",
                                            "Number of degrees of freedom in T-Coupling group System is 3057.00",
-                                           "GROMACS reminds you: \"Men love to wonder, and that is the seed of science.\" (Ralph Waldo Emerson)"
+                                           "GROMACS reminds you: \"I originally implemented PME to prove that you didn\u0027t need it...\" (Erik Lindahl)"
                                        ],
                        "output_tail":  [
-                                           "Setting the LD random seed to -82053733",
+                                           "Setting the LD random seed to -67142915",
                                            "Generated 3 of the 3 non-bonded parameter combinations",
                                            "Excluding 2 bonded neighbours molecule type \u0027SOL\u0027",
                                            "turning H bonds into constraints...",
-                                           "Setting gen_seed to -38209110",
+                                           "Setting gen_seed to -589873",
                                            "Velocities were taken from a Maxwell distribution at 300 K",
                                            "Analysing residue names:",
                                            "There are:   510      Water residues",
@@ -178,11 +178,11 @@
                                            ":-) GROMACS - gmx grompp, 2025.1 (-:",
                                            "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
                                            "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
-                                           "  gmx grompp -f smoke_md.mdp -c smoke_em.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top -o smoke_md.tpr -maxwarn 2",
+                                           "  gmx grompp -f smoke_md.mdp -c smoke_em.gro -p C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top -o smoke_md.tpr -maxwarn 2",
                                            "Number of degrees of freedom in T-Coupling group System is 3057.00",
-                                           "GROMACS reminds you: \"Men love to wonder, and that is the seed of science.\" (Ralph Waldo Emerson)"
+                                           "GROMACS reminds you: \"I originally implemented PME to prove that you didn\u0027t need it...\" (Erik Lindahl)"
                                        ],
                        "missing_markers":  [
 
@@ -192,20 +192,20 @@
                        "stage":  "mdrun-md-gpu",
                        "command":  "gmx mdrun -deffnm smoke_md -nb gpu -gpu_id 0",
                        "returncode":  0,
-                       "seconds":  15.71,
+                       "seconds":  16.11,
                        "stderr_tail":  [
                                            "Writing final coordinates.",
                                            "               Core t (s)   Wall t (s)        (%)",
                                            "       Time:      360.000       15.000     2400.0",
                                            "                 (ns/day)    (hour/ns)",
                                            "Performance:      576.012        0.042",
-                                           "GROMACS reminds you: \"Do You Have a Mind of Your Own ?\" (Garbage)"
+                                           "GROMACS reminds you: \"You ONLY have to do the coding ...\" (Anton Jansen, to core developer, on implementing new features)"
                                        ],
                        "output_tail":  [
                                            ":-) GROMACS - gmx mdrun, 2025.1 (-:",
                                            "Executable:   F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86\\bin\\gmx.exe",
                                            "Data prefix:  F:\\gromacs-2025.1-SM86\\gromacs-2025.1-SM86",
-                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206",
+                                           "Working dir:  C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305",
                                            "Command line:",
                                            "  gmx mdrun -deffnm smoke_md -nb gpu -gpu_id 0",
                                            "Compiled SIMD is AVX2_256, but CPU also supports AVX_512 (see log).",
@@ -221,13 +221,13 @@
                                            "Using 24 OpenMP threads ",
                                            "starting mdrun \u0027CGMD smoke test -- SPC water\u0027",
                                            "50000 steps,    100.0 ps.",
-                                           "Step 0  Warning: pressure scaling more than 1%, mu: 0.988712 0.988712 0.988712",
+                                           "Step 0  Warning: pressure scaling more than 1%, mu: 0.988044 0.988044 0.988044",
                                            "Writing final coordinates.",
                                            "               Core t (s)   Wall t (s)        (%)",
                                            "       Time:      360.000       15.000     2400.0",
                                            "                 (ns/day)    (hour/ns)",
                                            "Performance:      576.012        0.042",
-                                           "GROMACS reminds you: \"Do You Have a Mind of Your Own ?\" (Garbage)"
+                                           "GROMACS reminds you: \"You ONLY have to do the coding ...\" (Anton Jansen, to core developer, on implementing new features)"
                                        ],
                        "missing_markers":  [
 
@@ -239,7 +239,7 @@
                   "grompp failed on the bundled oplsaa.ff, retried with an inline SPC topology"
               ],
     "software":  {
-                     "generated_at":  "2026-11-10T11:42:06+08:00",
+                     "generated_at":  "2026-11-11T11:43:06+08:00",
                      "hostname":  "DESKTOP-IEUDGS5",
                      "platform":  "Microsoft Windows 10 专业版",
                      "machine":  "AMD64",
@@ -323,8 +323,8 @@
                                   2.5,
                                   2.5
                               ],
-                   "gro":  "C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box.gro",
-                   "top":  "C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261110-114206\\smoke_box_inline.top",
+                   "gro":  "C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box.gro",
+                   "top":  "C:\\Users\\BNI\\cgmd-runs\\smoke-native-20261111-114305\\smoke_box_inline.top",
                    "topology":  {
                                     "force_field":  "inline (self-contained SPC parameters)",
                                     "water":  "SPC/E, SETTLE on OW",
@@ -341,7 +341,7 @@
                   "fatal":  null
               },
     "accelerator":  "gpu",
-    "seconds_total":  24.23,
+    "seconds_total":  24.2,
     "host":  {
                  "hostname":  "DESKTOP-IEUDGS5",
                  "platform":  "Microsoft Windows 10 专业版",
@@ -373,25 +373,25 @@
                                   }
                     },
     "log_tail":  [
-                     " Constraints               1   24          2       0.000          0.009   0.0",
-                     " GPU constr. setup         1   24          1       0.000          0.010   0.0",
-                     " Kinetic energy            1   24      10001       0.200         11.324   1.3",
-                     " Rest                                              1.005         56.999   6.7",
+                     " Constraints               1   24          2       0.000          0.011   0.0",
+                     " GPU constr. setup         1   24          1       0.000          0.008   0.0",
+                     " Kinetic energy            1   24      10001       0.192         11.160   1.3",
+                     " Rest                                              1.000         58.044   6.7",
                      "--------------------------------------------------------------------------------",
-                     " Total                                            15.000        851.153 100.0",
+                     " Total                                            15.000        870.632 100.0",
                      "--------------------------------------------------------------------------------",
                      " Breakdown of PME mesh activities",
                      "--------------------------------------------------------------------------------",
-                     " Wait PME GPU gather       1   24      50001       0.334         18.976   2.2",
-                     " Reduce GPU PME F          1   24      50001       0.095          5.416   0.6",
-                     " Launch PME GPU ops.       1   24     450009       2.605        147.811  17.4",
+                     " Wait PME GPU gather       1   24      50001       0.337         19.561   2.2",
+                     " Reduce GPU PME F          1   24      50001       0.092          5.362   0.6",
+                     " Launch PME GPU ops.       1   24     450009       2.532        146.947  16.9",
                      "--------------------------------------------------------------------------------",
                      "",
                      "               Core t (s)   Wall t (s)        (%)",
                      "       Time:      360.000       15.000     2400.0",
                      "                 (ns/day)    (hour/ns)",
                      "Performance:      576.012        0.042",
-                     "Finished mdrun on rank 0 Tue Nov 10 11:42:30 2026",
+                     "Finished mdrun on rank 0 Wed Nov 11 11:43:29 2026",
                      ""
                  ],
     "files":  [
@@ -434,5 +434,5 @@
                   "step39b_n8.pdb",
                   "step39c_n8.pdb"
               ],
-    "stages_seconds":  22.32
+    "stages_seconds":  22.36
 }
