@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-26T17:20:02+08:00",
+    "generated_at":  "2026-11-26T17:21:18+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261126T092023-286c.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -153,12 +153,10 @@
                      "20261126T091433-552a":  1,
                      "20261126T091604-7dab":  1,
                      "20261126T091712-3c77":  1,
-                     "20261126T091821-c9ff":  1
+                     "20261126T091821-c9ff":  1,
+                     "20261126T092023-286c":  1
                  },
     "log_tail":  [
-                     "2026-11-26 16:32:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:33:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:34:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:35:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:36:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:37:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -215,7 +213,10 @@
                      "2026-11-26 17:18:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-26 17:18:56 [INFO] job kind=deskdiag",
                      "2026-11-26 17:19:00 [INFO] job 20261126T091821-c9ff (deskdiag) -\u003e ok: desk C:\\0apps\\ArenaDesk | drift 0 | served boot-fallback True | tasks 4",
-                     "2026-11-26 17:19:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-11-26 17:19:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-26 17:21:03 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-11-26 17:21:03 [INFO] job kind=cgmd",
+                     "2026-11-26 17:21:08 [INFO] job 20261126T092023-286c (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
                  ],
     "call_tail":  [
 
@@ -239,9 +240,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261126T092023-286c",
+                          "kind":  "cgmd",
+                          "status":  "ok",
+                          "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261126T092023-286c",
+                       "kind":  "cgmd",
+                       "status":  "ok",
+                       "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
+                       "finished_at":  "2026-11-26T17:21:08+08:00"
+                   },
                    {
                        "id":  "20261126T091821-c9ff",
                        "kind":  "deskdiag",
@@ -374,13 +387,6 @@
                        "status":  "ok",
                        "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                        "finished_at":  "2026-11-02T09:27:01+08:00"
-                   },
-                   {
-                       "id":  "20261102T012411-9e6d",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd run: 2000.0 ps CG on gpu at 5400.054 ns/day",
-                       "finished_at":  "2026-11-02T09:25:37+08:00"
                    }
                ]
 }
