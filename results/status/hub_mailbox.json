@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-26T17:16:02+08:00",
+    "generated_at":  "2026-11-26T17:17:07+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261126T091604-7dab.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -150,12 +150,10 @@
                      "selftest-20261119T132155":  1,
                      "selftest-20261126T132257":  1,
                      "20261126T091314-9efb":  1,
-                     "20261126T091433-552a":  1
+                     "20261126T091433-552a":  1,
+                     "20261126T091604-7dab":  1
                  },
     "log_tail":  [
-                     "2026-11-26 16:22:57 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:23:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:24:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:25:56 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:26:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:27:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -212,7 +210,10 @@
                      "2026-11-26 17:14:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-26 17:14:56 [INFO] job kind=selfcheck",
                      "2026-11-26 17:15:30 [INFO] job 20261126T091433-552a (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail",
-                     "2026-11-26 17:15:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-11-26 17:15:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-26 17:16:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-11-26 17:16:56 [INFO] job kind=files",
+                     "2026-11-26 17:16:56 [INFO] job 20261126T091604-7dab (files) -\u003e unsupported: unknown kind: files"
                  ],
     "call_tail":  [
 
@@ -236,9 +237,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261126T091604-7dab",
+                          "kind":  "files",
+                          "status":  "unsupported",
+                          "summary":  "unknown kind: files"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261126T091604-7dab",
+                       "kind":  "files",
+                       "status":  "unsupported",
+                       "summary":  "unknown kind: files",
+                       "finished_at":  "2026-11-26T17:16:56+08:00"
+                   },
                    {
                        "id":  "20261126T091433-552a",
                        "kind":  "selfcheck",
@@ -371,13 +384,6 @@
                        "status":  "ok",
                        "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                        "finished_at":  "2026-11-02T09:23:00+08:00"
-                   },
-                   {
-                       "id":  "20261102T012123-3a1c",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)",
-                       "finished_at":  "2026-11-02T09:21:58+08:00"
                    }
                ]
 }
