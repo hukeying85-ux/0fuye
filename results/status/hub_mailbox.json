@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-26T17:23:02+08:00",
+    "generated_at":  "2026-11-26T17:24:08+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261126T092328-85bc.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -155,12 +155,10 @@
                      "20261126T091712-3c77":  1,
                      "20261126T091821-c9ff":  1,
                      "20261126T092023-286c":  1,
-                     "20261126T092131-6312":  1
+                     "20261126T092131-6312":  1,
+                     "20261126T092328-85bc":  1
                  },
     "log_tail":  [
-                     "2026-11-26 16:39:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:40:55 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:41:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:42:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:44:01 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:44:56 [INFO] mailbox: 0 queued, running at most 1",
@@ -217,7 +215,10 @@
                      "2026-11-26 17:21:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-26 17:21:56 [INFO] job kind=cgmd",
                      "2026-11-26 17:21:59 [INFO] job 20261126T092131-6312 (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
-                     "2026-11-26 17:22:56 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-11-26 17:22:56 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-26 17:23:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-11-26 17:23:56 [INFO] job kind=abeta_preflight",
+                     "2026-11-26 17:23:57 [INFO] job 20261126T092328-85bc (abeta_preflight) -\u003e ok: read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen"
                  ],
     "call_tail":  [
 
@@ -241,9 +242,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261126T092328-85bc",
+                          "kind":  "abeta_preflight",
+                          "status":  "ok",
+                          "summary":  "read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen"
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261126T092328-85bc",
+                       "kind":  "abeta_preflight",
+                       "status":  "ok",
+                       "summary":  "read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen",
+                       "finished_at":  "2026-11-26T17:23:57+08:00"
+                   },
                    {
                        "id":  "20261126T092131-6312",
                        "kind":  "cgmd",
@@ -376,13 +389,6 @@
                        "status":  "ok",
                        "summary":  "cgmd run: 4000.0 ps CG on gpu at 7053.096 ns/day",
                        "finished_at":  "2026-11-02T09:29:53+08:00"
-                   },
-                   {
-                       "id":  "20261102T012713-d143",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd build: YLSLLQR -\u003e 1309 beads in 5.3 nm box (1275 W, 13 NA, 14 CL)",
-                       "finished_at":  "2026-11-02T09:27:59+08:00"
                    }
                ]
 }
