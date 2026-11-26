@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-26T17:22:11+08:00",
+    "generated_at":  "2026-11-26T17:23:02+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261126T092131-6312.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -158,7 +158,6 @@
                      "20261126T092131-6312":  1
                  },
     "log_tail":  [
-                     "2026-11-26 16:38:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:39:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:40:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:41:55 [INFO] mailbox: 0 queued, running at most 1",
@@ -217,7 +216,8 @@
                      "2026-11-26 17:21:08 [INFO] job 20261126T092023-286c (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                      "2026-11-26 17:21:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-26 17:21:56 [INFO] job kind=cgmd",
-                     "2026-11-26 17:21:59 [INFO] job 20261126T092131-6312 (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
+                     "2026-11-26 17:21:59 [INFO] job 20261126T092131-6312 (cgmd) -\u003e ok: cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
+                     "2026-11-26 17:22:56 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -241,12 +241,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261126T092131-6312",
-                          "kind":  "cgmd",
-                          "status":  "ok",
-                          "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found"
-                      }
+
                   ],
     "recent":  [
                    {
