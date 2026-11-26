@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-26T17:25:02+08:00",
+    "generated_at":  "2026-11-26T17:26:07+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261126T092500-8490.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -156,12 +156,10 @@
                      "20261126T091821-c9ff":  1,
                      "20261126T092023-286c":  1,
                      "20261126T092131-6312":  1,
-                     "20261126T092328-85bc":  1
+                     "20261126T092328-85bc":  1,
+                     "20261126T092500-8490":  1
                  },
     "log_tail":  [
-                     "2026-11-26 16:44:01 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:44:56 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-26 16:45:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:46:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:47:55 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-26 16:48:56 [INFO] mailbox: 0 queued, running at most 1",
@@ -218,7 +216,10 @@
                      "2026-11-26 17:23:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-26 17:23:56 [INFO] job kind=abeta_preflight",
                      "2026-11-26 17:23:57 [INFO] job 20261126T092328-85bc (abeta_preflight) -\u003e ok: read-only A-beta preflight: 3/3 inputs uniquely matched, 15 copies seen",
-                     "2026-11-26 17:24:55 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-11-26 17:24:55 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-26 17:25:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-11-26 17:25:56 [INFO] job kind=gmx",
+                     "2026-11-26 17:25:56 [INFO] job 20261126T092500-8490 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 "
                  ],
     "call_tail":  [
 
@@ -242,9 +243,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261126T092500-8490",
+                          "kind":  "gmx",
+                          "status":  "ok",
+                          "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 "
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261126T092500-8490",
+                       "kind":  "gmx",
+                       "status":  "ok",
+                       "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 ",
+                       "finished_at":  "2026-11-26T17:25:56+08:00"
+                   },
                    {
                        "id":  "20261126T092328-85bc",
                        "kind":  "abeta_preflight",
@@ -377,13 +390,6 @@
                        "status":  "ok",
                        "summary":  "cgmd run: 8000.0 ps CG on gpu at 5485.742 ns/day",
                        "finished_at":  "2026-11-02T09:32:09+08:00"
-                   },
-                   {
-                       "id":  "20261102T012816-1996",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd run: 4000.0 ps CG on gpu at 7053.096 ns/day",
-                       "finished_at":  "2026-11-02T09:29:53+08:00"
                    }
                ]
 }
