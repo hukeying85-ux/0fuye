@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-27T09:52:00+08:00",
+    "generated_at":  "2026-11-27T09:53:05+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  0,
+    "queued":  1,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-
+                  "20261127T015208-0cd1.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -161,12 +161,10 @@
                      "20261127T014735-e700":  1,
                      "20261127T014836-1b4e":  1,
                      "20261127T014945-53dd":  1,
-                     "20261127T015041-dc51":  1
+                     "20261127T015041-dc51":  1,
+                     "20261127T015208-0cd1":  1
                  },
     "log_tail":  [
-                     "2026-11-27 09:00:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-27 09:01:56 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-27 09:02:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:03:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:04:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:05:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -223,7 +221,10 @@
                      "2026-11-27 09:50:55 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-27 09:50:55 [INFO] job kind=shell",
                      "2026-11-27 09:50:55 [INFO] job 20261127T015041-dc51 (shell) -\u003e unsupported: shell jobs are disabled; start Invoke-CgmdMailbox.ps1 with -AllowShell",
-                     "2026-11-27 09:51:54 [INFO] mailbox: 0 queued, running at most 1"
+                     "2026-11-27 09:51:54 [INFO] mailbox: 0 queued, running at most 1",
+                     "2026-11-27 09:52:56 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-11-27 09:52:56 [INFO] job kind=gmx",
+                     "2026-11-27 09:52:56 [INFO] job 20261127T015208-0cd1 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 "
                  ],
     "call_tail":  [
 
@@ -247,9 +248,21 @@
                   }
               ],
     "processed":  [
-
+                      {
+                          "id":  "20261127T015208-0cd1",
+                          "kind":  "gmx",
+                          "status":  "ok",
+                          "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 "
+                      }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261127T015208-0cd1",
+                       "kind":  "gmx",
+                       "status":  "ok",
+                       "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 ",
+                       "finished_at":  "2026-11-27T09:52:56+08:00"
+                   },
                    {
                        "id":  "20261127T015041-dc51",
                        "kind":  "shell",
@@ -382,13 +395,6 @@
                        "status":  "ok",
                        "summary":  "cgmd run: 100000.0 ps CG on gpu at 5814.269 ns/day",
                        "finished_at":  "2026-11-02T10:06:28+08:00"
-                   },
-                   {
-                       "id":  "20261102T014115-cf33",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd run: 50000.0 ps CG on gpu at 6718.51 ns/day",
-                       "finished_at":  "2026-11-02T09:52:47+08:00"
                    }
                ]
 }
