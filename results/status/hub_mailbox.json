@@ -1,6 +1,6 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-27T09:48:08+08:00",
+    "generated_at":  "2026-11-27T09:49:38+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
@@ -11,7 +11,7 @@
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261127T014735-e700.json"
+                  "20261127T014836-1b4e.json"
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -158,12 +158,10 @@
                      "20261126T092131-6312":  1,
                      "20261126T092328-85bc":  1,
                      "20261126T092500-8490":  1,
-                     "20261127T014735-e700":  1
+                     "20261127T014735-e700":  1,
+                     "20261127T014836-1b4e":  1
                  },
     "log_tail":  [
-                     "2026-11-27 08:50:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-27 08:51:54 [INFO] mailbox: 0 queued, running at most 1",
-                     "2026-11-27 08:52:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 08:53:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 08:54:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 08:55:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -220,7 +218,10 @@
                      "2026-11-27 09:46:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:47:57 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-27 09:47:57 [INFO] job kind=ping",
-                     "2026-11-27 09:47:58 [INFO] job 20261127T014735-e700 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                     "2026-11-27 09:47:58 [INFO] job 20261127T014735-e700 (ping) -\u003e ok: DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)",
+                     "2026-11-27 09:48:55 [INFO] mailbox: 1 queued, running at most 1",
+                     "2026-11-27 09:48:55 [INFO] job kind=selfcheck",
+                     "2026-11-27 09:49:28 [INFO] job 20261127T014836-1b4e (selfcheck) -\u003e fail: selfcheck: 15 pass / 3 warn / 0 fail"
                  ],
     "call_tail":  [
 
@@ -245,13 +246,20 @@
               ],
     "processed":  [
                       {
-                          "id":  "20261127T014735-e700",
-                          "kind":  "ping",
-                          "status":  "ok",
-                          "summary":  "DESKTOP-IEUDGS5 alive, gmx 2025.1, 1 gpu(s)"
+                          "id":  "20261127T014836-1b4e",
+                          "kind":  "selfcheck",
+                          "status":  "fail",
+                          "summary":  "selfcheck: 15 pass / 3 warn / 0 fail"
                       }
                   ],
     "recent":  [
+                   {
+                       "id":  "20261127T014836-1b4e",
+                       "kind":  "selfcheck",
+                       "status":  "fail",
+                       "summary":  "selfcheck: 15 pass / 3 warn / 0 fail",
+                       "finished_at":  "2026-11-27T09:49:28+08:00"
+                   },
                    {
                        "id":  "20261127T014735-e700",
                        "kind":  "ping",
@@ -384,13 +392,6 @@
                        "status":  "ok",
                        "summary":  "cgmd probe: gmx 2025.1 | python 3.12.10 | martini3 found",
                        "finished_at":  "2026-11-02T09:40:01+08:00"
-                   },
-                   {
-                       "id":  "20261102T013225-667a",
-                       "kind":  "cgmd",
-                       "status":  "ok",
-                       "summary":  "cgmd run: 12000.0 ps CG on gpu at 7200.036 ns/day",
-                       "finished_at":  "2026-11-02T09:33:53+08:00"
                    }
                ]
 }
