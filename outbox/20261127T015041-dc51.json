@@ -1,0 +1,17 @@
+{
+    "schema":  "cgmd.mailbox.result.v1",
+    "id":  "20261127T015041-dc51",
+    "kind":  "shell",
+    "status":  "unsupported",
+    "summary":  "shell jobs are disabled; start Invoke-CgmdMailbox.ps1 with -AllowShell",
+    "detail":  null,
+    "logs_tail":  [
+
+                  ],
+    "note":  "",
+    "requested_by":  "user",
+    "started_at":  "2026-11-27T09:50:55+08:00",
+    "finished_at":  "2026-11-27T09:50:55+08:00",
+    "seconds":  0.02,
+    "worker":  "DESKTOP-IEUDGS5"
+}
