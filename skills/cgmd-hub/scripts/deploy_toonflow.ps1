@@ -276,7 +276,20 @@ $serverLog = Join-Path $RepoRoot ('logs\server-' + (Get-Date -Format 'yyyyMMdd-H
 $serverStarted = $false
 try {
     if (Test-Port $Port) {
-        Add-Step 'start' 'ok' ('port ' + $Port + ' already listening; reusing the running server')
+        # Something is listening, but that is not proof it is Toonflow: another
+        # dev server on :3000 would otherwise be adopted and reported as ours.
+        $ours = $false
+        try {
+            $probe = Invoke-WebRequest -Uri ('http://127.0.0.1:' + $Port + '/') -UseBasicParsing -TimeoutSec 10
+            $body = [string]$probe.Content
+            if ($body -match '(?i)toonflow') { $ours = $true }
+        } catch { }
+        if (-not $ours) {
+            Add-Step 'start' 'fail' ('port ' + $Port + ' is taken by another program; set -Port to a free port')
+            Write-Receipt 'fail' 'port already in use by another program' ([ordered]@{ port = $Port }) | Out-Null
+            exit 1
+        }
+        Add-Step 'start' 'ok' ('port ' + $Port + ' already serving Toonflow; reusing it')
     } else {
         $env:TOONFLOW_DATA_DIR = (Join-Path $RepoRoot 'data')
         $env:TOONFLOW_SERVER_PORT = [string]$Port

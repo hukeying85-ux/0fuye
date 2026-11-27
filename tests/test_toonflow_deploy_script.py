@@ -43,7 +43,7 @@ def test_every_failure_branch_exits_nonzero(source: str) -> None:
     assert "exit (Write-Receipt" not in source
     writes = len(re.findall(r"Write-Receipt 'fail'", source))
     exits = len(re.findall(r"^\s*exit 1\s*$", source, re.M))
-    assert writes >= 8, "expected a failure path for each pipeline stage"
+    assert writes >= 11, "expected a failure path for each pipeline stage"
     # One exit 1 per failure receipt, plus the final explicit exit 0.
     assert exits == writes, f"{writes} failure receipts but {exits} exit 1 statements"
     assert re.search(r"^exit 0\s*$", source, re.M), "the success path must return 0"
@@ -78,7 +78,9 @@ def test_disk_guard_refuses_small_free_space(source: str) -> None:
 def test_server_port_is_reusable_and_probed_without_duplicating(source: str) -> None:
     """A second run must adopt a live server, not spawn a competing one."""
     assert "if (Test-Port $Port)" in source
-    assert "already listening" in source
+    assert "already serving Toonflow" in source
+    # a foreign program on the port must abort, not be adopted
+    assert "taken by another program" in source
     assert "call \"" in source, "cmd /c needs `call` before bun"
 
 
