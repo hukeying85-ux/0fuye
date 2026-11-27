@@ -84,6 +84,21 @@ def test_server_port_is_reusable_and_probed_without_duplicating(source: str) -> 
     assert "call \"" in source, "cmd /c needs `call` before bun"
 
 
+def test_receipt_is_published_back_through_git(source: str) -> None:
+    """The operator must not have to copy JSON out of a console window."""
+    assert "toonflow_deploy.json" in source
+    assert "results\\status" in source or "results/status" in source
+    # Retry, because the poll task pushes the same branch every minute.
+    assert "pull --rebase --autostash" in source
+    # Stage exactly one path so a dirty operator tree is never swept in.
+    assert "git -C $publishRepo add -- 'results/status/toonflow_deploy.json'" in source
+
+
+def test_publish_failure_is_not_reported_as_success(source: str) -> None:
+    """A failed push is a warn on the receipt, not a silent no-op."""
+    assert "could not push; receipt stays on F:" in source
+
+
 def test_receipt_declares_the_model_limitation(source: str) -> None:
     """Honesty guard: the app ships no generative model, say so in the receipt."""
     line = next(l for l in source.splitlines() if "model_note" in l)

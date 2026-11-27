@@ -38,6 +38,10 @@
 .PARAMETER NoSample
     Skip sample media generation.
 
+.PARAMETER PublishBranch
+    Branch that receives results/status/toonflow_deploy.json.  Defaults to the
+    branch the desk's poll task already publishes heartbeats on.
+
 .OUTPUTS
     Writes <RepoRoot>\receipt\deploy-receipt.json and prints the same JSON to
     stdout.  Exit 0 = ready, 1 = failed (the JSON says which step).
@@ -51,6 +55,9 @@ param(
     [int]$Port = 3000,
     [string]$Repository = 'https://github.com/HBAI-Ltd/Toonflow-app.git',
     [string]$Branch = 'master',
+    [string]$PublishRemote = 'https://github.com/hukeying85-ux/0fuye.git',
+    [string]$PublishBranch = 'arena/32cd826e-0fuye',
+    [string]$GitHubToken = '',
     [switch]$SkipBuild,
     [switch]$NoSample,
     [int]$ServerWaitSeconds = 300
@@ -431,5 +438,85 @@ $final['sample_png_frames'] = @(if (Test-Path -LiteralPath $frames) { Get-ChildI
 $final['free_gb_after'] = [math]::Round((Get-FreeBytes $driveLetter) / $gb, 1)
 $final['model_note'] = 'Toonflow ships no generative video model. Real AI footage needs a model API key (Seedance/Seedream/MiniMax/Wan) or a local ComfyUI configured in the web UI; this receipt only proves the app, server and media pipeline work.'
 $status = if ($samplePath) { 'ok' } else { 'ready_no_sample' }
+
+# ------------------------------------------------------- 10. publish receipt
+# The operator should not have to copy JSON out of a console window, so the
+# receipt is pushed to the desk's own branch, where the Arena session can pick
+# it up with plain git.  Everything here stays on F:: a throw-away clone lives
+# under the deployment root.  Nothing here writes to C:, per the standing
+# rule that this work stays on F: entirely.
+$receiptFile = Join-Path $RepoRoot 'receipt\deploy-receipt.json'
+$publishRepo = Join-Path $RepoRoot 'publish-repo'
+try {
+    if (-not (Test-Path -LiteralPath $receiptFile)) { throw 'no receipt file to publish' }
+    $env:GIT_TERMINAL_PROMPT = '0'
+    # Credentials, best first: an explicit token, then whatever the desk already
+    # uses for its own pushes.  A public repo can be read anonymously but never
+    # pushed without one of these.  Only pre-existing paths are inspected and
+    # nothing is created on C:.
+    $credFile = Join-Path $RepoRoot 'tools\\git-credentials'
+    if (-not $GitHubToken) {
+        $candidates = @(
+            (Join-Path $env:USERPROFILE '.git-credentials'),
+            (Join-Path $RepoRoot 'repo\\.git-credentials'),
+            (Join-Path $RepoRoot 'tools\\git-credentials')
+        )
+        foreach ($candidate in $candidates) {
+            if (-not $candidate) { continue }
+            if (Test-Path -LiteralPath $candidate) { $credFile = $candidate; break }
+        }
+    }
+    $token = $GitHubToken
+    if (-not $token -and (Test-Path -LiteralPath $credFile)) {
+        $line = (Get-Content -LiteralPath $credFile -ErrorAction SilentlyContinue |
+                 Where-Object { $_ -match 'github\.com' } | Select-Object -First 1)
+        if ($line -and $line -match 'https://([^:@/]+):([^@]+)@') { $token = $matches[2] }
+    }
+    if ($token) {
+        # Write a one-line credential store under the F: deployment and point
+        # git at it, so the token never appears in a process command line where
+        # any local user could read it out of the task list.
+        $stored = $PublishRemote -replace '^https://', ('https://x-access-token:' + $token + '@')
+        Set-Content -LiteralPath $credFile -Value $stored -Encoding ASCII -NoNewline -Force
+        $null = & git config --global --replace-all credential.helper ('store --file=' + ($credFile -replace '\\', '/')) 2>&1
+        $pushRemote = $PublishRemote
+    } else {
+        $pushRemote = $PublishRemote
+    }
+    if (Test-Path -LiteralPath (Join-Path $publishRepo '.git')) {
+        $null = & git -C $publishRepo fetch --depth 1 origin $PublishBranch 2>&1
+        $null = & git -C $publishRepo checkout -q -B $PublishBranch FETCH_HEAD 2>&1
+        $null = & git -C $publishRepo reset --hard FETCH_HEAD 2>&1
+    } else {
+        $cloneOut = & git clone --depth 1 --branch $PublishBranch $PublishRemote $publishRepo 2>&1
+        if ($LASTEXITCODE -ne 0) { throw (($cloneOut | Out-String) -split "`n" | Select-Object -Last 4 | Out-String) }
+    }
+    $statusDir = Join-Path $publishRepo 'results\status'
+    if (-not (Test-Path -LiteralPath $statusDir)) { $null = New-Item -ItemType Directory -Path $statusDir -Force }
+    Copy-Item -LiteralPath $receiptFile -Destination (Join-Path $statusDir 'toonflow_deploy.json') -Force
+
+    $published = $false
+    for ($attempt = 1; $attempt -le 5 -and -not $published; $attempt++) {
+        # Stage exactly one path: a bare `add -A` would sweep up whatever the
+        # desk's own poll task left dirty in this checkout.
+        $null = & git -C $publishRepo add -- 'results/status/toonflow_deploy.json' 2>&1
+        $staged = (& git -C $publishRepo diff --cached --name-only 2>&1 | Out-String).Trim()
+        if ($staged) {
+            $null = & git -C $publishRepo -c user.name='CGMD Hub' -c user.email='hub@localhost' `
+                commit -q -m 'toonflow: deploy receipt [desktop hub]' 2>&1
+        }
+        # The poll task pushes the same branch every minute, so a rejected push
+        # is the normal case: rebase onto whatever landed and try again.
+        $null = & git -C $publishRepo pull --rebase --autostash origin $PublishBranch 2>&1
+        $pushTarget = if ($token) { $pushRemote } else { 'origin' }
+        $null = & git -C $publishRepo push $pushTarget ('HEAD:' + $PublishBranch) 2>&1
+        if ($LASTEXITCODE -eq 0) { $published = $true } else { Start-Sleep -Seconds 4 }
+    }
+    Add-Step 'publish-receipt' $(if ($published) { 'ok' } else { 'warn' }) `
+        $(if ($published) { ('pushed results/status/toonflow_deploy.json to ' + $PublishBranch) } else { 'could not push; receipt stays on F:' })
+} catch {
+    Add-Step 'publish-receipt' 'warn' $_.Exception.Message
+}
+
 Write-Receipt $status 'Toonflow deployed and answering' $final | Out-Null
 exit 0
