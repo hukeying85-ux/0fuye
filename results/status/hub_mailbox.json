@@ -1,17 +1,17 @@
 {
     "schema":  "cgmd.mailbox.worker.v1",
-    "generated_at":  "2026-11-27T09:53:05+08:00",
+    "generated_at":  "2026-11-27T09:54:00+08:00",
     "host":  "DESKTOP-IEUDGS5",
     "ref":  "hub/mailbox",
     "state":  "ran",
     "branch_created":  false,
     "init_note":  "",
     "worktree":  "C:\\cgmd\\0fuye\\skills\\cgmd-hub\\state\\mailbox",
-    "queued":  1,
+    "queued":  0,
     "max_jobs":  1,
     "allow_shell":  false,
     "inbox":  [
-                  "20261127T015208-0cd1.json"
+
               ],
     "attempts":  {
                      "20261029T063704-9a27":  1,
@@ -165,7 +165,6 @@
                      "20261127T015208-0cd1":  1
                  },
     "log_tail":  [
-                     "2026-11-27 09:03:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:04:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:05:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:06:54 [INFO] mailbox: 0 queued, running at most 1",
@@ -224,7 +223,8 @@
                      "2026-11-27 09:51:54 [INFO] mailbox: 0 queued, running at most 1",
                      "2026-11-27 09:52:56 [INFO] mailbox: 1 queued, running at most 1",
                      "2026-11-27 09:52:56 [INFO] job kind=gmx",
-                     "2026-11-27 09:52:56 [INFO] job 20261127T015208-0cd1 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 "
+                     "2026-11-27 09:52:56 [INFO] job 20261127T015208-0cd1 (gmx) -\u003e ok: gmx --version exit 0: CGMD_EXIT_CODE=0 ",
+                     "2026-11-27 09:53:54 [INFO] mailbox: 0 queued, running at most 1"
                  ],
     "call_tail":  [
 
@@ -248,12 +248,7 @@
                   }
               ],
     "processed":  [
-                      {
-                          "id":  "20261127T015208-0cd1",
-                          "kind":  "gmx",
-                          "status":  "ok",
-                          "summary":  "gmx --version exit 0: CGMD_EXIT_CODE=0 "
-                      }
+
                   ],
     "recent":  [
                    {
